@@ -7,6 +7,7 @@ This repository supports biomedical instrumentation labs built around Arduino bo
 - Python live plotting
 - Python CSV logging
 - Reusable parsers and protocol helpers
+- Pattern-first repository architecture
 
 ## Lab types
 
@@ -30,13 +31,22 @@ The software must support:
 - live plotting
 - CSV export
 
+### 3. Procedure-driven continuous labs
+Examples: blood pressure
+
+Expected output:
+- continuous waveform samples
+- explicit stage events
+- summary statistics when needed
+
 ## First milestone
-Create one working end-to-end continuous-stream example and one pulse-ox state-machine example.
+Create one working end-to-end `CONT_MED` example, define the shared serial protocol, and scaffold the repository for `CONT_HIGH`, `PHASED_CYCLE`, and `PROC_CONT`.
 
 ## Constraints
 - Keep the stack free and student-friendly
 - Prioritize clarity and maintainability
 - Design the Python side so it can parse multiple packet types
+- Organize the repository by acquisition pattern first
 
 ## Student deployment constraint
 
