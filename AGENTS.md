@@ -64,3 +64,29 @@ The final student-facing workflow should feel close to:
 - run one command,
 - see live plots,
 - save data automatically.
+
+## Architecture rule
+Organize the repository by acquisition pattern, not only by sensor name.
+
+Supported acquisition classes:
+- CONT_HIGH: high-rate continuous waveform acquisition
+- CONT_MED: medium-rate continuous waveform acquisition
+- PHASED_CYCLE: multi-phase acquisition where one final sample is reconstructed from several timed phases
+- PROC_CONT: continuous acquisition with procedure/state events
+
+Every lab must declare:
+- acquisition class
+- default sampling rate
+- packet types used
+- fields emitted
+- optional stage names
+- plotting defaults
+
+All serial packets must use a shared protocol with packet prefixes such as:
+META, DATA, PHASE, CYCLE, EVENT, STAT, ERR
+
+Keep student installation simple:
+- minimal dependencies
+- one Conda environment
+- beginner-friendly run commands
+- no need for students to edit source code
