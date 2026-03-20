@@ -1,33 +1,32 @@
-# Biomedical-Instrumentation-Lab
+## Student installation and usability priority
+This project must be as easy as possible for undergraduate students to install and use.
 
-## Project goal
-This repository contains Arduino and Python code for biomedical instrumentation laboratory boards.
+### Requirements
+- Minimize required software installations.
+- Prefer a single Python distribution for students, ideally Anaconda or another free Conda-based option.
+- Avoid requiring students to install multiple tools, IDEs, package managers, or complex drivers unless absolutely necessary.
+- The student workflow should be:
+  1. install the required Python distribution,
+  2. create or load one environment,
+  3. run one command or double-click one launcher script.
 
-## Main acquisition classes
-1. Continuous streaming labs
-   - Examples: EMG, ECG
-   - Stream timestamped analog samples over serial
+### Python dependency policy
+- Keep dependencies minimal.
+- Prefer widely used, stable, free packages.
+- Avoid unnecessary GUI frameworks or heavy libraries unless they clearly improve usability.
+- Do not introduce dependencies that are difficult to install on Windows or macOS.
 
-2. Sequenced optical labs
-   - Example: pulse oximetry
-   - Acquisition phases:
-     - RED_ON
-     - DARK1
-     - IR_ON
-     - DARK2
+### Deliverable expectations
+- Provide an environment file for setup.
+- Provide a simple launch script for students.
+- Provide clear setup instructions written for beginners.
+- Prefer one main application entry point per lab.
+- Design the software so students can use it without editing source code.
 
-## Coding rules
-- Keep code simple and heavily commented for students.
-- Prefer modular files over one large script.
-- Do not add unnecessary dependencies.
-- Keep Arduino and Python code separated cleanly.
-- Use human-readable serial output first.
-- Always explain assumptions before major refactors.
-- For Python, prioritize reliability of logging over plotting speed.
-- For plotting, avoid redrawing more often than needed.
-- Preserve a shared serial protocol document in docs/serial_protocol.md.
-
-## Safety and workflow
-- Make small, high-confidence changes.
-- After each meaningful change, suggest a git commit message.
-- Do not invent hardware details that are not written in the docs.
+### Usability goal
+The final student-facing workflow should feel close to:
+- connect Arduino,
+- open terminal or launcher,
+- run one command,
+- see live plots,
+- save data automatically.
