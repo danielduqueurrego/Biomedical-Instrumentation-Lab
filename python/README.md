@@ -19,6 +19,10 @@ This folder contains the shared Python acquisition code plus student-facing laun
 ## Current baseline app
 The first reference app is a `CONT_MED` three-channel demo for Arduino UNO R4 WiFi.
 
+Before running the Python app, upload the matching firmware from the repository root with:
+- macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
+- Windows: `tools\\upload_cont_med_three_channel.bat`
+
 Run it from this folder with:
 - `python run_cont_med_three_channel.py`
 - `python run_cont_med_three_channel.py --port COM3`

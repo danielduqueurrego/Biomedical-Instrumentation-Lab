@@ -11,3 +11,7 @@ Expected packet mix:
 - `DATA`
 - optional `STAT`
 - optional `ERR`
+
+Current student helper workflow:
+- one-time setup with `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
+- compile/upload with `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`

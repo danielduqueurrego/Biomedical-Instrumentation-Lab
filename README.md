@@ -2,6 +2,7 @@ Biomedical Instrumentation Lab is organized by acquisition pattern first so stud
 
 Primary architecture documents:
 - `docs/acquisition_architecture.md`
+- `docs/arduino_cli_setup.md`
 - `docs/sampling_strategy.md`
 - `docs/serial_protocol.md`
 
@@ -20,3 +21,8 @@ Student setup stays minimal:
 - one Conda environment
 - `matplotlib` for plotting
 - `pyserial` for serial communication
+- Arduino CLI for command-line firmware compile and upload
+
+Arduino CLI helper scripts:
+- `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
+- `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
