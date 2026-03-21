@@ -2,6 +2,8 @@
 
 This project uses Arduino CLI to reduce the amount of clicking students need to do before running a lab.
 
+For the full student workflow, including Conda setup and the Tkinter GUI, see `docs/student_setup.md`.
+
 ## Project requirement
 
 All student systems need:
@@ -11,6 +13,8 @@ All student systems need:
 - the Arduino UNO R4 WiFi board package: `arduino:renesas_uno`
 
 This repository includes cross-platform helper scripts in `tools/` so students can run setup, compile, and upload commands without editing source files.
+
+The Tkinter GUI also uses Arduino CLI board detection so the port can be filled automatically after the student selects a board.
 
 ## Recommended project workflow
 

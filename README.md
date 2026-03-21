@@ -3,6 +3,7 @@ Biomedical Instrumentation Lab is organized by acquisition pattern first so stud
 Primary architecture documents:
 - `docs/acquisition_architecture.md`
 - `docs/arduino_cli_setup.md`
+- `docs/student_setup.md`
 - `docs/sampling_strategy.md`
 - `docs/serial_protocol.md`
 
@@ -16,6 +17,7 @@ Top-level structure:
 
 Current implemented baseline:
 - `CONT_MED` three-channel Arduino UNO R4 WiFi demo using the shared `META` and `DATA` packet types
+- first Tkinter GUI foundation for student acquisition setup and live plotting
 
 Student setup stays minimal:
 - one Conda environment
@@ -26,3 +28,7 @@ Student setup stays minimal:
 Arduino CLI helper scripts:
 - `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
 - `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
+
+Python student entry points:
+- `python/system_check.py`
+- `python/run_student_acquisition_gui.py`

@@ -15,15 +15,36 @@ This folder contains the shared Python acquisition code plus student-facing laun
    `conda env create -f environment.yml`
 4. Activate it:
    `conda activate biomed-lab`
+5. Run the system check:
+   `python system_check.py`
 
-## Current baseline app
-The first reference app is a `CONT_MED` three-channel demo for Arduino UNO R4 WiFi.
+## Main student GUI
+The first student-facing GUI is a `CONT_MED` three-channel foundation app for Arduino UNO R4 WiFi.
 
 Before running the Python app, upload the matching firmware from the repository root with:
 - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
 - Windows: `tools\\upload_cont_med_three_channel.bat`
 
 Run it from this folder with:
+- `python run_student_acquisition_gui.py`
+- `./launch_student_acquisition_gui.sh`
+- `launch_student_acquisition_gui.bat`
+
+The GUI lets students:
+- select a board and let the GUI auto-fill the port from Arduino CLI
+- review or override the detected serial port when needed
+- choose a save folder and filename
+- choose 1 to 3 signals
+- assign each signal a name and preset
+- review preset sampling defaults
+- start and stop acquisition
+- view live plots
+- log data automatically
+
+When one Arduino UNO R4 WiFi is connected, the GUI is expected to fill the board and port automatically.
+
+## Existing reference CLI app
+The original reference CLI app is still available from this folder with:
 - `python run_cont_med_three_channel.py`
 - `python run_cont_med_three_channel.py --port COM3`
 - `./launch_cont_med_three_channel.sh`
@@ -32,12 +53,9 @@ Run it from this folder with:
 If only one serial port is present, the app can auto-select it. If several ports are present, use `--port`.
 
 ## Output files
-The reference app saves one session folder under:
+The student GUI saves files under the folder you choose, using your selected output filename.
+
+The CLI reference app still saves one session folder under:
 - `../data/cont_med/three_channel_data_demo/<timestamp>/`
 
-That session folder contains:
-- `data_samples.csv`
-- `metadata.csv`
-- `parse_errors.log`
-
-Close the plot window to stop acquisition.
+See `../docs/student_setup.md` for the Windows, macOS, and Linux setup path.

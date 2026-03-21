@@ -1,4 +1,5 @@
 import csv
+import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,15 @@ from acquisition.protocol import DataPacket
 @dataclass(slots=True)
 class SessionPaths:
     session_dir: Path
+    data_csv_path: Path
+    metadata_csv_path: Path
+    parse_errors_path: Path
+
+
+@dataclass(slots=True)
+class NamedSessionPaths:
+    output_dir: Path
+    output_basename: str
     data_csv_path: Path
     metadata_csv_path: Path
     parse_errors_path: Path
@@ -25,6 +35,38 @@ def create_session_paths(base_output_dir: Path) -> SessionPaths:
         metadata_csv_path=session_dir / "metadata.csv",
         parse_errors_path=session_dir / "parse_errors.log",
     )
+
+
+def sanitize_output_basename(output_basename: str) -> str:
+    cleaned = re.sub(r"[^A-Za-z0-9._-]+", "_", output_basename.strip())
+    cleaned = cleaned.strip("._")
+    return cleaned or "acquisition"
+
+
+def create_named_session_paths(output_dir: Path, output_basename: str) -> NamedSessionPaths:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    safe_basename = sanitize_output_basename(output_basename)
+
+    paths = NamedSessionPaths(
+        output_dir=output_dir,
+        output_basename=safe_basename,
+        data_csv_path=output_dir / f"{safe_basename}_data.csv",
+        metadata_csv_path=output_dir / f"{safe_basename}_metadata.csv",
+        parse_errors_path=output_dir / f"{safe_basename}_errors.log",
+    )
+
+    existing_paths = [
+        path.name
+        for path in (paths.data_csv_path, paths.metadata_csv_path, paths.parse_errors_path)
+        if path.exists()
+    ]
+    if existing_paths:
+        joined = ", ".join(existing_paths)
+        raise FileExistsError(
+            f"The selected output name would overwrite existing files in {output_dir}: {joined}"
+        )
+
+    return paths
 
 
 class DataCsvLogger:
