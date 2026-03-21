@@ -16,7 +16,7 @@ Top-level structure:
 - `python/apps`: student-facing Python apps built on the shared acquisition helpers
 
 Current implemented baseline:
-- `CONT_MED` three-channel Arduino UNO R4 WiFi demo using the shared `META` and `DATA` packet types
+- `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
 - first Tkinter GUI foundation for student acquisition setup and live plotting
 
 Student setup stays minimal:

@@ -15,3 +15,7 @@ Expected packet mix:
 Current student helper workflow:
 - one-time setup with `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
 - compile/upload with `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
+
+Current UNO R4 WiFi reference behavior:
+- stream `A0` to `A5` at about 120 Hz
+- let the Python GUI choose which subset of those six analog inputs is active

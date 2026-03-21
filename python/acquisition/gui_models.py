@@ -4,10 +4,12 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from acquisition.arduino_cli_wrapper import UNO_R4_WIFI_BOARD
+from acquisition.protocol import UNO_R4_ANALOG_PORTS
 from acquisition.presets import LAB_PRESETS
 
 
-MAX_SIGNAL_COUNT = 3
+MAX_SIGNAL_COUNT = len(UNO_R4_ANALOG_PORTS)
+DEFAULT_ACTIVE_SIGNAL_COUNT = 3
 DEFAULT_SIGNAL_PRESETS = ("EMG", "ECG", "Blood Pressure")
 DEFAULT_GUI_BAUD_RATE = 230400
 
@@ -16,6 +18,7 @@ DEFAULT_GUI_BAUD_RATE = 230400
 class SignalConfiguration:
     name: str
     preset_name: str
+    analog_port: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +44,7 @@ def default_signal_configurations(count: int = MAX_SIGNAL_COUNT) -> tuple[Signal
             SignalConfiguration(
                 name=f"Signal {index + 1}",
                 preset_name=preset_name,
+                analog_port=UNO_R4_ANALOG_PORTS[index],
             )
         )
     return tuple(selections)
@@ -69,6 +73,7 @@ def validate_gui_config(config: GuiAcquisitionConfig) -> None:
         raise ValueError(f"Signal count must be between 1 and {MAX_SIGNAL_COUNT}.")
 
     seen_names = set()
+    seen_ports = set()
     for index, signal in enumerate(config.signal_configurations, start=1):
         normalized_name = signal.name.strip()
         if not normalized_name:
@@ -80,3 +85,10 @@ def validate_gui_config(config: GuiAcquisitionConfig) -> None:
 
         if signal.preset_name not in LAB_PRESETS:
             raise ValueError(f"Signal {index} uses an unknown preset {signal.preset_name!r}.")
+
+        if signal.analog_port not in UNO_R4_ANALOG_PORTS:
+            raise ValueError(f"Signal {index} uses an unsupported analog port {signal.analog_port!r}.")
+
+        if signal.analog_port in seen_ports:
+            raise ValueError(f"Analog port {signal.analog_port} is assigned more than once.")
+        seen_ports.add(signal.analog_port)

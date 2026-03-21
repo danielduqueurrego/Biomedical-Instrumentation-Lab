@@ -11,11 +11,12 @@ import serial
 
 from acquisition.gui_models import GuiAcquisitionConfig
 from acquisition.protocol import (
-    DEFAULT_THREE_CHANNEL_FIELDS,
     DataPacket,
     PACKET_TYPE_DATA,
     PACKET_TYPE_META,
     PacketParseError,
+    UNO_R4_ANALOG_BANK_FIELDS,
+    UNO_R4_ANALOG_INDEX,
     parse_csv_packet,
     parse_data_packet,
     parse_meta_packet,
@@ -41,8 +42,10 @@ class GuiAcquisitionSession:
 
     def __init__(self, config: GuiAcquisitionConfig):
         self.config = config
-        self.expected_data_fields = DEFAULT_THREE_CHANNEL_FIELDS
+        self.expected_data_fields = UNO_R4_ANALOG_BANK_FIELDS
         self.selected_field_names = ("t_ms", *(signal.name.strip() for signal in config.signal_configurations))
+        self.selected_analog_ports = tuple(signal.analog_port for signal in config.signal_configurations)
+        self.selected_value_indexes = tuple(UNO_R4_ANALOG_INDEX[port_name] for port_name in self.selected_analog_ports)
 
         self.sample_queue: SimpleQueue[SessionSample] = SimpleQueue()
         self.message_queue: SimpleQueue[SessionMessage] = SimpleQueue()
@@ -117,10 +120,12 @@ class GuiAcquisitionSession:
         self.metadata_logger.write_meta(host_time_iso, "selected_port", (self.config.port,))
         self.metadata_logger.write_meta(host_time_iso, "baud_rate", (str(self.config.baud_rate),))
         self.metadata_logger.write_meta(host_time_iso, "selected_fields", self.selected_field_names)
+        self.metadata_logger.write_meta(host_time_iso, "available_analog_ports", self.expected_data_fields[1:])
 
         for index, signal in enumerate(self.config.signal_configurations, start=1):
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_name", (signal.name.strip(),))
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_preset", (signal.preset_name,))
+            self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_analog_port", (signal.analog_port,))
 
     def _close_resources(self) -> None:
         with self.shutdown_lock:
@@ -196,7 +201,7 @@ class GuiAcquisitionSession:
                     self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                     continue
 
-                selected_values = incoming_packet.values[: self.config.signal_count]
+                selected_values = tuple(incoming_packet.values[index] for index in self.selected_value_indexes)
                 logged_packet = DataPacket(
                     host_time_iso=incoming_packet.host_time_iso,
                     host_time_unix_s=incoming_packet.host_time_unix_s,

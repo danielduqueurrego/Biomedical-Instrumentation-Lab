@@ -19,7 +19,7 @@ This folder contains the shared Python acquisition code plus student-facing laun
    `python system_check.py`
 
 ## Main student GUI
-The first student-facing GUI is a `CONT_MED` three-channel foundation app for Arduino UNO R4 WiFi.
+The first student-facing GUI is a `CONT_MED` Arduino UNO R4 WiFi foundation app that streams the six standard analog inputs `A0` to `A5`.
 
 Before running the Python app, upload the matching firmware from the repository root with:
 - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
@@ -34,8 +34,8 @@ The GUI lets students:
 - select a board and let the GUI auto-fill the port from Arduino CLI
 - review or override the detected serial port when needed
 - choose a save folder and filename
-- choose 1 to 3 signals
-- assign each signal a name and preset
+- choose 1 to 6 signals
+- assign each signal a name, preset, and analog port from `A0` to `A5`
 - review preset sampling defaults
 - start and stop acquisition
 - view live plots

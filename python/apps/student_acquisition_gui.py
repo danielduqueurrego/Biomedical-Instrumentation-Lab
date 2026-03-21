@@ -18,12 +18,14 @@ from acquisition.arduino_cli_wrapper import (
     UNO_R4_WIFI_BOARD,
 )
 from acquisition.gui_models import (
+    DEFAULT_ACTIVE_SIGNAL_COUNT,
     MAX_SIGNAL_COUNT,
     GuiAcquisitionConfig,
     SignalConfiguration,
     default_gui_config,
     validate_gui_config,
 )
+from acquisition.protocol import UNO_R4_ANALOG_PORTS
 from acquisition.gui_session import GuiAcquisitionSession, SessionMessage, SessionSample
 from acquisition.presets import LAB_PRESETS, get_preset
 from acquisition.serial_tools import list_available_ports
@@ -51,20 +53,25 @@ class StudentAcquisitionGui:
         self.port_var = tk.StringVar(value="")
         self.output_dir_var = tk.StringVar(value=str(self.default_config.output_dir))
         self.output_basename_var = tk.StringVar(value=self.default_config.output_basename)
-        self.signal_count_var = tk.IntVar(value=self.default_config.signal_count)
+        self.signal_count_var = tk.IntVar(value=DEFAULT_ACTIVE_SIGNAL_COUNT)
         self.connection_summary_var = tk.StringVar(value="Waiting for board detection")
 
         self.port_display_to_device: dict[str, str] = {}
         self.detected_board_ports: list[DetectedBoardPort] = []
         self.signal_name_vars: list[tk.StringVar] = []
         self.signal_preset_vars: list[tk.StringVar] = []
+        self.signal_port_vars: list[tk.StringVar] = []
         self.signal_rows: list[tuple[ttk.Frame, ttk.Label]] = []
         self.plot_lines = []
         self.plot_time_s: deque[float] = deque(maxlen=2500)
         self.plot_signal_values: list[deque[int]] = []
         self.plot_history_seconds = 10.0
+        self.controls_canvas: tk.Canvas | None = None
+        self.controls_frame: ttk.Frame | None = None
+        self.controls_window_id: int | None = None
 
         self._build_ui()
+        self._bind_scroll_events()
         self._refresh_ports(log_message=False)
         self._apply_signal_count()
         self._append_status("Ready.")
@@ -76,9 +83,31 @@ class StudentAcquisitionGui:
         self.root.rowconfigure(0, weight=1)
         self.root.rowconfigure(1, weight=0)
 
-        controls = ttk.Frame(self.root, padding=12)
-        controls.grid(row=0, column=0, sticky="nsw")
-        controls.columnconfigure(0, weight=1)
+        controls_container = ttk.Frame(self.root, padding=(12, 12, 0, 0))
+        controls_container.grid(row=0, column=0, sticky="nsew")
+        controls_container.columnconfigure(0, weight=1)
+        controls_container.rowconfigure(0, weight=1)
+
+        self.controls_canvas = tk.Canvas(controls_container, highlightthickness=0, width=380)
+        self.controls_canvas.grid(row=0, column=0, sticky="nsew")
+
+        controls_scrollbar = ttk.Scrollbar(
+            controls_container,
+            orient="vertical",
+            command=self.controls_canvas.yview,
+        )
+        controls_scrollbar.grid(row=0, column=1, sticky="ns")
+        self.controls_canvas.configure(yscrollcommand=controls_scrollbar.set)
+
+        self.controls_frame = ttk.Frame(self.controls_canvas, padding=12)
+        self.controls_frame.columnconfigure(0, weight=1)
+        self.controls_window_id = self.controls_canvas.create_window(
+            (0, 0),
+            window=self.controls_frame,
+            anchor="nw",
+        )
+        self.controls_frame.bind("<Configure>", self._sync_controls_scrollregion)
+        self.controls_canvas.bind("<Configure>", self._resize_controls_window)
 
         plot_area = ttk.Frame(self.root, padding=(0, 12, 12, 0))
         plot_area.grid(row=0, column=1, sticky="nsew")
@@ -90,13 +119,73 @@ class StudentAcquisitionGui:
         status_area.columnconfigure(0, weight=1)
         status_area.rowconfigure(0, weight=1)
 
-        self._build_connection_frame(controls)
-        self._build_firmware_frame(controls)
-        self._build_output_frame(controls)
-        self._build_signal_frame(controls)
-        self._build_control_frame(controls)
+        self._build_connection_frame(self.controls_frame)
+        self._build_firmware_frame(self.controls_frame)
+        self._build_output_frame(self.controls_frame)
+        self._build_signal_frame(self.controls_frame)
+        self._build_control_frame(self.controls_frame)
         self._build_plot_frame(plot_area)
         self._build_status_frame(status_area)
+
+    def _bind_scroll_events(self) -> None:
+        self.root.bind_all("<MouseWheel>", self._on_controls_mousewheel, add="+")
+        self.root.bind_all("<Button-4>", self._on_controls_mousewheel, add="+")
+        self.root.bind_all("<Button-5>", self._on_controls_mousewheel, add="+")
+
+    def _sync_controls_scrollregion(self, _event=None) -> None:
+        if self.controls_canvas is None:
+            return
+        self.controls_canvas.configure(scrollregion=self.controls_canvas.bbox("all"))
+
+    def _resize_controls_window(self, event: tk.Event) -> None:
+        if self.controls_canvas is None or self.controls_window_id is None:
+            return
+        self.controls_canvas.itemconfigure(self.controls_window_id, width=event.width)
+
+    def _widget_is_in_controls_pane(self, widget) -> bool:
+        if self.controls_canvas is None or self.controls_frame is None:
+            return False
+
+        current = widget
+        while current is not None:
+            if current == self.controls_canvas or current == self.controls_frame:
+                return True
+            current = getattr(current, "master", None)
+        return False
+
+    def _controls_can_scroll(self) -> bool:
+        if self.controls_canvas is None:
+            return False
+
+        bbox = self.controls_canvas.bbox("all")
+        if bbox is None:
+            return False
+
+        content_height = bbox[3] - bbox[1]
+        visible_height = self.controls_canvas.winfo_height()
+        return content_height > visible_height
+
+    def _on_controls_mousewheel(self, event: tk.Event) -> str | None:
+        if self.controls_canvas is None or not self._controls_can_scroll():
+            return None
+
+        if not self._widget_is_in_controls_pane(event.widget):
+            return None
+
+        if getattr(event, "num", None) == 4:
+            delta_units = -1
+        elif getattr(event, "num", None) == 5:
+            delta_units = 1
+        elif getattr(event, "delta", 0):
+            if abs(event.delta) >= 120:
+                delta_units = int(-event.delta / 120)
+            else:
+                delta_units = -1 if event.delta > 0 else 1
+        else:
+            return None
+
+        self.controls_canvas.yview_scroll(delta_units, "units")
+        return "break"
 
     def _build_connection_frame(self, parent: ttk.Frame) -> None:
         frame = ttk.LabelFrame(parent, text="Connection", padding=10)
@@ -173,18 +262,28 @@ class StudentAcquisitionGui:
         self.signal_count_spinbox.grid(row=1, column=0, sticky="w", pady=(0, 10))
         self.signal_count_var.trace_add("write", lambda *_args: self._apply_signal_count())
 
+        ttk.Label(
+            frame,
+            text="UNO R4 WiFi analog inputs available in this demo: A0 to A5.",
+            wraplength=320,
+            justify="left",
+        ).grid(row=2, column=0, sticky="w", pady=(0, 6))
+
         defaults = self.default_config.signal_configurations
         preset_names = list(LAB_PRESETS)
+        analog_port_names = list(UNO_R4_ANALOG_PORTS)
 
         for index in range(MAX_SIGNAL_COUNT):
             signal_frame = ttk.Frame(frame, padding=(0, 8, 0, 0))
-            signal_frame.grid(row=index + 2, column=0, sticky="ew")
+            signal_frame.grid(row=index + 3, column=0, sticky="ew")
             signal_frame.columnconfigure(0, weight=1)
 
             name_var = tk.StringVar(value=defaults[index].name)
             preset_var = tk.StringVar(value=defaults[index].preset_name)
+            port_var = tk.StringVar(value=defaults[index].analog_port)
             self.signal_name_vars.append(name_var)
             self.signal_preset_vars.append(preset_var)
+            self.signal_port_vars.append(port_var)
 
             ttk.Label(signal_frame, text=f"Signal {index + 1} name").grid(row=0, column=0, sticky="w")
             name_entry = ttk.Entry(signal_frame, textvariable=name_var)
@@ -194,8 +293,12 @@ class StudentAcquisitionGui:
             preset_combo = ttk.Combobox(signal_frame, textvariable=preset_var, values=preset_names, state="readonly")
             preset_combo.grid(row=3, column=0, sticky="ew", pady=(4, 4))
 
+            ttk.Label(signal_frame, text="Analog port").grid(row=4, column=0, sticky="w")
+            port_combo = ttk.Combobox(signal_frame, textvariable=port_var, values=analog_port_names, state="readonly")
+            port_combo.grid(row=5, column=0, sticky="ew", pady=(4, 4))
+
             info_label = ttk.Label(signal_frame, text="", wraplength=300, justify="left")
-            info_label.grid(row=4, column=0, sticky="w")
+            info_label.grid(row=6, column=0, sticky="w")
             self.signal_rows.append((signal_frame, info_label))
 
             preset_var.trace_add("write", lambda *_args, row_index=index: self._update_signal_preset_info(row_index))
@@ -456,6 +559,7 @@ class StudentAcquisitionGui:
                 SignalConfiguration(
                     name=self.signal_name_vars[index].get().strip(),
                     preset_name=self.signal_preset_vars[index].get(),
+                    analog_port=self.signal_port_vars[index].get(),
                 )
             )
 

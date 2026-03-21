@@ -29,7 +29,12 @@ PACKET_MIN_FIELD_COUNTS = {
     PACKET_TYPE_ERR: 4,
 }
 
-DEFAULT_THREE_CHANNEL_FIELDS = ("t_ms", "ch1", "ch2", "ch3")
+UNO_R4_ANALOG_PORTS = ("A0", "A1", "A2", "A3", "A4", "A5")
+UNO_R4_ANALOG_BANK_FIELDS = ("t_ms", *UNO_R4_ANALOG_PORTS)
+UNO_R4_ANALOG_INDEX = {port_name: index for index, port_name in enumerate(UNO_R4_ANALOG_PORTS)}
+
+# The legacy reference CLI app still plots the first three UNO R4 analog inputs.
+DEFAULT_THREE_CHANNEL_FIELDS = ("t_ms", "A0", "A1", "A2")
 
 
 class PacketParseError(ValueError):

@@ -18,10 +18,10 @@ Format:
 `META,key,value1,value2,...`
 
 Examples:
-- `META,lab,CONT_MED_THREE_CHANNEL`
+- `META,lab,CONT_MED_ANALOG_BANK`
 - `META,acq_class,CONT_MED`
 - `META,rate_hz,120`
-- `META,fields,t_ms,ch1,ch2,ch3`
+- `META,fields,t_ms,A0,A1,A2,A3,A4,A5`
 
 ### `DATA`
 Use for continuous waveform samples in `CONT_HIGH`, `CONT_MED`, and `PROC_CONT`.
@@ -30,7 +30,7 @@ Format:
 `DATA,t_ms,sample1,sample2,...`
 
 Example:
-`DATA,1523,512,487,530`
+`DATA,1523,512,487,530,501,498,505`
 
 The meaning of `sample1,sample2,...` is declared by a `META,fields,...` packet at startup.
 

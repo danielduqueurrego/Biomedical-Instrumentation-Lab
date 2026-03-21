@@ -229,10 +229,10 @@ def build_arg_parser() -> argparse.ArgumentParser:
     subparsers.add_parser("setup", help="Install or update the Arduino UNO R4 WiFi board core.")
     subparsers.add_parser("board-list", help="Show the serial boards detected by Arduino CLI.")
 
-    compile_parser = subparsers.add_parser("compile-demo", help="Compile the CONT_MED three-channel reference sketch.")
+    compile_parser = subparsers.add_parser("compile-demo", help="Compile the CONT_MED UNO R4 analog-bank reference sketch.")
     compile_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
-    upload_parser = subparsers.add_parser("upload-demo", help="Compile and upload the CONT_MED three-channel sketch.")
+    upload_parser = subparsers.add_parser("upload-demo", help="Compile and upload the CONT_MED UNO R4 analog-bank sketch.")
     upload_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
     upload_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
     upload_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")

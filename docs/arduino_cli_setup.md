@@ -25,7 +25,7 @@ From the repository root:
    - macOS/Linux: `./tools/setup_arduino_cli.sh`
    - Windows: `tools\\setup_arduino_cli.bat`
 3. Connect the UNO R4 WiFi by USB.
-4. Upload the current `CONT_MED` reference sketch:
+4. Upload the current `CONT_MED` reference sketch. It streams the UNO R4 WiFi analog inputs `A0` to `A5`, and the GUI lets students choose which of those six inputs are active:
    - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
    - Windows: `tools\\upload_cont_med_three_channel.bat`
 

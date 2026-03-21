@@ -10,9 +10,11 @@ import serial
 from acquisition.live_plot import ThreeChannelLivePlot
 from acquisition.protocol import (
     DEFAULT_THREE_CHANNEL_FIELDS,
+    DataPacket,
     PACKET_TYPE_DATA,
     PACKET_TYPE_META,
     PacketParseError,
+    UNO_R4_ANALOG_BANK_FIELDS,
     parse_csv_packet,
     parse_data_packet,
     parse_meta_packet,
@@ -40,14 +42,15 @@ class ContMedThreeChannelApp:
         self.serial_connection = open_serial_connection(self.serial_port_name, args.baud_rate)
 
         self.session_paths = create_session_paths(args.output_dir)
-        self.expected_data_fields = DEFAULT_THREE_CHANNEL_FIELDS
-        self.csv_logger = DataCsvLogger(self.session_paths.data_csv_path, self.expected_data_fields)
+        self.expected_data_fields = UNO_R4_ANALOG_BANK_FIELDS
+        self.selected_field_names = DEFAULT_THREE_CHANNEL_FIELDS
+        self.csv_logger = DataCsvLogger(self.session_paths.data_csv_path, self.selected_field_names)
         self.metadata_logger = MetadataLogger(self.session_paths.metadata_csv_path)
         self.parse_error_logger = ParseErrorLogger(self.session_paths.parse_errors_path)
 
         self.plotter = ThreeChannelLivePlot(
             packet_queue=self.packet_queue,
-            channel_labels=self.expected_data_fields[1:],
+            channel_labels=self.selected_field_names[1:],
             history_seconds=args.history_seconds,
             update_interval_ms=args.plot_update_ms,
         )
@@ -144,24 +147,32 @@ class ContMedThreeChannelApp:
             if packet.packet_type != PACKET_TYPE_DATA:
                 self.parse_error_logger.write_error(
                     host_time_iso,
-                    f"Unexpected packet type {packet.packet_type!r} for the three-channel CONT_MED app.",
+                    f"Unexpected packet type {packet.packet_type!r} for the CONT_MED A0-A2 reference app.",
                     packet.raw_line,
                 )
                 continue
 
             try:
-                data_packet = parse_data_packet(packet, self.expected_data_fields)
+                incoming_packet = parse_data_packet(packet, self.expected_data_fields)
             except PacketParseError as error:
                 self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                 continue
 
+            data_packet = DataPacket(
+                host_time_iso=incoming_packet.host_time_iso,
+                host_time_unix_s=incoming_packet.host_time_unix_s,
+                device_time_ms=incoming_packet.device_time_ms,
+                field_names=self.selected_field_names,
+                values=incoming_packet.values[:3],
+                raw_line=incoming_packet.raw_line,
+            )
             self.csv_logger.write_sample(data_packet)
             self.packet_queue.put(data_packet)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Connect to a serial port, log shared DATA packets to CSV, and plot three channels live.",
+        description="Connect to a serial port, log the first three UNO R4 analog-bank channels to CSV, and plot them live.",
     )
     parser.add_argument(
         "--port",
