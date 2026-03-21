@@ -90,3 +90,32 @@ Keep student installation simple:
 - one Conda environment
 - beginner-friendly run commands
 - no need for students to edit source code
+
+## Student usability requirement
+This project must be extremely easy for students to install and use.
+
+Priorities:
+- minimize required software
+- prefer one Conda-based Python environment
+- use Arduino CLI behind scripts and GUI instead of exposing raw commands to students
+- support Windows, macOS, and Linux
+- provide setup documentation for all three OSes
+- provide launcher scripts for all three OSes
+- avoid unnecessary dependencies
+
+## GUI requirement
+The project must include a Python GUI for students.
+
+The GUI should allow:
+- selecting serial port and board
+- optionally compiling/uploading firmware through Arduino CLI
+- choosing how many signals are active
+- assigning each signal a name and a preset/type
+- showing the predefined sampling parameters for each signal type
+- selecting save folder and filename
+- starting/stopping acquisition
+- displaying live plots
+- logging data to file
+
+Use a simple cross-platform GUI approach first, prioritizing low installation burden and maintainability.
+Prefer tkinter/ttk for v1 unless a stronger dependency is clearly justified.
