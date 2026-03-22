@@ -58,6 +58,8 @@ Current live-plot behavior:
 - changing the subplot count resets to a simple default split
 - any signal can be assigned to one or more subplots with the `S1` to `S6` selectors
 - the signal reference line above the plot explains which configured signal each `S#` label represents
+- the top toolbar can hide or restore the left setup panel and the bottom status log
+- subplot legends are shown on the left side of each graph so the newest signal updates remain easier to see on the right
 
 See also:
 - `../docs/generated_firmware_workflow.md`

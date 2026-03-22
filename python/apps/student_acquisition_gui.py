@@ -69,6 +69,8 @@ class StudentAcquisitionGui:
         self.connection_summary_var = tk.StringVar(value="Waiting for board detection")
         self.lab_profile_var = tk.StringVar(value="Choose Lab")
         self.current_lab_var = tk.StringVar(value="Loaded lab: Custom")
+        self.controls_toggle_label_var = tk.StringVar(value="Hide Left Panel")
+        self.status_toggle_label_var = tk.StringVar(value="Hide Status Log")
         self.firmware_summary_var = tk.StringVar(
             value="Firmware: UNO R4 WiFi Analog Bank Foundation. No lab profile loaded yet."
         )
@@ -92,6 +94,10 @@ class StudentAcquisitionGui:
         self.plot_time_s: deque[float] = deque(maxlen=2500)
         self.plot_signal_values: list[deque[int]] = []
         self.plot_history_seconds = 10.0
+        self.controls_visible = True
+        self.status_visible = True
+        self.controls_container: ttk.Frame | None = None
+        self.status_area: ttk.Frame | None = None
         self.controls_canvas: tk.Canvas | None = None
         self.controls_frame: ttk.Frame | None = None
         self.controls_window_id: int | None = None
@@ -116,16 +122,16 @@ class StudentAcquisitionGui:
         toolbar.grid(row=0, column=0, columnspan=2, sticky="ew", padx=12, pady=(12, 0))
         toolbar.columnconfigure(0, weight=1)
 
-        controls_container = ttk.Frame(self.root, padding=(12, 12, 0, 0))
-        controls_container.grid(row=1, column=0, sticky="nsew")
-        controls_container.columnconfigure(0, weight=1)
-        controls_container.rowconfigure(0, weight=1)
+        self.controls_container = ttk.Frame(self.root, padding=(12, 12, 0, 0))
+        self.controls_container.grid(row=1, column=0, sticky="nsew")
+        self.controls_container.columnconfigure(0, weight=1)
+        self.controls_container.rowconfigure(0, weight=1)
 
-        self.controls_canvas = tk.Canvas(controls_container, highlightthickness=0, width=380)
+        self.controls_canvas = tk.Canvas(self.controls_container, highlightthickness=0, width=380)
         self.controls_canvas.grid(row=0, column=0, sticky="nsew")
 
         controls_scrollbar = ttk.Scrollbar(
-            controls_container,
+            self.controls_container,
             orient="vertical",
             command=self.controls_canvas.yview,
         )
@@ -147,10 +153,10 @@ class StudentAcquisitionGui:
         plot_area.columnconfigure(0, weight=1)
         plot_area.rowconfigure(0, weight=1)
 
-        status_area = ttk.Frame(self.root, padding=12)
-        status_area.grid(row=2, column=0, columnspan=2, sticky="nsew")
-        status_area.columnconfigure(0, weight=1)
-        status_area.rowconfigure(0, weight=1)
+        self.status_area = ttk.Frame(self.root, padding=12)
+        self.status_area.grid(row=2, column=0, columnspan=2, sticky="nsew")
+        self.status_area.columnconfigure(0, weight=1)
+        self.status_area.rowconfigure(0, weight=1)
 
         self._build_toolbar_frame(toolbar)
         self._build_connection_frame(self.controls_frame)
@@ -159,7 +165,7 @@ class StudentAcquisitionGui:
         self._build_signal_frame(self.controls_frame)
         self._build_control_frame(self.controls_frame)
         self._build_plot_frame(plot_area)
-        self._build_status_frame(status_area)
+        self._build_status_frame(self.status_area)
 
     def _build_toolbar_frame(self, parent: ttk.LabelFrame) -> None:
         selector_row = ttk.Frame(parent)
@@ -177,6 +183,18 @@ class StudentAcquisitionGui:
         self.lab_profile_combo.bind("<<ComboboxSelected>>", self._on_lab_profile_selected)
         self._bind_combobox_scroll_guard(self.lab_profile_combo)
 
+        ttk.Button(
+            selector_row,
+            textvariable=self.controls_toggle_label_var,
+            command=self._toggle_controls_panel,
+        ).grid(row=0, column=2, sticky="e", padx=(8, 0))
+
+        ttk.Button(
+            selector_row,
+            textvariable=self.status_toggle_label_var,
+            command=self._toggle_status_panel,
+        ).grid(row=0, column=3, sticky="e", padx=(8, 0))
+
         ttk.Label(parent, textvariable=self.current_lab_var, wraplength=1000, justify="left").grid(
             row=1,
             column=0,
@@ -188,6 +206,32 @@ class StudentAcquisitionGui:
             column=0,
             sticky="w",
         )
+
+    def _toggle_controls_panel(self) -> None:
+        if self.controls_container is None:
+            return
+
+        if self.controls_visible:
+            self.controls_container.grid_remove()
+            self.controls_visible = False
+            self.controls_toggle_label_var.set("Show Left Panel")
+        else:
+            self.controls_container.grid()
+            self.controls_visible = True
+            self.controls_toggle_label_var.set("Hide Left Panel")
+
+    def _toggle_status_panel(self) -> None:
+        if self.status_area is None:
+            return
+
+        if self.status_visible:
+            self.status_area.grid_remove()
+            self.status_visible = False
+            self.status_toggle_label_var.set("Show Status Log")
+        else:
+            self.status_area.grid()
+            self.status_visible = True
+            self.status_toggle_label_var.set("Hide Status Log")
 
     def _bind_scroll_events(self) -> None:
         self.root.bind_all("<MouseWheel>", self._on_controls_mousewheel, add="+")
@@ -1009,7 +1053,7 @@ class StudentAcquisitionGui:
                     line_group[signal_index] = line
 
                 axis.set_title(self._subplot_title(subplot_index, signal_configurations, selected_indices))
-                axis.legend(loc="upper right")
+                axis.legend(loc="upper left")
                 self.plot_line_groups.append(line_group)
             else:
                 axis.set_title(f"Subplot {subplot_index + 1}: no signals selected")

@@ -141,6 +141,8 @@ The live-plot workflow:
 - shows a signal reference line above the plot so students can match `S1` to the full configured name
 - lets one signal appear in more than one subplot when comparison views are helpful
 - resets to a simple default subplot split whenever the subplot count changes
+- lets students hide or restore the left setup panel and bottom status log from the top toolbar
+- places subplot legends on the left side of each graph
 
 In the most common case, where one Arduino UNO R4 WiFi is connected, the GUI should fill the board and port automatically after refresh.
 
