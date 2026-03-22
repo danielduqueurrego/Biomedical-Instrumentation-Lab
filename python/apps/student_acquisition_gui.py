@@ -635,6 +635,16 @@ class StudentAcquisitionGui:
                             ),
                         )
                     )
+                if result and getattr(result, "uses_pulseox_led_cycle", False):
+                    self.background_queue.put(
+                        (
+                            "message",
+                            SessionMessage(
+                                level="info",
+                                text="PulseOx LED cycle enabled: D6=RED, D5=IR, phases RED_ON/DARK1/IR_ON/DARK2.",
+                            ),
+                        )
+                    )
                 if result and hasattr(result, "snapshot_path"):
                     self.background_queue.put(
                         ("message", SessionMessage(level="info", text=f"Saved Arduino code copy to {result.snapshot_path}"))

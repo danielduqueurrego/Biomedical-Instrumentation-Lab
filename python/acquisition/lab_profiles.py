@@ -31,7 +31,8 @@ SHARED_FIRMWARE_NOTE = (
 )
 PULSE_OX_NOTE = (
     "This profile loads the requested signal labels and the shared analog capture sketch only. "
-    "It does not start the phased-cycle Pulse Oximetry implementation yet."
+    "The generated sketch also drives D6 for RED and D5 for IR in the sequence "
+    "RED_ON, DARK1, IR_ON, DARK2."
 )
 
 LAB_PROFILES = {

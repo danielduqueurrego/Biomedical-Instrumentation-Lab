@@ -29,6 +29,7 @@ class GeneratedCompileArtifact:
     sample_rate_hz: int
     sample_period_us: int
     analog_ports: tuple[str, ...]
+    uses_pulseox_led_cycle: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -255,6 +256,7 @@ class ArduinoCli:
             sample_rate_hz=generated_sketch.sample_rate_hz,
             sample_period_us=generated_sketch.sample_period_us,
             analog_ports=generated_sketch.analog_ports,
+            uses_pulseox_led_cycle=generated_sketch.uses_pulseox_led_cycle,
         )
 
     def upload(self, sketch_dir: Path, fqbn: str, port: str, verbose: bool = False) -> None:

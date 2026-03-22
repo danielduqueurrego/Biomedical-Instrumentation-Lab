@@ -32,6 +32,7 @@ From the repository root:
 In the student GUI workflow, firmware compile and upload use a generated Arduino sketch based on the current GUI signal selection:
 - only the selected analog ports are emitted
 - the sample rate is set to the highest default rate among the selected signal presets
+- if any selected signal uses the `PulseOx` preset, the generated sketch drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
 - the generated Arduino source is saved for review after each successful compile
 
 If auto-detection does not find the correct port, pass it explicitly:

@@ -48,7 +48,7 @@ Current toolbar behavior:
 - each lab profile loads the requested signal names and analog-port defaults
 - the GUI compile/upload path generates a shared UNO R4 analog capture sketch from the currently selected signals
 - the generated sketch uses only the selected analog ports and the highest selected preset rate
-- the Pulse Oximetry profile does not start the phased-cycle implementation yet
+- when any selected signal uses the `PulseOx` preset, the generated sketch also drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
 - each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
 
 ## Existing reference CLI app
