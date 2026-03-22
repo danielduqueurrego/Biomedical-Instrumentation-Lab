@@ -12,7 +12,7 @@ Students only need:
 After that, the intended workflow is:
 1. create one Conda environment,
 2. run one system check,
-3. upload firmware with Arduino CLI,
+3. compile or upload firmware from the GUI or Arduino CLI,
 4. launch the Python GUI,
 5. save data automatically.
 
@@ -113,18 +113,31 @@ Run it with:
 ## What the first GUI supports
 
 The first GUI allows students to:
+- load lab profiles from a lab dropdown
 - select the current board target
 - let Arduino CLI auto-detect the connected board port
 - review the detected serial port if more than one board or port is present
 - choose a save folder and output filename
-- choose between 1 and 3 active signals
-- assign a name and preset to each active signal
+- use an auto-updated timestamp suffix in the output filename
+- choose between 1 and 6 active signals
+- assign a name, preset, and analog port to each active signal
 - review preset sampling defaults
+- compile or upload firmware from the GUI
 - start and stop acquisition
 - see live plots
 - log data to CSV
 
+The GUI-generated firmware workflow:
+- generates Arduino code from the current signal selection
+- uses the highest selected preset rate
+- emits only the selected analog ports
+- saves a timestamped copy of the compiled Arduino code for review
+- adds PulseOx LED sequencing on `D6` and `D5` when the `PulseOx` preset is used
+
 In the most common case, where one Arduino UNO R4 WiFi is connected, the GUI should fill the board and port automatically after refresh.
+
+For more detail on generated Arduino code, see:
+- `docs/generated_firmware_workflow.md`
 
 ## Official references
 

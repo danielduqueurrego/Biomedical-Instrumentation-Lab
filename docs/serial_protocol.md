@@ -22,6 +22,9 @@ Examples:
 - `META,acq_class,CONT_MED`
 - `META,rate_hz,120`
 - `META,fields,t_ms,A0,A1,A2,A3,A4,A5`
+- `META,selected_ports,A0,A1,A2`
+- `META,pulseox_led_pins,IR_D5,RED_D6`
+- `META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2`
 
 ### `DATA`
 Use for continuous waveform samples in `CONT_HIGH`, `CONT_MED`, and `PROC_CONT`.
@@ -33,6 +36,8 @@ Example:
 `DATA,1523,512,487,530,501,498,505`
 
 The meaning of `sample1,sample2,...` is declared by a `META,fields,...` packet at startup.
+
+In the current GUI-generated firmware workflow, `DATA` remains the main packet for student acquisition even when PulseOx LED sequencing is enabled.
 
 ### `PHASE`
 Use for raw phase measurements in `PHASED_CYCLE`.

@@ -3,6 +3,7 @@ Biomedical Instrumentation Lab is organized by acquisition pattern first so stud
 Primary architecture documents:
 - `docs/acquisition_architecture.md`
 - `docs/arduino_cli_setup.md`
+- `docs/generated_firmware_workflow.md`
 - `docs/student_setup.md`
 - `docs/sampling_strategy.md`
 - `docs/serial_protocol.md`

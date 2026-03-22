@@ -3,6 +3,7 @@
 This project uses Arduino CLI to reduce the amount of clicking students need to do before running a lab.
 
 For the full student workflow, including Conda setup and the Tkinter GUI, see `docs/student_setup.md`.
+For the generated GUI firmware behavior, see `docs/generated_firmware_workflow.md`.
 
 ## Project requirement
 

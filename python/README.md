@@ -51,6 +51,9 @@ Current toolbar behavior:
 - when any selected signal uses the `PulseOx` preset, the generated sketch also drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
 - each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
 
+See also:
+- `../docs/generated_firmware_workflow.md`
+
 ## Existing reference CLI app
 The original reference CLI app is still available from this folder with:
 - `python run_cont_med_three_channel.py`
