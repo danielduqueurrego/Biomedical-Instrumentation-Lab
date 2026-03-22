@@ -76,6 +76,9 @@ The helper tool wraps these Arduino CLI operations:
 - `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi <sketch-folder>`
 - `arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port <port> <sketch-folder>`
 
+After each successful compile, the project also saves a timestamped copy of the compiled Arduino sketch source under:
+- `data/arduino_code_snapshots/`
+
 The current reference sketch is:
 - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
 

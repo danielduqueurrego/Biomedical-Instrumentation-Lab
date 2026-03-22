@@ -7,10 +7,12 @@ import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
 
 
 class ArduinoCliError(RuntimeError):
@@ -199,12 +201,38 @@ class ArduinoCli:
     def install_core(self, core: str) -> None:
         self.run(["core", "install", core])
 
-    def compile(self, sketch_dir: Path, fqbn: str, verbose: bool = False) -> None:
+    def _save_compiled_sketch_copy(self, sketch_dir: Path, fqbn: str) -> Path:
+        timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+        ARDUINO_CODE_SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
+        snapshot_dir = ARDUINO_CODE_SNAPSHOT_DIR / f"{timestamp}_{sketch_dir.name}"
+        suffix = 1
+        while snapshot_dir.exists():
+            snapshot_dir = ARDUINO_CODE_SNAPSHOT_DIR / f"{timestamp}_{sketch_dir.name}_{suffix}"
+            suffix += 1
+
+        shutil.copytree(sketch_dir, snapshot_dir)
+
+        manifest_path = snapshot_dir / "compile_snapshot_info.txt"
+        manifest_path.write_text(
+            "\n".join(
+                (
+                    f"compiled_at={datetime.now().isoformat()}",
+                    f"source_sketch_dir={sketch_dir}",
+                    f"board_fqbn={fqbn}",
+                )
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        return snapshot_dir
+
+    def compile(self, sketch_dir: Path, fqbn: str, verbose: bool = False) -> Path:
         args = ["compile", "--fqbn", fqbn]
         if verbose:
             args.append("--verbose")
         args.append(str(sketch_dir))
         self.run(args)
+        return self._save_compiled_sketch_copy(sketch_dir, fqbn)
 
     def upload(self, sketch_dir: Path, fqbn: str, port: str, verbose: bool = False) -> None:
         args = ["upload", "--fqbn", fqbn, "--port", port]
@@ -261,13 +289,15 @@ def main() -> int:
                 print(board_port.description)
         elif args.command == "compile-demo":
             print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
-            cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
+            snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
             print("Compile finished.")
+            print(f"Saved Arduino code copy to: {snapshot_dir}")
         elif args.command == "upload-demo":
             if not args.skip_compile:
                 print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
-                cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
+                snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
                 print("Compile finished.")
+                print(f"Saved Arduino code copy to: {snapshot_dir}")
 
             selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
             print(f"Uploading {UNO_R4_WIFI_BOARD.sketch_dir.name} to {selected_port}...")

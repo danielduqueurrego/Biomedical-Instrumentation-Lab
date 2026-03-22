@@ -25,6 +25,9 @@ from acquisition.serial_tools import open_serial_connection
 from acquisition.session_logging import DataCsvLogger, MetadataLogger, ParseErrorLogger, create_named_session_paths
 
 
+SERIAL_SHUTDOWN_EXCEPTIONS = (serial.SerialException, OSError, TypeError)
+
+
 @dataclass(frozen=True, slots=True)
 class SessionSample:
     device_time_ms: int
@@ -94,14 +97,10 @@ class GuiAcquisitionSession:
             if not self.running and self.stop_event.is_set():
                 return
 
+            # Let the reader thread leave readline() on its next timeout and
+            # close the serial port itself. Closing from this thread can raise
+            # low-level read errors on Linux while os.read() is still active.
             self.stop_event.set()
-
-            if self.serial_connection is not None:
-                try:
-                    if self.serial_connection.is_open:
-                        self.serial_connection.close()
-                except serial.SerialException:
-                    pass
 
     def join(self, timeout: float | None = None) -> None:
         if self.reader_thread is not None:
@@ -129,6 +128,14 @@ class GuiAcquisitionSession:
 
     def _close_resources(self) -> None:
         with self.shutdown_lock:
+            if self.serial_connection is not None:
+                try:
+                    if self.serial_connection.is_open:
+                        self.serial_connection.close()
+                except SERIAL_SHUTDOWN_EXCEPTIONS:
+                    pass
+                self.serial_connection = None
+
             if self.csv_logger is not None:
                 self.csv_logger.close()
                 self.csv_logger = None
@@ -153,7 +160,7 @@ class GuiAcquisitionSession:
             while not self.stop_event.is_set():
                 try:
                     raw_bytes = self.serial_connection.readline()
-                except serial.SerialException as error:
+                except SERIAL_SHUTDOWN_EXCEPTIONS as error:
                     if not self.stop_event.is_set():
                         self.reader_error = error
                         self._publish_message("error", f"Serial error: {error}")

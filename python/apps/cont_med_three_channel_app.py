@@ -25,6 +25,7 @@ from acquisition.session_logging import DataCsvLogger, MetadataLogger, ParseErro
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "cont_med" / "three_channel_data_demo"
+SERIAL_SHUTDOWN_EXCEPTIONS = (serial.SerialException, OSError, TypeError)
 
 
 class ContMedThreeChannelApp:
@@ -83,19 +84,21 @@ class ContMedThreeChannelApp:
             if self.stop_requested:
                 return
 
+            # Let the reader thread leave readline() on timeout. Closing the
+            # port from this thread can trip low-level read errors on Linux.
             self.stop_event.set()
             self.stop_requested = True
-
-            try:
-                if self.serial_connection.is_open:
-                    self.serial_connection.close()
-            except serial.SerialException:
-                pass
 
     def close_resources(self) -> None:
         with self.shutdown_lock:
             if self.resources_closed:
                 return
+
+            try:
+                if self.serial_connection.is_open:
+                    self.serial_connection.close()
+            except SERIAL_SHUTDOWN_EXCEPTIONS:
+                pass
 
             self.csv_logger.close()
             self.metadata_logger.close()
@@ -106,7 +109,7 @@ class ContMedThreeChannelApp:
         while not self.stop_event.is_set():
             try:
                 raw_bytes = self.serial_connection.readline()
-            except serial.SerialException as error:
+            except SERIAL_SHUTDOWN_EXCEPTIONS as error:
                 if not self.stop_event.is_set():
                     self.reader_error = error
                     self.stop_event.set()

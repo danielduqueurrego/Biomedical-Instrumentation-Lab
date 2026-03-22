@@ -31,6 +31,7 @@ Run it from this folder with:
 - `launch_student_acquisition_gui.bat`
 
 The GUI lets students:
+- use a top toolbar to load ready-made lab profiles for ECG, Pulse Oximetry, Blood Pressure, and EMG
 - select a board and let the GUI auto-fill the port from Arduino CLI
 - review or override the detected serial port when needed
 - choose a save folder and filename
@@ -42,6 +43,12 @@ The GUI lets students:
 - log data automatically
 
 When one Arduino UNO R4 WiFi is connected, the GUI is expected to fill the board and port automatically.
+
+Current toolbar behavior:
+- each lab profile loads the requested signal names and analog-port defaults
+- the toolbar currently points all profiles to the shared UNO R4 analog-bank foundation sketch
+- the Pulse Oximetry profile does not start the phased-cycle implementation yet
+- each successful firmware compile saves a timestamped copy of the Arduino sketch under `../data/arduino_code_snapshots/`
 
 ## Existing reference CLI app
 The original reference CLI app is still available from this folder with:

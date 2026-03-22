@@ -17,7 +17,7 @@ Top-level structure:
 
 Current implemented baseline:
 - `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
-- first Tkinter GUI foundation for student acquisition setup and live plotting
+- first Tkinter GUI foundation for student acquisition setup, lab-profile loading, and live plotting
 
 Student setup stays minimal:
 - one Conda environment
@@ -28,6 +28,8 @@ Student setup stays minimal:
 Arduino CLI helper scripts:
 - `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
 - `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
+
+Each successful firmware compile also saves a timestamped copy of the Arduino sketch source under `data/arduino_code_snapshots/`.
 
 Python student entry points:
 - `python/system_check.py`

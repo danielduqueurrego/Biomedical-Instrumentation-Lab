@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import re
 import threading
 import tkinter as tk
 from collections import deque
+from datetime import datetime
 from pathlib import Path
 from queue import Empty, SimpleQueue
 from tkinter import filedialog, messagebox, ttk
@@ -27,6 +29,7 @@ from acquisition.gui_models import (
 )
 from acquisition.protocol import UNO_R4_ANALOG_PORTS
 from acquisition.gui_session import GuiAcquisitionSession, SessionMessage, SessionSample
+from acquisition.lab_profiles import LAB_PROFILE_ORDER, LabProfile, get_lab_profile
 from acquisition.presets import LAB_PRESETS, get_preset
 from acquisition.serial_tools import list_available_ports
 from acquisition.system_check import render_system_check, run_system_check
@@ -35,6 +38,7 @@ from acquisition.system_check import render_system_check, run_system_check
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "gui_sessions"
 PLOT_COLORS = ("#0F766E", "#B45309", "#1D4ED8")
+TIMESTAMP_SUFFIX_PATTERN = re.compile(r"_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}$")
 
 
 class StudentAcquisitionGui:
@@ -55,6 +59,11 @@ class StudentAcquisitionGui:
         self.output_basename_var = tk.StringVar(value=self.default_config.output_basename)
         self.signal_count_var = tk.IntVar(value=DEFAULT_ACTIVE_SIGNAL_COUNT)
         self.connection_summary_var = tk.StringVar(value="Waiting for board detection")
+        self.lab_profile_var = tk.StringVar(value="Choose Lab")
+        self.current_lab_var = tk.StringVar(value="Loaded lab: Custom")
+        self.firmware_summary_var = tk.StringVar(
+            value="Firmware: UNO R4 WiFi Analog Bank Foundation. No lab profile loaded yet."
+        )
 
         self.port_display_to_device: dict[str, str] = {}
         self.detected_board_ports: list[DetectedBoardPort] = []
@@ -62,6 +71,8 @@ class StudentAcquisitionGui:
         self.signal_preset_vars: list[tk.StringVar] = []
         self.signal_port_vars: list[tk.StringVar] = []
         self.signal_rows: list[tuple[ttk.Frame, ttk.Label]] = []
+        self.lab_profile_combo: ttk.Combobox | None = None
+        self.current_lab_profile: LabProfile | None = None
         self.plot_lines = []
         self.plot_time_s: deque[float] = deque(maxlen=2500)
         self.plot_signal_values: list[deque[int]] = []
@@ -72,6 +83,7 @@ class StudentAcquisitionGui:
 
         self._build_ui()
         self._bind_scroll_events()
+        self._refresh_output_basename()
         self._refresh_ports(log_message=False)
         self._apply_signal_count()
         self._append_status("Ready.")
@@ -80,11 +92,16 @@ class StudentAcquisitionGui:
     def _build_ui(self) -> None:
         self.root.columnconfigure(0, weight=0)
         self.root.columnconfigure(1, weight=1)
-        self.root.rowconfigure(0, weight=1)
-        self.root.rowconfigure(1, weight=0)
+        self.root.rowconfigure(0, weight=0)
+        self.root.rowconfigure(1, weight=1)
+        self.root.rowconfigure(2, weight=0)
+
+        toolbar = ttk.LabelFrame(self.root, text="Lab Menu", padding=10)
+        toolbar.grid(row=0, column=0, columnspan=2, sticky="ew", padx=12, pady=(12, 0))
+        toolbar.columnconfigure(0, weight=1)
 
         controls_container = ttk.Frame(self.root, padding=(12, 12, 0, 0))
-        controls_container.grid(row=0, column=0, sticky="nsew")
+        controls_container.grid(row=1, column=0, sticky="nsew")
         controls_container.columnconfigure(0, weight=1)
         controls_container.rowconfigure(0, weight=1)
 
@@ -110,15 +127,16 @@ class StudentAcquisitionGui:
         self.controls_canvas.bind("<Configure>", self._resize_controls_window)
 
         plot_area = ttk.Frame(self.root, padding=(0, 12, 12, 0))
-        plot_area.grid(row=0, column=1, sticky="nsew")
+        plot_area.grid(row=1, column=1, sticky="nsew")
         plot_area.columnconfigure(0, weight=1)
         plot_area.rowconfigure(0, weight=1)
 
         status_area = ttk.Frame(self.root, padding=12)
-        status_area.grid(row=1, column=0, columnspan=2, sticky="nsew")
+        status_area.grid(row=2, column=0, columnspan=2, sticky="nsew")
         status_area.columnconfigure(0, weight=1)
         status_area.rowconfigure(0, weight=1)
 
+        self._build_toolbar_frame(toolbar)
         self._build_connection_frame(self.controls_frame)
         self._build_firmware_frame(self.controls_frame)
         self._build_output_frame(self.controls_frame)
@@ -127,10 +145,43 @@ class StudentAcquisitionGui:
         self._build_plot_frame(plot_area)
         self._build_status_frame(status_area)
 
+    def _build_toolbar_frame(self, parent: ttk.LabelFrame) -> None:
+        selector_row = ttk.Frame(parent)
+        selector_row.grid(row=0, column=0, sticky="ew")
+        selector_row.columnconfigure(1, weight=1)
+
+        ttk.Label(selector_row, text="Lab").grid(row=0, column=0, sticky="w", padx=(0, 8))
+        self.lab_profile_combo = ttk.Combobox(
+            selector_row,
+            textvariable=self.lab_profile_var,
+            values=LAB_PROFILE_ORDER,
+            state="readonly",
+        )
+        self.lab_profile_combo.grid(row=0, column=1, sticky="ew")
+        self.lab_profile_combo.bind("<<ComboboxSelected>>", self._on_lab_profile_selected)
+        self._bind_combobox_scroll_guard(self.lab_profile_combo)
+
+        ttk.Label(parent, textvariable=self.current_lab_var, wraplength=1000, justify="left").grid(
+            row=1,
+            column=0,
+            sticky="w",
+            pady=(8, 4),
+        )
+        ttk.Label(parent, textvariable=self.firmware_summary_var, wraplength=1000, justify="left").grid(
+            row=2,
+            column=0,
+            sticky="w",
+        )
+
     def _bind_scroll_events(self) -> None:
         self.root.bind_all("<MouseWheel>", self._on_controls_mousewheel, add="+")
         self.root.bind_all("<Button-4>", self._on_controls_mousewheel, add="+")
         self.root.bind_all("<Button-5>", self._on_controls_mousewheel, add="+")
+
+    def _bind_combobox_scroll_guard(self, combobox: ttk.Combobox) -> None:
+        combobox.bind("<MouseWheel>", self._on_combobox_mousewheel, add="+")
+        combobox.bind("<Button-4>", self._on_combobox_mousewheel, add="+")
+        combobox.bind("<Button-5>", self._on_combobox_mousewheel, add="+")
 
     def _sync_controls_scrollregion(self, _event=None) -> None:
         if self.controls_canvas is None:
@@ -187,6 +238,10 @@ class StudentAcquisitionGui:
         self.controls_canvas.yview_scroll(delta_units, "units")
         return "break"
 
+    def _on_combobox_mousewheel(self, event: tk.Event) -> str:
+        scroll_result = self._on_controls_mousewheel(event)
+        return scroll_result or "break"
+
     def _build_connection_frame(self, parent: ttk.Frame) -> None:
         frame = ttk.LabelFrame(parent, text="Connection", padding=10)
         frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
@@ -200,10 +255,12 @@ class StudentAcquisitionGui:
             values=[board.display_name for board in SUPPORTED_BOARDS],
         )
         self.board_combo.grid(row=0, column=1, sticky="ew", pady=(0, 8))
+        self._bind_combobox_scroll_guard(self.board_combo)
 
         ttk.Label(frame, text="Serial port").grid(row=1, column=0, sticky="w", padx=(0, 8))
         self.port_combo = ttk.Combobox(frame, textvariable=self.port_var, state="readonly")
         self.port_combo.grid(row=1, column=1, sticky="ew")
+        self._bind_combobox_scroll_guard(self.port_combo)
 
         summary_label = ttk.Label(frame, textvariable=self.connection_summary_var, wraplength=300, justify="left")
         summary_label.grid(row=2, column=0, columnspan=2, sticky="w", pady=(8, 0))
@@ -224,10 +281,10 @@ class StudentAcquisitionGui:
         self.setup_cli_button = ttk.Button(frame, text="Setup Arduino CLI", command=self._setup_arduino_cli)
         self.setup_cli_button.grid(row=0, column=0, sticky="ew", pady=(0, 6))
 
-        self.compile_button = ttk.Button(frame, text="Compile Demo Firmware", command=self._compile_demo_firmware)
+        self.compile_button = ttk.Button(frame, text="Compile Loaded Firmware", command=self._compile_demo_firmware)
         self.compile_button.grid(row=1, column=0, sticky="ew", pady=(0, 6))
 
-        self.upload_button = ttk.Button(frame, text="Upload Demo Firmware", command=self._upload_demo_firmware)
+        self.upload_button = ttk.Button(frame, text="Upload Loaded Firmware", command=self._upload_demo_firmware)
         self.upload_button.grid(row=2, column=0, sticky="ew")
 
     def _build_output_frame(self, parent: ttk.Frame) -> None:
@@ -292,10 +349,12 @@ class StudentAcquisitionGui:
             ttk.Label(signal_frame, text="Preset").grid(row=2, column=0, sticky="w")
             preset_combo = ttk.Combobox(signal_frame, textvariable=preset_var, values=preset_names, state="readonly")
             preset_combo.grid(row=3, column=0, sticky="ew", pady=(4, 4))
+            self._bind_combobox_scroll_guard(preset_combo)
 
             ttk.Label(signal_frame, text="Analog port").grid(row=4, column=0, sticky="w")
             port_combo = ttk.Combobox(signal_frame, textvariable=port_var, values=analog_port_names, state="readonly")
             port_combo.grid(row=5, column=0, sticky="ew", pady=(4, 4))
+            self._bind_combobox_scroll_guard(port_combo)
 
             info_label = ttk.Label(signal_frame, text="", wraplength=300, justify="left")
             info_label.grid(row=6, column=0, sticky="w")
@@ -450,14 +509,79 @@ class StudentAcquisitionGui:
         report = run_system_check()
         self._append_status(render_system_check(report))
 
+    def _on_lab_profile_selected(self, _event=None) -> None:
+        profile_name = self.lab_profile_var.get().strip()
+        if profile_name in LAB_PROFILE_ORDER:
+            self._load_lab_profile(profile_name)
+
+    def _timestamp_suffix(self) -> str:
+        return datetime.now().strftime("_%Y_%m_%d_%H_%M_%S")
+
+    def _default_output_prefix(self) -> str:
+        if self.current_lab_profile is not None:
+            return self.current_lab_profile.output_basename
+        return self.default_config.output_basename
+
+    def _output_prefix_without_timestamp(self) -> str:
+        current_value = self.output_basename_var.get().strip()
+        if not current_value:
+            return self._default_output_prefix()
+
+        prefix = TIMESTAMP_SUFFIX_PATTERN.sub("", current_value).rstrip("_")
+        return prefix or self._default_output_prefix()
+
+    def _refresh_output_basename(self, prefix: str | None = None) -> None:
+        selected_prefix = (prefix or self._output_prefix_without_timestamp()).strip()
+        if not selected_prefix:
+            selected_prefix = self._default_output_prefix()
+        self.output_basename_var.set(f"{selected_prefix}{self._timestamp_suffix()}")
+
+    def _load_lab_profile(self, profile_name: str, log_message: bool = True) -> None:
+        profile = get_lab_profile(profile_name)
+        self.current_lab_profile = profile
+        self.lab_profile_var.set(profile.display_name)
+        self.board_var.set(UNO_R4_WIFI_BOARD.display_name)
+        self.signal_count_var.set(len(profile.signal_configurations))
+        self._refresh_output_basename(profile.output_basename)
+
+        for index, signal in enumerate(profile.signal_configurations):
+            self.signal_name_vars[index].set(signal.name)
+            self.signal_preset_vars[index].set(signal.preset_name)
+            self.signal_port_vars[index].set(signal.analog_port)
+
+        for index in range(len(profile.signal_configurations), MAX_SIGNAL_COUNT):
+            default_signal = self.default_config.signal_configurations[index]
+            self.signal_name_vars[index].set(default_signal.name)
+            self.signal_preset_vars[index].set(default_signal.preset_name)
+            self.signal_port_vars[index].set(default_signal.analog_port)
+
+        self.current_lab_var.set(f"Loaded lab: {profile.display_name}")
+        self.firmware_summary_var.set(f"Firmware: {profile.firmware_label}. {profile.note}")
+        self._apply_signal_count()
+
+        if log_message:
+            self._append_status(
+                f"Loaded {profile.display_name} profile with {len(profile.signal_configurations)} signal(s)."
+            )
+
+    def _selected_sketch_dir(self) -> Path:
+        if self.current_lab_profile is not None:
+            return self.current_lab_profile.sketch_dir
+        return self._selected_board().sketch_dir
+
+    def _selected_firmware_label(self) -> str:
+        if self.current_lab_profile is not None:
+            return self.current_lab_profile.firmware_label
+        return "UNO R4 WiFi Analog Bank Foundation"
+
     def _setup_arduino_cli(self) -> None:
         self._run_cli_task("Arduino CLI setup", self._setup_arduino_cli_task)
 
     def _compile_demo_firmware(self) -> None:
-        self._run_cli_task("Firmware compile", self._compile_demo_firmware_task)
+        self._run_cli_task(f"Firmware compile ({self._selected_firmware_label()})", self._compile_demo_firmware_task)
 
     def _upload_demo_firmware(self) -> None:
-        self._run_cli_task("Firmware upload", self._upload_demo_firmware_task)
+        self._run_cli_task(f"Firmware upload ({self._selected_firmware_label()})", self._upload_demo_firmware_task)
 
     def _setup_arduino_cli_task(self) -> None:
         cli = ArduinoCli.from_environment()
@@ -467,18 +591,20 @@ class StudentAcquisitionGui:
     def _compile_demo_firmware_task(self) -> None:
         board = self._selected_board()
         cli = ArduinoCli.from_environment()
-        cli.compile(board.sketch_dir, board.fqbn)
+        return cli.compile(self._selected_sketch_dir(), board.fqbn)
 
     def _upload_demo_firmware_task(self) -> None:
         board = self._selected_board()
         cli = ArduinoCli.from_environment()
+        sketch_dir = self._selected_sketch_dir()
 
         selected_port = self._selected_port_device()
         if not selected_port:
             selected_port = cli.detect_port_for_board(board)
 
-        cli.compile(board.sketch_dir, board.fqbn)
-        cli.upload(board.sketch_dir, board.fqbn, selected_port)
+        snapshot_dir = cli.compile(sketch_dir, board.fqbn)
+        cli.upload(sketch_dir, board.fqbn, selected_port)
+        return snapshot_dir
 
     def _run_cli_task(self, task_name: str, task_function) -> None:
         if self.cli_task_running:
@@ -491,11 +617,15 @@ class StudentAcquisitionGui:
 
         def worker() -> None:
             try:
-                task_function()
+                result = task_function()
             except Exception as error:
                 self.background_queue.put(("message", SessionMessage(level="error", text=f"{task_name} failed: {error}")))
             else:
                 self.background_queue.put(("message", SessionMessage(level="info", text=f"{task_name} finished.")))
+                if result:
+                    self.background_queue.put(
+                        ("message", SessionMessage(level="info", text=f"Saved Arduino code copy to {result}"))
+                    )
             finally:
                 self.background_queue.put(("cli_task_done", None))
 
@@ -581,6 +711,7 @@ class StudentAcquisitionGui:
             return
 
         try:
+            self._refresh_output_basename()
             config = self._build_gui_config()
             session = GuiAcquisitionSession(config)
             session.start()
@@ -601,6 +732,7 @@ class StudentAcquisitionGui:
         self.session.join(timeout=2.0)
         self.session = None
         self._set_acquisition_controls(running=False)
+        self._refresh_output_basename()
 
     def _set_acquisition_controls(self, running: bool) -> None:
         entry_state = "disabled" if running else "normal"
@@ -614,6 +746,8 @@ class StudentAcquisitionGui:
         self.output_dir_button.configure(state=entry_state)
         self.output_basename_entry.configure(state=entry_state)
         self.signal_count_spinbox.configure(state=spinbox_state)
+        if self.lab_profile_combo is not None:
+            self.lab_profile_combo.configure(state=combo_state)
 
         for index in range(MAX_SIGNAL_COUNT):
             children = self.signal_rows[index][0].winfo_children()
