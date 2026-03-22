@@ -10,6 +10,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
+from acquisition.arduino_codegen import create_generated_analog_capture_sketch
+
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
@@ -17,6 +19,16 @@ ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
 
 class ArduinoCliError(RuntimeError):
     """Raised when Arduino CLI could not complete the requested operation."""
+
+
+@dataclass(frozen=True, slots=True)
+class GeneratedCompileArtifact:
+    sketch_dir: Path
+    sketch_path: Path
+    snapshot_path: Path
+    sample_rate_hz: int
+    sample_period_us: int
+    analog_ports: tuple[str, ...]
 
 
 @dataclass(frozen=True, slots=True)
@@ -201,30 +213,29 @@ class ArduinoCli:
     def install_core(self, core: str) -> None:
         self.run(["core", "install", core])
 
+    def _find_primary_sketch_file(self, sketch_dir: Path) -> Path:
+        preferred = sketch_dir / f"{sketch_dir.name}.ino"
+        if preferred.is_file():
+            return preferred
+
+        ino_files = sorted(sketch_dir.glob("*.ino"))
+        if len(ino_files) == 1:
+            return ino_files[0]
+
+        raise ArduinoCliError(f"Could not find exactly one Arduino sketch file in {sketch_dir}.")
+
     def _save_compiled_sketch_copy(self, sketch_dir: Path, fqbn: str) -> Path:
         timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
         ARDUINO_CODE_SNAPSHOT_DIR.mkdir(parents=True, exist_ok=True)
-        snapshot_dir = ARDUINO_CODE_SNAPSHOT_DIR / f"{timestamp}_{sketch_dir.name}"
+        snapshot_path = ARDUINO_CODE_SNAPSHOT_DIR / f"arduino_code_{timestamp}.ino"
         suffix = 1
-        while snapshot_dir.exists():
-            snapshot_dir = ARDUINO_CODE_SNAPSHOT_DIR / f"{timestamp}_{sketch_dir.name}_{suffix}"
+        while snapshot_path.exists():
+            snapshot_path = ARDUINO_CODE_SNAPSHOT_DIR / f"arduino_code_{timestamp}_{suffix}.ino"
             suffix += 1
 
-        shutil.copytree(sketch_dir, snapshot_dir)
-
-        manifest_path = snapshot_dir / "compile_snapshot_info.txt"
-        manifest_path.write_text(
-            "\n".join(
-                (
-                    f"compiled_at={datetime.now().isoformat()}",
-                    f"source_sketch_dir={sketch_dir}",
-                    f"board_fqbn={fqbn}",
-                )
-            )
-            + "\n",
-            encoding="utf-8",
-        )
-        return snapshot_dir
+        source_sketch_path = self._find_primary_sketch_file(sketch_dir)
+        snapshot_path.write_text(source_sketch_path.read_text(encoding="utf-8"), encoding="utf-8")
+        return snapshot_path
 
     def compile(self, sketch_dir: Path, fqbn: str, verbose: bool = False) -> Path:
         args = ["compile", "--fqbn", fqbn]
@@ -233,6 +244,18 @@ class ArduinoCli:
         args.append(str(sketch_dir))
         self.run(args)
         return self._save_compiled_sketch_copy(sketch_dir, fqbn)
+
+    def compile_generated_analog_capture(self, signal_configurations, fqbn: str, baud_rate: int, verbose: bool = False) -> GeneratedCompileArtifact:
+        generated_sketch = create_generated_analog_capture_sketch(signal_configurations, baud_rate)
+        snapshot_path = self.compile(generated_sketch.sketch_dir, fqbn, verbose=verbose)
+        return GeneratedCompileArtifact(
+            sketch_dir=generated_sketch.sketch_dir,
+            sketch_path=generated_sketch.sketch_path,
+            snapshot_path=snapshot_path,
+            sample_rate_hz=generated_sketch.sample_rate_hz,
+            sample_period_us=generated_sketch.sample_period_us,
+            analog_ports=generated_sketch.analog_ports,
+        )
 
     def upload(self, sketch_dir: Path, fqbn: str, port: str, verbose: bool = False) -> None:
         args = ["upload", "--fqbn", fqbn, "--port", port]

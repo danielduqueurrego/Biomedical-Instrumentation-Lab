@@ -19,7 +19,7 @@ This folder contains the shared Python acquisition code plus student-facing laun
    `python system_check.py`
 
 ## Main student GUI
-The first student-facing GUI is a `CONT_MED` Arduino UNO R4 WiFi foundation app that streams the six standard analog inputs `A0` to `A5`.
+The first student-facing GUI is a shared Arduino UNO R4 WiFi acquisition app built around the six standard analog inputs `A0` to `A5`.
 
 Before running the Python app, upload the matching firmware from the repository root with:
 - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
@@ -46,9 +46,10 @@ When one Arduino UNO R4 WiFi is connected, the GUI is expected to fill the board
 
 Current toolbar behavior:
 - each lab profile loads the requested signal names and analog-port defaults
-- the toolbar currently points all profiles to the shared UNO R4 analog-bank foundation sketch
+- the GUI compile/upload path generates a shared UNO R4 analog capture sketch from the currently selected signals
+- the generated sketch uses only the selected analog ports and the highest selected preset rate
 - the Pulse Oximetry profile does not start the phased-cycle implementation yet
-- each successful firmware compile saves a timestamped copy of the Arduino sketch under `../data/arduino_code_snapshots/`
+- each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
 
 ## Existing reference CLI app
 The original reference CLI app is still available from this folder with:

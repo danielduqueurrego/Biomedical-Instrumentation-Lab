@@ -10,6 +10,11 @@
 // This sketch reads the six standard UNO R4 WiFi analog inputs and sends one
 // DATA CSV line at about 120 Hz. The Python GUI can label and select any subset
 // of these six inputs without changing the firmware.
+//
+// Note:
+// The student GUI compile/upload workflow generates a custom sketch with the
+// selected analog ports and the highest selected preset rate. This file remains
+// the fixed reference example in the repository.
 
 const unsigned long BAUD_RATE = 230400;
 const unsigned long SAMPLE_PERIOD_US = 8333;  // About 120 Hz.

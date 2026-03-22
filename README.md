@@ -29,7 +29,7 @@ Arduino CLI helper scripts:
 - `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
 - `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
 
-Each successful firmware compile also saves a timestamped copy of the Arduino sketch source under `data/arduino_code_snapshots/`.
+Each successful firmware compile also saves a timestamped Arduino code copy under `data/arduino_code_snapshots/`, and GUI-driven compiles generate that code from the selected signals and highest selected preset rate.
 
 Python student entry points:
 - `python/system_check.py`

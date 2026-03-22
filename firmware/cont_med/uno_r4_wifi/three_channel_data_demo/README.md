@@ -3,6 +3,7 @@
 This sketch is the current Arduino CLI reference demo for the repository.
 It streams the six standard Arduino UNO R4 WiFi analog inputs `A0` to `A5` at about 120 Hz.
 The student GUI can then choose any subset of those six inputs and assign each one a student-friendly signal name and preset.
+When students compile or upload from the GUI, the project generates a temporary Arduino sketch that uses the selected ports and the highest selected preset rate instead of this fixed 120 Hz reference file.
 
 ## One-time setup
 

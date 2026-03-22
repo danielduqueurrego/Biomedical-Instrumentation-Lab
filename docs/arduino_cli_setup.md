@@ -29,6 +29,11 @@ From the repository root:
    - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
    - Windows: `tools\\upload_cont_med_three_channel.bat`
 
+In the student GUI workflow, firmware compile and upload use a generated Arduino sketch based on the current GUI signal selection:
+- only the selected analog ports are emitted
+- the sample rate is set to the highest default rate among the selected signal presets
+- the generated Arduino source is saved for review after each successful compile
+
 If auto-detection does not find the correct port, pass it explicitly:
 - macOS/Linux: `./tools/upload_cont_med_three_channel.sh --port /dev/ttyACM0`
 - Windows: `tools\\upload_cont_med_three_channel.bat --port COM3`
@@ -77,7 +82,7 @@ The helper tool wraps these Arduino CLI operations:
 - `arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port <port> <sketch-folder>`
 
 After each successful compile, the project also saves a timestamped copy of the compiled Arduino sketch source under:
-- `data/arduino_code_snapshots/`
+- `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
 
 The current reference sketch is:
 - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`

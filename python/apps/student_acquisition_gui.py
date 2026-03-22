@@ -564,11 +564,6 @@ class StudentAcquisitionGui:
                 f"Loaded {profile.display_name} profile with {len(profile.signal_configurations)} signal(s)."
             )
 
-    def _selected_sketch_dir(self) -> Path:
-        if self.current_lab_profile is not None:
-            return self.current_lab_profile.sketch_dir
-        return self._selected_board().sketch_dir
-
     def _selected_firmware_label(self) -> str:
         if self.current_lab_profile is not None:
             return self.current_lab_profile.firmware_label
@@ -591,20 +586,27 @@ class StudentAcquisitionGui:
     def _compile_demo_firmware_task(self) -> None:
         board = self._selected_board()
         cli = ArduinoCli.from_environment()
-        return cli.compile(self._selected_sketch_dir(), board.fqbn)
+        return cli.compile_generated_analog_capture(
+            signal_configurations=self._selected_signal_configurations(),
+            fqbn=board.fqbn,
+            baud_rate=self.default_config.baud_rate,
+        )
 
     def _upload_demo_firmware_task(self) -> None:
         board = self._selected_board()
         cli = ArduinoCli.from_environment()
-        sketch_dir = self._selected_sketch_dir()
 
         selected_port = self._selected_port_device()
         if not selected_port:
             selected_port = cli.detect_port_for_board(board)
 
-        snapshot_dir = cli.compile(sketch_dir, board.fqbn)
-        cli.upload(sketch_dir, board.fqbn, selected_port)
-        return snapshot_dir
+        compile_artifact = cli.compile_generated_analog_capture(
+            signal_configurations=self._selected_signal_configurations(),
+            fqbn=board.fqbn,
+            baud_rate=self.default_config.baud_rate,
+        )
+        cli.upload(compile_artifact.sketch_dir, board.fqbn, selected_port)
+        return compile_artifact
 
     def _run_cli_task(self, task_name: str, task_function) -> None:
         if self.cli_task_running:
@@ -622,7 +624,22 @@ class StudentAcquisitionGui:
                 self.background_queue.put(("message", SessionMessage(level="error", text=f"{task_name} failed: {error}")))
             else:
                 self.background_queue.put(("message", SessionMessage(level="info", text=f"{task_name} finished.")))
-                if result:
+                if result and hasattr(result, "sample_rate_hz") and hasattr(result, "analog_ports"):
+                    joined_ports = ", ".join(result.analog_ports)
+                    self.background_queue.put(
+                        (
+                            "message",
+                            SessionMessage(
+                                level="info",
+                                text=f"Generated Arduino code at {result.sample_rate_hz} Hz for ports {joined_ports}.",
+                            ),
+                        )
+                    )
+                if result and hasattr(result, "snapshot_path"):
+                    self.background_queue.put(
+                        ("message", SessionMessage(level="info", text=f"Saved Arduino code copy to {result.snapshot_path}"))
+                    )
+                elif result:
                     self.background_queue.put(
                         ("message", SessionMessage(level="info", text=f"Saved Arduino code copy to {result}"))
                     )
@@ -644,6 +661,17 @@ class StudentAcquisitionGui:
 
     def _selected_port_device(self) -> str:
         return self.port_display_to_device.get(self.port_var.get(), self.port_var.get().strip())
+
+    def _selected_signal_configurations(self) -> tuple[SignalConfiguration, ...]:
+        signal_count = int(self.signal_count_var.get())
+        return tuple(
+            SignalConfiguration(
+                name=self.signal_name_vars[index].get().strip(),
+                preset_name=self.signal_preset_vars[index].get(),
+                analog_port=self.signal_port_vars[index].get(),
+            )
+            for index in range(signal_count)
+        )
 
     def _apply_signal_count(self) -> None:
         try:

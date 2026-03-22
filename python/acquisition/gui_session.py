@@ -15,8 +15,7 @@ from acquisition.protocol import (
     PACKET_TYPE_DATA,
     PACKET_TYPE_META,
     PacketParseError,
-    UNO_R4_ANALOG_BANK_FIELDS,
-    UNO_R4_ANALOG_INDEX,
+    UNO_R4_ANALOG_PORTS,
     parse_csv_packet,
     parse_data_packet,
     parse_meta_packet,
@@ -45,10 +44,9 @@ class GuiAcquisitionSession:
 
     def __init__(self, config: GuiAcquisitionConfig):
         self.config = config
-        self.expected_data_fields = UNO_R4_ANALOG_BANK_FIELDS
-        self.selected_field_names = ("t_ms", *(signal.name.strip() for signal in config.signal_configurations))
         self.selected_analog_ports = tuple(signal.analog_port for signal in config.signal_configurations)
-        self.selected_value_indexes = tuple(UNO_R4_ANALOG_INDEX[port_name] for port_name in self.selected_analog_ports)
+        self.expected_data_fields = ("t_ms", *self.selected_analog_ports)
+        self.selected_field_names = ("t_ms", *(signal.name.strip() for signal in config.signal_configurations))
 
         self.sample_queue: SimpleQueue[SessionSample] = SimpleQueue()
         self.message_queue: SimpleQueue[SessionMessage] = SimpleQueue()
@@ -119,7 +117,8 @@ class GuiAcquisitionSession:
         self.metadata_logger.write_meta(host_time_iso, "selected_port", (self.config.port,))
         self.metadata_logger.write_meta(host_time_iso, "baud_rate", (str(self.config.baud_rate),))
         self.metadata_logger.write_meta(host_time_iso, "selected_fields", self.selected_field_names)
-        self.metadata_logger.write_meta(host_time_iso, "available_analog_ports", self.expected_data_fields[1:])
+        self.metadata_logger.write_meta(host_time_iso, "available_analog_ports", UNO_R4_ANALOG_PORTS)
+        self.metadata_logger.write_meta(host_time_iso, "selected_analog_ports", self.selected_analog_ports)
 
         for index, signal in enumerate(self.config.signal_configurations, start=1):
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_name", (signal.name.strip(),))
@@ -208,13 +207,12 @@ class GuiAcquisitionSession:
                     self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                     continue
 
-                selected_values = tuple(incoming_packet.values[index] for index in self.selected_value_indexes)
                 logged_packet = DataPacket(
                     host_time_iso=incoming_packet.host_time_iso,
                     host_time_unix_s=incoming_packet.host_time_unix_s,
                     device_time_ms=incoming_packet.device_time_ms,
                     field_names=self.selected_field_names,
-                    values=selected_values,
+                    values=incoming_packet.values,
                     raw_line=incoming_packet.raw_line,
                 )
                 self.csv_logger.write_sample(logged_packet)
