@@ -18,7 +18,7 @@ Top-level structure:
 
 Current implemented baseline:
 - `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
-- first Tkinter GUI foundation for student acquisition setup, lab-profile loading, and live plotting
+- first Tkinter GUI foundation for student acquisition setup, lab-profile loading, generated firmware compile/upload, and multi-subplot live plotting
 
 Student setup stays minimal:
 - one Conda environment

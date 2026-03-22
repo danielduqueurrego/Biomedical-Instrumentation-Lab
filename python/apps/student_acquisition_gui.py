@@ -27,6 +27,13 @@ from acquisition.gui_models import (
     default_gui_config,
     validate_gui_config,
 )
+from acquisition.gui_plot_layout import (
+    MAX_SUBPLOT_COUNT,
+    clamp_subplot_count,
+    default_subplot_signal_indices,
+    format_signal_reference_text,
+    selected_subplot_signal_indices,
+)
 from acquisition.protocol import UNO_R4_ANALOG_PORTS
 from acquisition.gui_session import GuiAcquisitionSession, SessionMessage, SessionSample
 from acquisition.lab_profiles import LAB_PROFILE_ORDER, LabProfile, get_lab_profile
@@ -37,7 +44,7 @@ from acquisition.system_check import render_system_check, run_system_check
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "gui_sessions"
-PLOT_COLORS = ("#0F766E", "#B45309", "#1D4ED8")
+PLOT_COLORS = ("#0F766E", "#B45309", "#1D4ED8", "#BE123C", "#4338CA", "#047857")
 TIMESTAMP_SUFFIX_PATTERN = re.compile(r"_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}$")
 
 
@@ -58,12 +65,14 @@ class StudentAcquisitionGui:
         self.output_dir_var = tk.StringVar(value=str(self.default_config.output_dir))
         self.output_basename_var = tk.StringVar(value=self.default_config.output_basename)
         self.signal_count_var = tk.IntVar(value=DEFAULT_ACTIVE_SIGNAL_COUNT)
+        self.subplot_count_var = tk.IntVar(value=1)
         self.connection_summary_var = tk.StringVar(value="Waiting for board detection")
         self.lab_profile_var = tk.StringVar(value="Choose Lab")
         self.current_lab_var = tk.StringVar(value="Loaded lab: Custom")
         self.firmware_summary_var = tk.StringVar(
             value="Firmware: UNO R4 WiFi Analog Bank Foundation. No lab profile loaded yet."
         )
+        self.plot_signal_reference_var = tk.StringVar(value="Signals: none configured yet.")
 
         self.port_display_to_device: dict[str, str] = {}
         self.detected_board_ports: list[DetectedBoardPort] = []
@@ -73,7 +82,13 @@ class StudentAcquisitionGui:
         self.signal_rows: list[tuple[ttk.Frame, ttk.Label]] = []
         self.lab_profile_combo: ttk.Combobox | None = None
         self.current_lab_profile: LabProfile | None = None
-        self.plot_lines = []
+        self.subplot_count_spinbox: ttk.Spinbox | None = None
+        self.subplot_rows: list[ttk.Frame] = []
+        self.subplot_signal_vars: list[list[tk.BooleanVar]] = []
+        self.subplot_checkbuttons: list[list[ttk.Checkbutton]] = []
+        self.updating_subplot_controls = False
+        self.plot_axes = []
+        self.plot_line_groups: list[dict[int, object]] = []
         self.plot_time_s: deque[float] = deque(maxlen=2500)
         self.plot_signal_values: list[deque[int]] = []
         self.plot_history_seconds = 10.0
@@ -86,6 +101,7 @@ class StudentAcquisitionGui:
         self._refresh_output_basename()
         self._refresh_ports(log_message=False)
         self._apply_signal_count()
+        self._refresh_plot_preview()
         self._append_status("Ready.")
         self.root.after(100, self._poll_background_work)
 
@@ -341,6 +357,7 @@ class StudentAcquisitionGui:
             self.signal_name_vars.append(name_var)
             self.signal_preset_vars.append(preset_var)
             self.signal_port_vars.append(port_var)
+            name_var.trace_add("write", lambda *_args: self._refresh_signal_reference_text())
 
             ttk.Label(signal_frame, text=f"Signal {index + 1} name").grid(row=0, column=0, sticky="w")
             name_entry = ttk.Entry(signal_frame, textvariable=name_var)
@@ -379,17 +396,87 @@ class StudentAcquisitionGui:
         frame = ttk.LabelFrame(parent, text="Live Plot", padding=10)
         frame.grid(row=0, column=0, sticky="nsew")
         frame.columnconfigure(0, weight=1)
-        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
 
-        self.figure = Figure(figsize=(8.0, 5.6), dpi=100)
-        self.axis = self.figure.add_subplot(111)
-        self.axis.set_title("Waiting for acquisition")
-        self.axis.set_xlabel("Device time (s)")
-        self.axis.set_ylabel("ADC value")
-        self.axis.grid(True)
+        plot_controls_frame = ttk.Frame(frame)
+        plot_controls_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        plot_controls_frame.columnconfigure(1, weight=1)
+
+        ttk.Label(plot_controls_frame, text="Number of subplots").grid(
+            row=0,
+            column=0,
+            sticky="w",
+            padx=(0, 8),
+        )
+        self.subplot_count_spinbox = ttk.Spinbox(
+            plot_controls_frame,
+            from_=1,
+            to=MAX_SUBPLOT_COUNT,
+            textvariable=self.subplot_count_var,
+            width=6,
+            command=self._apply_subplot_count,
+        )
+        self.subplot_count_spinbox.grid(row=0, column=1, sticky="w")
+        self.subplot_count_var.trace_add("write", lambda *_args: self._apply_subplot_count())
+
+        ttk.Label(
+            plot_controls_frame,
+            text=(
+                "Use S1 to S6 to place each configured signal on one or more subplots. "
+                "Changing the subplot count resets to a simple default split."
+            ),
+            wraplength=760,
+            justify="left",
+        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=(6, 4))
+
+        ttk.Label(
+            plot_controls_frame,
+            textvariable=self.plot_signal_reference_var,
+            wraplength=760,
+            justify="left",
+        ).grid(row=2, column=0, columnspan=2, sticky="w", pady=(0, 8))
+
+        subplot_selection_frame = ttk.Frame(plot_controls_frame)
+        subplot_selection_frame.grid(row=3, column=0, columnspan=2, sticky="ew")
+        subplot_selection_frame.columnconfigure(0, weight=1)
+
+        for subplot_index in range(MAX_SUBPLOT_COUNT):
+            subplot_row = ttk.Frame(subplot_selection_frame)
+            subplot_row.grid(row=subplot_index, column=0, sticky="ew", pady=(0, 4))
+            subplot_row.columnconfigure(1, weight=1)
+
+            ttk.Label(subplot_row, text=f"Subplot {subplot_index + 1}").grid(
+                row=0,
+                column=0,
+                sticky="w",
+                padx=(0, 12),
+            )
+
+            checkbox_frame = ttk.Frame(subplot_row)
+            checkbox_frame.grid(row=0, column=1, sticky="w")
+
+            subplot_vars = []
+            subplot_checkbuttons = []
+            for signal_index in range(MAX_SIGNAL_COUNT):
+                signal_var = tk.BooleanVar(value=False)
+                checkbutton = ttk.Checkbutton(
+                    checkbox_frame,
+                    text=f"S{signal_index + 1}",
+                    variable=signal_var,
+                    command=self._on_subplot_selection_changed,
+                )
+                checkbutton.grid(row=0, column=signal_index, sticky="w", padx=(0, 8))
+                subplot_vars.append(signal_var)
+                subplot_checkbuttons.append(checkbutton)
+
+            self.subplot_rows.append(subplot_row)
+            self.subplot_signal_vars.append(subplot_vars)
+            self.subplot_checkbuttons.append(subplot_checkbuttons)
+
+        self.figure = Figure(figsize=(8.0, 5.6), dpi=100, constrained_layout=True)
 
         self.canvas = FigureCanvasTkAgg(self.figure, master=frame)
-        self.canvas.get_tk_widget().grid(row=0, column=0, sticky="nsew")
+        self.canvas.get_tk_widget().grid(row=1, column=0, sticky="nsew")
 
     def _build_status_frame(self, parent: ttk.Frame) -> None:
         self.status_text = tk.Text(parent, height=12, wrap="word")
@@ -683,6 +770,11 @@ class StudentAcquisitionGui:
             for index in range(signal_count)
         )
 
+    def _plot_signal_configurations(self) -> tuple[SignalConfiguration, ...]:
+        if self.session is not None:
+            return self.session.config.signal_configurations
+        return self._selected_signal_configurations()
+
     def _apply_signal_count(self) -> None:
         try:
             signal_count = int(self.signal_count_var.get())
@@ -698,6 +790,82 @@ class StudentAcquisitionGui:
                 row_frame.grid()
             else:
                 row_frame.grid_remove()
+
+        self._refresh_signal_reference_text(signal_count)
+        self._apply_subplot_count(reset_assignments=True)
+
+    def _refresh_signal_reference_text(self, signal_count: int | None = None) -> None:
+        if signal_count is None:
+            try:
+                signal_count = int(self.signal_count_var.get())
+            except tk.TclError:
+                signal_count = DEFAULT_ACTIVE_SIGNAL_COUNT
+
+        active_names = [self.signal_name_vars[index].get() for index in range(max(0, min(MAX_SIGNAL_COUNT, signal_count)))]
+        self.plot_signal_reference_var.set(format_signal_reference_text(active_names))
+
+    def _apply_subplot_count(self, reset_assignments: bool = True) -> None:
+        if self.updating_subplot_controls:
+            return
+
+        try:
+            requested_subplot_count = int(self.subplot_count_var.get())
+        except tk.TclError:
+            requested_subplot_count = 1
+
+        signal_count = len(self._plot_signal_configurations())
+        bounded_subplot_count = clamp_subplot_count(requested_subplot_count, signal_count or 1)
+
+        self.updating_subplot_controls = True
+        try:
+            if self.subplot_count_var.get() != bounded_subplot_count:
+                self.subplot_count_var.set(bounded_subplot_count)
+
+            if reset_assignments:
+                self._apply_default_subplot_assignments(signal_count, bounded_subplot_count)
+
+            for subplot_index, subplot_row in enumerate(self.subplot_rows):
+                if subplot_index < bounded_subplot_count:
+                    subplot_row.grid()
+                else:
+                    subplot_row.grid_remove()
+
+                for signal_index, checkbutton in enumerate(self.subplot_checkbuttons[subplot_index]):
+                    if signal_index < signal_count:
+                        checkbutton.grid()
+                    else:
+                        self.subplot_signal_vars[subplot_index][signal_index].set(False)
+                        checkbutton.grid_remove()
+        finally:
+            self.updating_subplot_controls = False
+
+        self._refresh_plot_preview()
+
+    def _apply_default_subplot_assignments(self, signal_count: int, subplot_count: int) -> None:
+        default_indices = default_subplot_signal_indices(signal_count, subplot_count)
+
+        for subplot_index, subplot_vars in enumerate(self.subplot_signal_vars):
+            selected_indices = set(default_indices[subplot_index]) if subplot_index < len(default_indices) else set()
+            for signal_index, signal_var in enumerate(subplot_vars):
+                signal_var.set(signal_index in selected_indices)
+
+    def _selected_subplot_signal_indices(self, signal_count: int, subplot_count: int) -> tuple[tuple[int, ...], ...]:
+        selection_grid = tuple(
+            tuple(signal_var.get() for signal_var in subplot_vars)
+            for subplot_vars in self.subplot_signal_vars
+        )
+        return selected_subplot_signal_indices(selection_grid, signal_count, subplot_count)
+
+    def _on_subplot_selection_changed(self) -> None:
+        if self.updating_subplot_controls:
+            return
+        self._refresh_plot_preview()
+
+    def _refresh_plot_preview(self) -> None:
+        signal_configurations = self._plot_signal_configurations()
+        if not signal_configurations:
+            return
+        self._rebuild_plot_layout(signal_configurations)
 
     def _update_signal_preset_info(self, row_index: int) -> None:
         preset_name = self.signal_preset_vars[row_index].get()
@@ -802,20 +970,76 @@ class StudentAcquisitionGui:
         self.plot_time_s = deque(maxlen=2500)
         self.plot_signal_values = [deque(maxlen=2500) for _ in signal_configurations]
         self.plot_history_seconds = max(get_preset(signal.preset_name).plotting.history_seconds for signal in signal_configurations)
+        self._rebuild_plot_layout(signal_configurations)
 
-        self.axis.clear()
-        self.axis.set_title("Live Acquisition")
-        self.axis.set_xlabel("Device time (s)")
-        self.axis.set_ylabel("ADC value")
-        self.axis.grid(True)
+    def _rebuild_plot_layout(self, signal_configurations: tuple[SignalConfiguration, ...]) -> None:
+        if not signal_configurations:
+            return
 
-        self.plot_lines = []
-        for index, signal in enumerate(signal_configurations):
-            line, = self.axis.plot([], [], label=signal.name, color=PLOT_COLORS[index % len(PLOT_COLORS)], linewidth=1.8)
-            self.plot_lines.append(line)
+        signal_count = len(signal_configurations)
+        try:
+            requested_subplot_count = int(self.subplot_count_var.get())
+        except tk.TclError:
+            requested_subplot_count = 1
 
-        self.axis.legend(loc="upper right")
+        subplot_count = clamp_subplot_count(requested_subplot_count, signal_count)
+        selected_groups = self._selected_subplot_signal_indices(signal_count, subplot_count)
+
+        self.figure.clear()
+        axes_grid = self.figure.subplots(subplot_count, 1, sharex=True, squeeze=False)
+        self.plot_axes = list(axes_grid.flat)
+        self.plot_line_groups = []
+
+        for subplot_index, axis in enumerate(self.plot_axes):
+            axis.grid(True)
+            axis.set_ylabel("ADC value")
+
+            selected_indices = selected_groups[subplot_index] if subplot_index < len(selected_groups) else ()
+            if selected_indices:
+                line_group = {}
+                for signal_index in selected_indices:
+                    signal = signal_configurations[signal_index]
+                    line, = axis.plot(
+                        [],
+                        [],
+                        label=signal.name,
+                        color=PLOT_COLORS[signal_index % len(PLOT_COLORS)],
+                        linewidth=1.8,
+                    )
+                    line_group[signal_index] = line
+
+                axis.set_title(self._subplot_title(subplot_index, signal_configurations, selected_indices))
+                axis.legend(loc="upper right")
+                self.plot_line_groups.append(line_group)
+            else:
+                axis.set_title(f"Subplot {subplot_index + 1}: no signals selected")
+                axis.text(
+                    0.5,
+                    0.5,
+                    "Select one or more signals above.",
+                    ha="center",
+                    va="center",
+                    transform=axis.transAxes,
+                    color="#4B5563",
+                )
+                self.plot_line_groups.append({})
+
+        if self.plot_axes:
+            self.plot_axes[-1].set_xlabel("Device time (s)")
+
         self.canvas.draw_idle()
+
+        if self.plot_time_s:
+            self._refresh_plot()
+
+    def _subplot_title(
+        self,
+        subplot_index: int,
+        signal_configurations: tuple[SignalConfiguration, ...],
+        selected_indices: tuple[int, ...],
+    ) -> str:
+        selected_names = ", ".join(signal_configurations[signal_index].name for signal_index in selected_indices)
+        return f"Subplot {subplot_index + 1}: {selected_names}"
 
     def _append_sample(self, sample: SessionSample) -> None:
         if not self.plot_signal_values:
@@ -827,33 +1051,34 @@ class StudentAcquisitionGui:
                 self.plot_signal_values[index].append(value)
 
     def _refresh_plot(self) -> None:
-        if not self.plot_lines or not self.plot_time_s:
+        if not self.plot_axes or not self.plot_time_s:
             return
 
         x_values = list(self.plot_time_s)
-        for line, values in zip(self.plot_lines, self.plot_signal_values):
-            line.set_data(x_values, list(values))
-
         latest_time = x_values[-1]
         left_edge = max(0.0, latest_time - self.plot_history_seconds)
         right_edge = max(self.plot_history_seconds, latest_time)
-        self.axis.set_xlim(left_edge, right_edge)
+        visible_indices = [index for index, timestamp in enumerate(x_values) if timestamp >= left_edge]
+        signal_value_lists = [list(signal_values) for signal_values in self.plot_signal_values]
 
-        visible_values = []
-        for index, timestamp in enumerate(x_values):
-            if timestamp < left_edge:
+        for axis, line_group in zip(self.plot_axes, self.plot_line_groups):
+            axis.set_xlim(left_edge, right_edge)
+
+            visible_values = []
+            for signal_index, line in line_group.items():
+                signal_values = signal_value_lists[signal_index]
+                line.set_data(x_values, signal_values)
+                visible_values.extend(signal_values[index] for index in visible_indices if index < len(signal_values))
+
+            if not visible_values:
+                axis.set_ylim(0, 1)
                 continue
-            for signal_values in self.plot_signal_values:
-                if index < len(signal_values):
-                    visible_values.append(list(signal_values)[index])
 
-        if not visible_values:
-            visible_values = [0, 1]
+            min_value = min(visible_values)
+            max_value = max(visible_values)
+            padding = max(10.0, (max_value - min_value) * 0.05)
+            axis.set_ylim(min_value - padding, max_value + padding)
 
-        min_value = min(visible_values)
-        max_value = max(visible_values)
-        padding = max(10.0, (max_value - min_value) * 0.05)
-        self.axis.set_ylim(min_value - padding, max_value + padding)
         self.canvas.draw_idle()
 
     def _append_status(self, message: str) -> None:

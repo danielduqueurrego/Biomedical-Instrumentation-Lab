@@ -39,6 +39,8 @@ The GUI lets students:
 - assign each signal a name, preset, and analog port from `A0` to `A5`
 - review preset sampling defaults
 - start and stop acquisition
+- choose how many live subplots to show
+- choose which configured signals appear in each subplot
 - view live plots
 - log data automatically
 
@@ -50,6 +52,12 @@ Current toolbar behavior:
 - the generated sketch uses only the selected analog ports and the highest selected preset rate
 - when any selected signal uses the `PulseOx` preset, the generated sketch also drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
 - each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
+
+Current live-plot behavior:
+- subplot count can be set from 1 up to the number of active signals
+- changing the subplot count resets to a simple default split
+- any signal can be assigned to one or more subplots with the `S1` to `S6` selectors
+- the signal reference line above the plot explains which configured signal each `S#` label represents
 
 See also:
 - `../docs/generated_firmware_workflow.md`

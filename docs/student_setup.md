@@ -121,6 +121,8 @@ The first GUI allows students to:
 - use an auto-updated timestamp suffix in the output filename
 - choose between 1 and 6 active signals
 - assign a name, preset, and analog port to each active signal
+- choose how many live subplots to display
+- choose which configured signals appear in each subplot
 - review preset sampling defaults
 - compile or upload firmware from the GUI
 - start and stop acquisition
@@ -133,6 +135,12 @@ The GUI-generated firmware workflow:
 - emits only the selected analog ports
 - saves a timestamped copy of the compiled Arduino code for review
 - adds PulseOx LED sequencing on `D6` and `D5` when the `PulseOx` preset is used
+
+The live-plot workflow:
+- uses `S1` to `S6` as short signal labels in the plot-layout controls
+- shows a signal reference line above the plot so students can match `S1` to the full configured name
+- lets one signal appear in more than one subplot when comparison views are helpful
+- resets to a simple default subplot split whenever the subplot count changes
 
 In the most common case, where one Arduino UNO R4 WiFi is connected, the GUI should fill the board and port automatically after refresh.
 
