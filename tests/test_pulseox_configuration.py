@@ -11,7 +11,11 @@ if str(PYTHON_DIR) not in sys.path:
 from acquisition.gui_models import GuiAcquisitionConfig, SignalConfiguration, validate_signal_configurations
 from acquisition.gui_session import GuiAcquisitionSession
 from acquisition.lab_profiles import get_lab_profile
-from acquisition.protocol import PULSEOX_CYCLE_VALUE_FIELDS, PULSEOX_PHASE_VALUE_FIELDS
+from acquisition.protocol import (
+    PULSEOX_CYCLE_VALUE_FIELDS,
+    PULSEOX_PHASE_VALUE_FIELDS,
+    pulseox_cycle_display_names,
+)
 
 
 class PulseOxConfigurationTests(unittest.TestCase):
@@ -36,7 +40,7 @@ class PulseOxConfigurationTests(unittest.TestCase):
                 )
             )
 
-    def test_session_exposes_pulseox_cycle_series_names(self) -> None:
+    def test_session_exposes_pulseox_protocol_fields_and_plot_labels(self) -> None:
         profile = get_lab_profile("Pulse Oximetry")
         config = GuiAcquisitionConfig(
             board_name="Arduino UNO R4 WiFi",
@@ -58,7 +62,11 @@ class PulseOxConfigurationTests(unittest.TestCase):
             session.expected_cycle_fields,
             ("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS),
         )
-        self.assertEqual(session.plot_series_names, PULSEOX_CYCLE_VALUE_FIELDS)
+        self.assertEqual(session.cycle_value_fields, PULSEOX_CYCLE_VALUE_FIELDS)
+        self.assertEqual(
+            session.plot_series_names,
+            pulseox_cycle_display_names(tuple(signal.name for signal in profile.signal_configurations)),
+        )
 
 
 if __name__ == "__main__":

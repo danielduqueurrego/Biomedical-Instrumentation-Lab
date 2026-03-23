@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Sequence
 
 
 PACKET_TYPE_META = "META"
@@ -37,6 +38,12 @@ PULSEOX_ANALOG_CHANNELS = (
     ("reflective_filtered", "A2"),
     ("transmission_filtered", "A3"),
 )
+PULSEOX_ANALOG_DISPLAY_NAMES = (
+    "Reflective photodiode raw output",
+    "Transmission photodiode raw output",
+    "Filtered reflective photodiode output",
+    "Filtered transmission photodiode output",
+)
 PULSEOX_PHASE_VALUE_FIELDS = tuple(channel_name for channel_name, _port_name in PULSEOX_ANALOG_CHANNELS)
 PULSEOX_ANALOG_PORTS = tuple(port_name for _channel_name, port_name in PULSEOX_ANALOG_CHANNELS)
 PULSEOX_ANALOG_MAP_FIELDS = tuple(f"{channel_name}={port_name}" for channel_name, port_name in PULSEOX_ANALOG_CHANNELS)
@@ -53,6 +60,20 @@ PULSEOX_CYCLE_VALUE_FIELDS = (
 
 # The legacy reference CLI app still plots the first three UNO R4 analog inputs.
 DEFAULT_THREE_CHANNEL_FIELDS = ("t_ms", "A0", "A1", "A2")
+
+
+def pulseox_cycle_display_names(signal_names: Sequence[str]) -> tuple[str, ...]:
+    """Build readable live-plot labels for PulseOx corrected cycle values."""
+
+    display_names = []
+
+    for index, default_name in enumerate(PULSEOX_ANALOG_DISPLAY_NAMES):
+        selected_name = signal_names[index].strip() if index < len(signal_names) else ""
+        base_name = selected_name or default_name
+        display_names.append(f"{base_name} (RED corrected)")
+        display_names.append(f"{base_name} (IR corrected)")
+
+    return tuple(display_names)
 
 
 class PacketParseError(ValueError):

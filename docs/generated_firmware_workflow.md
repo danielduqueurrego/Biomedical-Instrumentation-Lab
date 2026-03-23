@@ -73,6 +73,11 @@ For PulseOx, the GUI:
 - logs raw phase packets to `<output>_phase.csv`
 - logs corrected cycle packets to `<output>_cycle.csv`
 - plots the corrected `CYCLE` values live
+- uses student-facing live-plot labels derived from the four configured channel names, with `RED corrected` and `IR corrected` suffixes
+
+Important distinction:
+- the serial protocol and cycle CSV keep the explicit protocol field names such as `reflective_raw_red_corr`
+- the live plot uses readable display labels so the plot matches the four PulseOx channel names shown on the left side of the GUI
 
 The generated sketch also emits metadata such as:
 - `META,phase_fields,...`

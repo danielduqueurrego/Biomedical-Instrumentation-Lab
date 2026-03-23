@@ -3,7 +3,7 @@ from __future__ import annotations
 import threading
 from tkinter import messagebox, ttk
 
-from acquisition.arduino_cli_wrapper import ArduinoCli
+from acquisition.arduino_cli_wrapper import ArduinoCli, ArduinoCliError
 from acquisition.gui_session import SessionMessage
 
 
@@ -54,7 +54,26 @@ class FirmwareMixin:
         board = self._selected_board()
         cli = ArduinoCli.from_environment()
 
+        detected_ports = [
+            detected_board.port
+            for detected_board in cli.list_supported_board_ports()
+            if detected_board.matched_board is not None and detected_board.matched_board.fqbn == board.fqbn
+        ]
+        if not detected_ports:
+            raise ArduinoCliError(
+                f"No {board.display_name} board was detected. Connect the board, click Refresh Ports, and try again."
+            )
+
         selected_port = self._selected_port_device()
+        if selected_port and selected_port not in detected_ports:
+            if len(detected_ports) == 1:
+                selected_port = detected_ports[0]
+            else:
+                joined_ports = ", ".join(detected_ports)
+                raise ArduinoCliError(
+                    f"The selected port is no longer available for {board.display_name}. "
+                    f"Choose one of the detected ports: {joined_ports}."
+                )
         if not selected_port:
             selected_port = cli.detect_port_for_board(board)
 

@@ -35,6 +35,7 @@ from acquisition.protocol import (
     parse_data_packet,
     parse_meta_packet,
     parse_phase_packet,
+    pulseox_cycle_display_names,
 )
 from acquisition.serial_tools import open_serial_connection
 from acquisition.session_logging import (
@@ -83,7 +84,9 @@ class GuiAcquisitionSession:
             self.expected_phase_fields = ("t_us", "cycle_idx", "phase", *PULSEOX_PHASE_VALUE_FIELDS)
             self.expected_cycle_fields = ("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS)
             self.phase_value_fields = PULSEOX_PHASE_VALUE_FIELDS
-            self.plot_series_names = PULSEOX_CYCLE_VALUE_FIELDS
+            self.cycle_value_fields = PULSEOX_CYCLE_VALUE_FIELDS
+            signal_names = tuple(signal.name.strip() for signal in config.signal_configurations)
+            self.plot_series_names = pulseox_cycle_display_names(signal_names)
         else:
             self.selected_field_names = (
                 self.continuous_timestamp_field_name,
@@ -93,6 +96,7 @@ class GuiAcquisitionSession:
             self.expected_phase_fields = ()
             self.expected_cycle_fields = ()
             self.phase_value_fields = ()
+            self.cycle_value_fields = ()
             self.plot_series_names = self.selected_field_names[1:]
 
         self.sample_queue: SimpleQueue[SessionSample] = SimpleQueue()
@@ -125,7 +129,7 @@ class GuiAcquisitionSession:
 
             if self.is_phased_cycle:
                 self.phase_logger = PhaseCsvLogger(session_paths.phase_csv_path, self.phase_value_fields)
-                self.cycle_logger = CycleCsvLogger(session_paths.cycle_csv_path, self.plot_series_names)
+                self.cycle_logger = CycleCsvLogger(session_paths.cycle_csv_path, self.cycle_value_fields)
             else:
                 self.data_logger = DataCsvLogger(session_paths.data_csv_path, self.selected_field_names)
 
@@ -357,7 +361,7 @@ class GuiAcquisitionSession:
 
         if packet.packet_type == PACKET_TYPE_CYCLE:
             try:
-                cycle_packet = parse_cycle_packet(packet, self.plot_series_names)
+                cycle_packet = parse_cycle_packet(packet, self.cycle_value_fields)
             except PacketParseError as error:
                 self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                 return

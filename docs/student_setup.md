@@ -164,6 +164,7 @@ The first GUI allows students to:
 - choose which plotted series appear in each subplot
 - review preset sampling defaults
 - compile or upload firmware from the GUI
+- get a clear error if firmware upload is attempted with no supported Arduino board detected
 - start and stop acquisition
 - see live plots
 - log data to CSV
@@ -200,6 +201,7 @@ The GUI-generated firmware workflow:
 - emits raw `PHASE` packets with all four optical channels during every phase
 - emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each optical path
 - saves PulseOx raw phases to `<output>_phase.csv` and corrected cycles to `<output>_cycle.csv`
+- uses readable PulseOx plot labels derived from the four configured channel names, instead of raw protocol field names
 
 The live-plot workflow:
 - uses `S1` onward as short plotted-series labels in the plot-layout controls

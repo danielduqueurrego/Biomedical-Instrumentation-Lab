@@ -16,6 +16,10 @@ from acquisition.arduino_codegen import create_generated_analog_capture_sketch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
+BOARD_LIST_TIMEOUT_SECONDS = 10
+COMPILE_TIMEOUT_SECONDS = 180
+UPLOAD_TIMEOUT_SECONDS = 30
+SETUP_TIMEOUT_SECONDS = 300
 
 
 class ArduinoCliError(RuntimeError):
@@ -105,14 +109,27 @@ class ArduinoCli:
     def from_environment(cls, explicit_path: str | None = None) -> "ArduinoCli":
         return cls(resolve_arduino_cli(explicit_path))
 
-    def run(self, args: list[str], capture_output: bool = False) -> subprocess.CompletedProcess[str]:
+    def run(
+        self,
+        args: list[str],
+        capture_output: bool = False,
+        timeout_seconds: int | None = None,
+    ) -> subprocess.CompletedProcess[str]:
         try:
             return subprocess.run(
                 [self.executable_path, *args],
                 check=True,
                 text=True,
                 capture_output=capture_output,
+                timeout=timeout_seconds,
             )
+        except subprocess.TimeoutExpired as error:
+            command_text = " ".join([self.executable_path, *args])
+            timeout_label = f"{timeout_seconds}s" if timeout_seconds is not None else "the configured limit"
+            raise ArduinoCliError(
+                f"Arduino CLI command timed out after {timeout_label}: {command_text}. "
+                "Check that the board is connected, the selected port is correct, and no other app is using the port."
+            ) from error
         except subprocess.CalledProcessError as error:
             stderr = error.stderr.strip() if error.stderr else ""
             stdout = error.stdout.strip() if error.stdout else ""
@@ -120,7 +137,7 @@ class ArduinoCli:
             raise ArduinoCliError(details) from error
 
     def version(self) -> str:
-        result = self.run(["version"], capture_output=True)
+        result = self.run(["version"], capture_output=True, timeout_seconds=BOARD_LIST_TIMEOUT_SECONDS)
         return result.stdout.strip()
 
     @staticmethod
@@ -291,13 +308,17 @@ class ArduinoCli:
     def list_detected_boards(self) -> list[DetectedBoardPort]:
         if self._supports_board_list_json is not False:
             try:
-                result = self.run(["board", "list", "--format", "json"], capture_output=True)
+                result = self.run(
+                    ["board", "list", "--format", "json"],
+                    capture_output=True,
+                    timeout_seconds=BOARD_LIST_TIMEOUT_SECONDS,
+                )
                 self._supports_board_list_json = True
                 return self._parse_board_list_json(result.stdout)
             except (ArduinoCliError, json.JSONDecodeError):
                 self._supports_board_list_json = False
 
-        result = self.run(["board", "list"], capture_output=True)
+        result = self.run(["board", "list"], capture_output=True, timeout_seconds=BOARD_LIST_TIMEOUT_SECONDS)
         detected_boards = []
 
         for line in result.stdout.splitlines():
@@ -338,10 +359,10 @@ class ArduinoCli:
         return unique_matches[0]
 
     def update_index(self) -> None:
-        self.run(["core", "update-index"])
+        self.run(["core", "update-index"], timeout_seconds=SETUP_TIMEOUT_SECONDS)
 
     def install_core(self, core: str) -> None:
-        self.run(["core", "install", core])
+        self.run(["core", "install", core], timeout_seconds=SETUP_TIMEOUT_SECONDS)
 
     def _find_primary_sketch_file(self, sketch_dir: Path) -> Path:
         preferred = sketch_dir / f"{sketch_dir.name}.ino"
@@ -372,7 +393,7 @@ class ArduinoCli:
         if verbose:
             args.append("--verbose")
         args.append(str(sketch_dir))
-        self.run(args)
+        self.run(args, timeout_seconds=COMPILE_TIMEOUT_SECONDS)
         return self._save_compiled_sketch_copy(sketch_dir, fqbn)
 
     def compile_generated_analog_capture(self, signal_configurations, fqbn: str, baud_rate: int, verbose: bool = False) -> GeneratedCompileArtifact:
@@ -396,7 +417,7 @@ class ArduinoCli:
         if verbose:
             args.append("--verbose")
         args.append(str(sketch_dir))
-        self.run(args)
+        self.run(args, timeout_seconds=UPLOAD_TIMEOUT_SECONDS)
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

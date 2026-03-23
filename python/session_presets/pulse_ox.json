@@ -33,14 +33,14 @@
   "plot": {
     "subplot_count": 4,
     "series_names": [
-      "reflective_raw_red_corr",
-      "reflective_raw_ir_corr",
-      "transmission_raw_red_corr",
-      "transmission_raw_ir_corr",
-      "reflective_filtered_red_corr",
-      "reflective_filtered_ir_corr",
-      "transmission_filtered_red_corr",
-      "transmission_filtered_ir_corr"
+      "Reflective photodiode raw output (RED corrected)",
+      "Reflective photodiode raw output (IR corrected)",
+      "Transmission photodiode raw output (RED corrected)",
+      "Transmission photodiode raw output (IR corrected)",
+      "Filtered reflective photodiode output (RED corrected)",
+      "Filtered reflective photodiode output (IR corrected)",
+      "Filtered transmission photodiode output (RED corrected)",
+      "Filtered transmission photodiode output (IR corrected)"
     ],
     "selected_series_indices": [
       [

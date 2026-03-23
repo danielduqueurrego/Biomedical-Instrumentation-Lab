@@ -9,7 +9,7 @@ from acquisition.arduino_cli_wrapper import SUPPORTED_BOARDS, UNO_R4_WIFI_BOARD
 from acquisition.gui_models import MAX_SIGNAL_COUNT, GuiAcquisitionConfig, SignalConfiguration, validate_gui_config
 from acquisition.lab_profiles import LAB_PROFILE_ORDER, get_lab_profile
 from acquisition.presets import LAB_PRESETS, get_preset
-from acquisition.protocol import PULSEOX_ANALOG_PORTS, PULSEOX_CYCLE_VALUE_FIELDS, UNO_R4_ANALOG_PORTS
+from acquisition.protocol import PULSEOX_ANALOG_PORTS, UNO_R4_ANALOG_PORTS, pulseox_cycle_display_names
 
 
 class SignalConfigurationMixin:
@@ -152,7 +152,8 @@ class SignalConfigurationMixin:
 
         signal_configurations = self._selected_signal_configurations()
         if self._is_pulseox_configuration(signal_configurations):
-            return PULSEOX_CYCLE_VALUE_FIELDS
+            signal_names = tuple(signal.name.strip() for signal in signal_configurations)
+            return pulseox_cycle_display_names(signal_names)
 
         return tuple(signal.name.strip() or f"Signal {index + 1}" for index, signal in enumerate(signal_configurations))
 

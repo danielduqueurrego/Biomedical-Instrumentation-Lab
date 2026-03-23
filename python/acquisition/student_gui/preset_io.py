@@ -9,7 +9,7 @@ from acquisition.presets import (
     continuous_timestamp_field_name_for_rate_hz,
     default_sample_rate_hz_for_signal_configurations,
 )
-from acquisition.protocol import PULSEOX_CYCLE_VALUE_FIELDS
+from acquisition.protocol import pulseox_cycle_display_names
 from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR, DEFAULT_SESSION_PRESET_DIR, REPO_ROOT
 
 
@@ -167,7 +167,7 @@ def derive_preset_metadata(signal_configurations: tuple[SignalConfiguration, ...
 
 def default_plot_series_names(signal_configurations: tuple[SignalConfiguration, ...]) -> tuple[str, ...]:
     if signal_configurations and all(signal.preset_name == "PulseOx" for signal in signal_configurations):
-        return PULSEOX_CYCLE_VALUE_FIELDS
+        return pulseox_cycle_display_names(tuple(signal.name.strip() for signal in signal_configurations))
     return tuple(signal.name.strip() or f"Signal {index + 1}" for index, signal in enumerate(signal_configurations))
 
 

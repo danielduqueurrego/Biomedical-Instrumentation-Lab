@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 from pathlib import Path
+
+import pytest
 
 from acquisition import arduino_cli_wrapper
 from acquisition.arduino_cli_wrapper import (
     ArduinoCli,
+    ArduinoCliError,
     BoardDefinition,
     CONT_HIGH_UNO_R4_EMG_SKETCH_DIR,
     DetectedBoardPort,
@@ -61,3 +65,19 @@ def test_upload_cont_high_emg_uses_shared_board_detection_without_port(monkeypat
     assert fake_cli.upload_calls == [
         (CONT_HIGH_UNO_R4_EMG_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, "COM7", False)
     ]
+
+
+def test_run_wraps_subprocess_timeout_with_student_friendly_message(monkeypatch) -> None:
+    cli = ArduinoCli("arduino-cli")
+
+    def fake_run(*args, **kwargs):
+        raise subprocess.TimeoutExpired(cmd=["arduino-cli", "upload"], timeout=30)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+
+    with pytest.raises(ArduinoCliError) as error_info:
+        cli.run(["upload", "--port", "/dev/ttyACM0"], timeout_seconds=30)
+
+    message = str(error_info.value)
+    assert "timed out" in message
+    assert "arduino-cli upload --port /dev/ttyACM0" in message

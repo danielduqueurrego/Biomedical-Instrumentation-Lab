@@ -80,6 +80,7 @@ Notes:
 - `<output>_phase.csv` stores raw phase samples for all four channels
 - `<output>_cycle.csv` stores corrected red and IR outputs by optical path and signal path
 - the live plot shows corrected `CYCLE` values, not every raw phase sample
+- the live plot labels are derived from the four configured left-panel channels, with `RED corrected` and `IR corrected` suffixes
 
 ## Common troubleshooting
 

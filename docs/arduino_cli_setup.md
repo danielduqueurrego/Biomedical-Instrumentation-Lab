@@ -16,6 +16,7 @@ All student systems need:
 This repository includes cross-platform helper scripts in `tools/` so students can run setup, compile, and upload commands without editing source files.
 
 The Tkinter GUI also uses Arduino CLI board detection so the port can be filled automatically after the student selects a board.
+GUI firmware uploads now fail fast when no supported board is detected, and Arduino CLI compile/upload commands use built-in timeouts so a missing board does not appear to freeze the app indefinitely.
 
 ## Recommended project workflow
 
@@ -82,6 +83,7 @@ Project notes:
   - add the user to the `dialout` group if your system uses it
   - if needed, add the user to the group that owns the device node
   - if uploads fail after reset, check the udev rules guidance from Arduino
+- If the GUI reports that the upload timed out, first check that the UNO R4 WiFi is connected, appears in `arduino-cli board list`, and is not already open in another serial monitor.
 
 ## Commands used by this project
 

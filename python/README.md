@@ -87,6 +87,7 @@ Each preset stores:
 - the subplot count and plotted-series selections
 
 When one Arduino UNO R4 WiFi is connected, the GUI is expected to fill the board and port automatically.
+If no supported board is currently detected, GUI firmware upload now stops immediately with a clear status message instead of waiting indefinitely.
 
 Current toolbar behavior:
 - each lab profile loads the requested signal names and analog-port defaults
@@ -101,7 +102,9 @@ Current toolbar behavior:
 - in PulseOx mode, the generated sketch drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
 - in PulseOx mode, the generated sketch emits raw `PHASE` packets with all four optical channels on every phase
 - in PulseOx mode, the generated sketch emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each path
+- in PulseOx mode, the live plot labels are derived from the four configured channel names, with `RED corrected` and `IR corrected` suffixes
 - each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
+- compile and upload commands use timeouts so a missing board or busy serial port fails with a readable error instead of looking frozen
 
 Current live-plot behavior:
 - subplot count can be set from 1 up to the number of plotted series
