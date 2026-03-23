@@ -13,7 +13,7 @@ After that, the intended workflow is:
 1. create one Conda environment,
 2. run one system check,
 3. compile or upload firmware from the GUI or Arduino CLI,
-4. launch the Python GUI,
+4. launch the Python GUI from a top-level starter script,
 5. save data automatically.
 
 ## Windows
@@ -33,9 +33,17 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
+   `tools\setup_arduino_cli.bat`
+3. Upload the reference firmware:
+   `tools\upload_cont_med_three_channel.bat`
+4. Launch the GUI from the repository root:
+   `launch_student_gui_windows.bat`
+
+If needed, the older fallback launcher still works from the `python` folder:
+- `python\launch_student_acquisition_gui.bat`
    `tools\\setup_arduino_cli.bat`
 3. Upload a reference firmware (choose one):
    `tools\\upload_cont_med_three_channel.bat`
@@ -61,7 +69,7 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
@@ -90,7 +98,7 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
