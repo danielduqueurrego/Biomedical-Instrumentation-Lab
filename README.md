@@ -16,6 +16,7 @@ Top-level structure:
 - `python/apps`: student-facing Python apps built on the shared acquisition helpers
 
 Current implemented baseline:
+- `CONT_HIGH` Arduino UNO R4 WiFi EMG reference sketch streaming `EMG_A0` and `EMG_A1` at a 1 kHz target using shared `META` and `DATA` packets
 - `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
 - generated student GUI firmware for continuous labs using selected signals, selected analog ports, and the highest selected preset rate
 - generated `PHASED_CYCLE` PulseOx firmware and logging path using `PHASE` and `CYCLE` packets, D6 for RED LED control, and D5 for IR LED control
@@ -30,6 +31,7 @@ Student setup stays minimal:
 Arduino CLI helper scripts:
 - `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
 - `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
+- `tools/upload_cont_high_emg_reference.sh` or `tools/upload_cont_high_emg_reference.bat`
 
 Each successful firmware compile also saves a timestamped Arduino code copy under `data/arduino_code_snapshots/`. GUI-driven compiles generate that code from the selected signals, highest selected preset rate, and PulseOx phase logic when the `PulseOx` preset is used.
 

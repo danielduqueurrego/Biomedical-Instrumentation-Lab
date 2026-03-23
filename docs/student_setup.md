@@ -37,8 +37,9 @@ After that, the intended workflow is:
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `tools\\setup_arduino_cli.bat`
-3. Upload the reference firmware:
+3. Upload a reference firmware (choose one):
    `tools\\upload_cont_med_three_channel.bat`
+   `tools\\upload_cont_high_emg_reference.bat`
 4. Go back to the `python` folder.
 5. Launch the GUI:
    `launch_student_acquisition_gui.bat`
@@ -64,8 +65,9 @@ After that, the intended workflow is:
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
-3. Upload the reference firmware:
+3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
+   `./tools/upload_cont_high_emg_reference.sh`
 4. Go back to the `python` folder.
 5. Launch the GUI:
    `./launch_student_acquisition_gui.sh`
@@ -92,8 +94,9 @@ After that, the intended workflow is:
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
-3. Upload the reference firmware:
+3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
+   `./tools/upload_cont_high_emg_reference.sh`
 4. Go back to the `python` folder.
 5. Launch the GUI:
    `./launch_student_acquisition_gui.sh`
