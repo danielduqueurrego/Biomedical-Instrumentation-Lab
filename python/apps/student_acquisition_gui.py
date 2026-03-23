@@ -39,6 +39,7 @@ from acquisition.gui_plot_layout import (
 from acquisition.protocol import UNO_R4_ANALOG_PORTS
 from acquisition.gui_session import GuiAcquisitionSession, SessionMessage, SessionSample
 from acquisition.lab_profiles import LAB_PROFILE_ORDER, LabProfile, get_lab_profile
+from acquisition.architecture import AcquisitionClass
 from acquisition.presets import LAB_PRESETS, get_preset
 from acquisition.serial_tools import list_available_ports
 from acquisition.system_check import render_system_check, run_system_check
@@ -964,7 +965,7 @@ class StudentAcquisitionGui:
             else f"{preset.default_cycle_rate_hz} cycles/s"
         )
         packets = "/".join(preset.packet_types)
-        if preset_name == "PulseOx":
+        if preset.acquisition_class == AcquisitionClass.PHASED_CYCLE:
             role_combo.configure(state="readonly")
             role_text = self.signal_role_vars[row_index].get()
             if role_text == PULSEOX_ROLE_AUTO:

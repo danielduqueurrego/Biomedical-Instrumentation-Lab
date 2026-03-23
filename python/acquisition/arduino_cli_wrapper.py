@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import re
 import shutil
@@ -65,7 +66,14 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
 )
 
-SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD,)
+UNO_R4_WIFI_CONT_HIGH_EMG_BOARD = BoardDefinition(
+    display_name="Arduino UNO R4 WiFi",
+    fqbn="arduino:renesas_uno:unor4wifi",
+    core="arduino:renesas_uno",
+    sketch_dir=REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference",
+)
+
+SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD, UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
 
 
@@ -95,6 +103,7 @@ def resolve_arduino_cli(explicit_path: str | None = None) -> str:
 class ArduinoCli:
     def __init__(self, executable_path: str):
         self.executable_path = executable_path
+        self._supports_board_list_json: bool | None = None
 
     @classmethod
     def from_environment(cls, explicit_path: str | None = None) -> "ArduinoCli":
@@ -170,6 +179,109 @@ class ArduinoCli:
             matched_board=matched_board,
         )
 
+    def _extract_board_candidate(
+        self, board_candidate: dict[str, object] | None
+    ) -> tuple[str, str]:
+        """Return board name + fqbn from a JSON board candidate object."""
+        if not isinstance(board_candidate, dict):
+            return "", ""
+
+        board_name = str(board_candidate.get("name") or "").strip()
+        fqbn = str(board_candidate.get("fqbn") or "").strip()
+        return board_name, fqbn
+
+    def _select_best_board_candidate(
+        self, board_candidates: list[dict[str, object]], description: str
+    ) -> tuple[str, str, BoardDefinition | None]:
+        """
+        Pick the best board candidate from Arduino CLI JSON.
+
+        Preference order:
+        1) First candidate that matches a supported board.
+        2) First candidate with a valid fqbn.
+        3) First candidate if list is non-empty.
+        """
+        parsed_candidates: list[tuple[str, str, BoardDefinition | None]] = []
+
+        for candidate in board_candidates:
+            board_name, fqbn = self._extract_board_candidate(candidate)
+            matched_board = self._match_supported_board(board_name, fqbn, description)
+            parsed_candidates.append((board_name, fqbn, matched_board))
+
+        for board_name, fqbn, matched_board in parsed_candidates:
+            if matched_board is not None:
+                return board_name, fqbn, matched_board
+
+        for board_name, fqbn, matched_board in parsed_candidates:
+            if fqbn:
+                return board_name, fqbn, matched_board
+
+        if parsed_candidates:
+            return parsed_candidates[0]
+
+        return "", "", None
+
+    def _parse_board_list_json(self, stdout: str) -> list[DetectedBoardPort]:
+        payload = json.loads(stdout)
+        detected_ports = payload.get("detected_ports", [])
+        if not isinstance(detected_ports, list):
+            return []
+
+        parsed_results: list[DetectedBoardPort] = []
+
+        for port_entry in detected_ports:
+            if not isinstance(port_entry, dict):
+                continue
+
+            port_data = port_entry.get("port", {})
+            if not isinstance(port_data, dict):
+                continue
+
+            port = str(port_data.get("address") or "").strip()
+            if not port:
+                continue
+
+            protocol = str(port_data.get("protocol") or "").strip()
+            protocol_label = str(port_data.get("protocol_label") or "").strip()
+            port_label = str(port_data.get("label") or "").strip()
+
+            board_candidates = port_entry.get("matching_boards", [])
+            if not isinstance(board_candidates, list):
+                board_candidates = []
+
+            board_name, fqbn, matched_board = self._select_best_board_candidate(
+                [entry for entry in board_candidates if isinstance(entry, dict)],
+                description=port_label,
+            )
+
+            if matched_board is not None and not board_name:
+                board_name = matched_board.display_name
+
+            if not board_name:
+                board_name = "Unknown board"
+
+            description_bits = [port]
+            if port_label:
+                description_bits.append(port_label)
+            if protocol:
+                description_bits.append(f"protocol={protocol}")
+            if protocol_label:
+                description_bits.append(f"protocol_label={protocol_label}")
+            if len(board_candidates) > 1:
+                description_bits.append(f"matches={len(board_candidates)}")
+
+            parsed_results.append(
+                DetectedBoardPort(
+                    port=port,
+                    board_name=board_name,
+                    fqbn=fqbn,
+                    description=" | ".join(description_bits),
+                    matched_board=matched_board,
+                )
+            )
+
+        return parsed_results
+
     def list_board_ports(self) -> list[BoardPort]:
         return [
             BoardPort(port=detected.port, description=detected.description)
@@ -177,6 +289,14 @@ class ArduinoCli:
         ]
 
     def list_detected_boards(self) -> list[DetectedBoardPort]:
+        if self._supports_board_list_json is not False:
+            try:
+                result = self.run(["board", "list", "--format", "json"], capture_output=True)
+                self._supports_board_list_json = True
+                return self._parse_board_list_json(result.stdout)
+            except (ArduinoCliError, json.JSONDecodeError):
+                self._supports_board_list_json = False
+
         result = self.run(["board", "list"], capture_output=True)
         detected_boards = []
 
@@ -291,10 +411,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
     compile_parser = subparsers.add_parser("compile-demo", help="Compile the CONT_MED UNO R4 analog-bank reference sketch.")
     compile_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
+    compile_cont_high_parser = subparsers.add_parser(
+        "compile-cont-high-emg",
+        help="Compile the CONT_HIGH UNO R4 EMG high-rate reference sketch.",
+    )
+    compile_cont_high_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
     upload_parser = subparsers.add_parser("upload-demo", help="Compile and upload the CONT_MED UNO R4 analog-bank sketch.")
     upload_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
     upload_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
     upload_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
+    upload_cont_high_parser = subparsers.add_parser(
+        "upload-cont-high-emg",
+        help="Compile and upload the CONT_HIGH UNO R4 EMG high-rate reference sketch.",
+    )
+    upload_cont_high_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
+    upload_cont_high_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
+    upload_cont_high_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
     return parser
 
@@ -323,6 +457,15 @@ def main() -> int:
             snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
             print("Compile finished.")
             print(f"Saved Arduino code copy to: {snapshot_dir}")
+        elif args.command == "compile-cont-high-emg":
+            print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+            snapshot_dir = cli.compile(
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                verbose=args.verbose,
+            )
+            print("Compile finished.")
+            print(f"Saved Arduino code copy to: {snapshot_dir}")
         elif args.command == "upload-demo":
             if not args.skip_compile:
                 print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
@@ -333,6 +476,26 @@ def main() -> int:
             selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
             print(f"Uploading {UNO_R4_WIFI_BOARD.sketch_dir.name} to {selected_port}...")
             cli.upload(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
+            print("Upload finished.")
+        elif args.command == "upload-cont-high-emg":
+            if not args.skip_compile:
+                print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+                snapshot_dir = cli.compile(
+                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                    verbose=args.verbose,
+                )
+                print("Compile finished.")
+                print(f"Saved Arduino code copy to: {snapshot_dir}")
+
+            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
+            print(f"Uploading {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} to {selected_port}...")
+            cli.upload(
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                selected_port,
+                verbose=args.verbose,
+            )
             print("Upload finished.")
         else:
             raise ArduinoCliError(f"Unsupported command: {args.command}")

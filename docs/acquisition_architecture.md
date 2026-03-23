@@ -73,3 +73,8 @@ python/
 2. `CONT_MED` is implemented end to end for the reference UNO R4 WiFi demo and the student GUI.
 3. GUI-generated `PHASED_CYCLE` PulseOx firmware is implemented with raw `PHASE` logging and corrected `CYCLE` logging.
 4. `CONT_HIGH` still uses the same shared GUI workflow, but more high-rate validation remains useful on real hardware.
+
+## Canonical lab manifest
+- `python/acquisition/lab_manifest.py` is the canonical source for per-lab defaults.
+- `presets.py` and `lab_profiles.py` derive their acquisition class, rates, packet types, default emitted fields, plotting defaults, and phase names from this manifest.
+- Keep this manifest updated first when adding or changing labs so GUI labels and protocol defaults stay aligned.

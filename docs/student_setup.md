@@ -44,6 +44,13 @@ After that, the intended workflow is:
 
 If needed, the older fallback launcher still works from the `python` folder:
 - `python\launch_student_acquisition_gui.bat`
+   `tools\\setup_arduino_cli.bat`
+3. Upload a reference firmware (choose one):
+   `tools\\upload_cont_med_three_channel.bat`
+   `tools\\upload_cont_high_emg_reference.bat`
+4. Go back to the `python` folder.
+5. Launch the GUI:
+   `launch_student_acquisition_gui.bat`
 
 ## macOS
 
@@ -66,13 +73,12 @@ If needed, the older fallback launcher still works from the `python` folder:
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
-3. Upload the reference firmware:
+3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
-4. Launch the GUI from the repository root:
-   `./launch_student_gui_macos.command`
-
-If needed, the older fallback launcher still works from the `python` folder:
-- `./python/launch_student_acquisition_gui.sh`
+   `./tools/upload_cont_high_emg_reference.sh`
+4. Go back to the `python` folder.
+5. Launch the GUI:
+   `./launch_student_acquisition_gui.sh`
 
 ## Linux
 
@@ -96,26 +102,12 @@ If needed, the older fallback launcher still works from the `python` folder:
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
-3. Upload the reference firmware:
+3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
-4. Launch the GUI from the repository root:
-   `./launch_student_gui_linux.sh`
-
-If needed, the older fallback launcher still works from the `python` folder:
-- `./python/launch_student_acquisition_gui.sh`
-
-## If a launcher reports Conda errors
-
-The new top-level launchers check for Conda and the `biomed-lab` environment before opening the GUI.
-They first look on your terminal `PATH`, then check common Conda install folders.
-
-If a launcher says Conda or the environment is missing, run these exact commands:
-
-1. `cd python`
-2. `conda env create -f environment.yml`
-3. return to repository root and run your OS launcher again
-
-If Conda is installed but still not found, close and reopen your terminal, then try the launcher again.
+   `./tools/upload_cont_high_emg_reference.sh`
+4. Go back to the `python` folder.
+5. Launch the GUI:
+   `./launch_student_acquisition_gui.sh`
 
 ## What the system check verifies
 
