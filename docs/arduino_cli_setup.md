@@ -52,6 +52,7 @@ Recommended requirements:
 
 Project notes:
 - For UNO R4 WiFi uploads on Windows, keep Arduino CLI updated. Arduino support says the touch-reset upload fix is included in Arduino CLI `0.33.1` or later.
+- This project now prefers machine-readable board detection with `arduino-cli board list --format json`. To guarantee JSON output support in student setups, require Arduino CLI `0.33.1` or later (recommended for all operating systems in this repo).
 - If the board is not detected correctly after connecting it, reconnect it and try the upload again.
 
 ## macOS
@@ -83,6 +84,7 @@ Project notes:
 The helper tool wraps these Arduino CLI operations:
 - `arduino-cli core update-index`
 - `arduino-cli core install arduino:renesas_uno`
+- `arduino-cli board list --format json` (preferred when supported by the installed CLI)
 - `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi <sketch-folder>`
 - `arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port <port> <sketch-folder>`
 
