@@ -1,0 +1,6 @@
+row_type,packet_type,host_time_iso,host_time_unix_s,device_timestamp_field,device_timestamp,cycle_idx,phase,meta_key,meta_values,error_message,raw_line,Raw ECG,Amplified ECG,Comparator Output
+META,META,2026-03-23T14:05:00+00:00,1711202700.000000,,,,acquisition_class,CONT_MED,,,"",,,
+META,META,2026-03-23T14:05:00+00:00,1711202700.000000,,,,selected_fields,t_ms|Raw ECG|Amplified ECG|Comparator Output,,,"",,,
+DATA,DATA,2026-03-23T14:05:00.010000+00:00,1711202700.010000,t_ms,100,,,,,,"DATA,100,8020,11240,0",8020,11240,0
+DATA,DATA,2026-03-23T14:05:00.012000+00:00,1711202700.012000,t_ms,102,,,,,,"DATA,102,8135,11480,1",8135,11480,1
+DATA,DATA,2026-03-23T14:05:00.014000+00:00,1711202700.014000,t_ms,104,,,,,,"DATA,104,8074,11310,0",8074,11310,0

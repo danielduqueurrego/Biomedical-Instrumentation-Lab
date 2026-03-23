@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#f8fafc"/>
+  <rect x="40" y="40" width="1200" height="640" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="80" y="110" font-family="Arial, sans-serif" font-size="34" fill="#0f172a">Placeholder: EMG live plot screenshot</text>
+  <text x="80" y="160" font-family="Arial, sans-serif" font-size="22" fill="#334155">Replace with a real EMG classroom screenshot when available.</text>
+  <rect x="90" y="210" width="1100" height="360" rx="12" fill="#ecfeff" stroke="#99f6e4" stroke-width="2"/>
+  <polyline points="120,420 200,350 280,470 360,260 440,390 520,330 600,500 680,300 760,430 840,340 920,510 1000,320 1080,400 1160,360" fill="none" stroke="#0f766e" stroke-width="5"/>
+  <text x="110" y="620" font-family="Arial, sans-serif" font-size="24" fill="#475569">Suggested replacement filename: emg_live_plot.png</text>
+</svg>

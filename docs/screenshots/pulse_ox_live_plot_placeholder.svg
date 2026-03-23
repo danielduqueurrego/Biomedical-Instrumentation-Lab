@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#f8fafc"/>
+  <rect x="40" y="40" width="1200" height="640" rx="18" fill="#ffffff" stroke="#cbd5e1" stroke-width="3"/>
+  <text x="80" y="110" font-family="Arial, sans-serif" font-size="34" fill="#0f172a">Placeholder: PulseOx live plot screenshot</text>
+  <text x="80" y="160" font-family="Arial, sans-serif" font-size="22" fill="#334155">Replace with a real PulseOx classroom screenshot when available.</text>
+  <rect x="90" y="210" width="1100" height="360" rx="12" fill="#fff7ed" stroke="#fdba74" stroke-width="2"/>
+  <polyline points="120,430 180,420 240,400 300,360 360,320 420,300 480,340 540,390 600,430 660,420 720,390 780,350 840,320 900,305 960,330 1020,380 1080,425 1160,415" fill="none" stroke="#b45309" stroke-width="5"/>
+  <polyline points="120,500 180,490 240,470 300,430 360,390 420,370 480,405 540,455 600,495 660,485 720,455 780,415 840,390 900,375 960,398 1020,445 1080,490 1160,480" fill="none" stroke="#1d4ed8" stroke-width="5"/>
+  <text x="110" y="620" font-family="Arial, sans-serif" font-size="24" fill="#475569">Suggested replacement filename: pulse_ox_live_plot.png</text>
+</svg>

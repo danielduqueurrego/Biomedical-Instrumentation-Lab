@@ -1,0 +1,6 @@
+row_type,packet_type,host_time_iso,host_time_unix_s,device_timestamp_field,device_timestamp,cycle_idx,phase,meta_key,meta_values,error_message,raw_line,Raw EMG,Rectified EMG,Enveloped EMG,Pressure
+META,META,2026-03-23T14:00:00+00:00,1711202400.000000,,,,acquisition_class,CONT_HIGH,,,"",,,
+META,META,2026-03-23T14:00:00+00:00,1711202400.000000,,,,selected_fields,t_us|Raw EMG|Rectified EMG|Enveloped EMG|Pressure,,,"",,,
+DATA,DATA,2026-03-23T14:00:00.050000+00:00,1711202400.050000,t_us,1000,,,,,,"DATA,1000,812,1034,944,120",812,1034,944,120
+DATA,DATA,2026-03-23T14:00:00.050500+00:00,1711202400.050500,t_us,1500,,,,,,"DATA,1500,890,1102,982,121",890,1102,982,121
+DATA,DATA,2026-03-23T14:00:00.051000+00:00,1711202400.051000,t_us,2000,,,,,,"DATA,2000,921,1160,1013,121",921,1160,1013,121

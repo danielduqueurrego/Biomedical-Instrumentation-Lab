@@ -61,6 +61,7 @@ Notes:
 - EMG `DATA` rows store both host timestamps and Arduino `t_us`
 - current UNO R4 WiFi EMG firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
 - `PARSE_ERROR` and `ERR` rows should stay absent during a healthy session
+- synthetic example file: `examples/session_csv/emg_example_session.csv`
 
 ## Common troubleshooting
 

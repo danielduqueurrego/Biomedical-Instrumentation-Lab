@@ -61,6 +61,7 @@ Optional preset:
 Use one of these:
 - GUI lab profile: `Pulse Oximetry`
 - GUI session preset: `python/session_presets/pulse_ox.json`
+- committed reference sketch: `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
 
 The GUI-generated firmware will:
 - drive `D6` and `D5`
@@ -82,6 +83,7 @@ Notes:
 - the session CSV uses readable PulseOx column labels derived from the configured channel names
 - the live plot shows corrected `CYCLE` values, not every raw phase sample
 - the live plot labels are derived from the four configured left-panel channels, with `RED corrected` and `IR corrected` suffixes
+- synthetic example file: `examples/session_csv/pulse_ox_example_session.csv`
 
 ## Common troubleshooting
 

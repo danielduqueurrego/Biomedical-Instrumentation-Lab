@@ -22,3 +22,4 @@ Related documents:
 - [Serial protocol](../serial_protocol.md)
 - [Generated firmware workflow](../generated_firmware_workflow.md)
 - [Hardware validation framework](../validation/README.md)
+- [Example session CSVs](../../examples/session_csv/README.md)

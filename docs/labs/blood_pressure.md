@@ -64,6 +64,7 @@ Notes:
 - Blood Pressure `DATA` rows store both host timestamps and Arduino `t_ms`
 - current UNO R4 WiFi Blood Pressure firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
 - the output stays on the continuous `DATA` workflow during manual cuff inflation and deflation
+- synthetic example file: `examples/session_csv/blood_pressure_example_session.csv`
 
 ## Common troubleshooting
 

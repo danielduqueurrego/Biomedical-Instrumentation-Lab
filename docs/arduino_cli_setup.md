@@ -101,6 +101,7 @@ Committed reference sketches currently included in the repo:
 - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
 - `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
 - `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
+- `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
 
 ## CI smoke tests
 
@@ -118,6 +119,8 @@ Current CI compile targets:
   - `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
 - committed `CONT_HIGH` four-channel sketch:
   - `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
+- committed `PHASED_CYCLE` PulseOx reference sketch:
+  - `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
 
 Both committed `CONT_HIGH` sketches now use `t_us` timestamps, matching the shared protocol and Python logging path for high-rate data.
 - generated example sketches:

@@ -12,8 +12,8 @@ Expected packet mix:
 - optional `STAT`
 - optional `ERR`
 
-Current repository note:
-- the PulseOx workflow currently uses GUI-generated firmware rather than a fixed committed sketch
+Committed PulseOx reference sketch:
+- `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
 
 Current GUI-generated PulseOx behavior:
 - drive `D6` for RED LED control

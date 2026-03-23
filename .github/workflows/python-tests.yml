@@ -76,6 +76,12 @@ jobs:
           echo "Compiling firmware/cont_high/uno_r4_wifi/emg_four_channel_demo"
           arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi firmware/cont_high/uno_r4_wifi/emg_four_channel_demo
 
+      - name: Compile committed PHASED_CYCLE PulseOx reference sketch
+        run: |
+          set -euxo pipefail
+          echo "Compiling firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference
+
       - name: Generate CI example sketches
         id: generate
         run: |

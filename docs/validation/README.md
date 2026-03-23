@@ -23,6 +23,11 @@ Each validation session should record at least:
 5. Save the session CSV and complete the validation checklist.
 6. Keep screenshots or wiring photos if they help explain a failure or a good known setup.
 
+Practical bench habit:
+- fill the short per-lab table immediately after the run
+- then add extra notes only if something failed or looked unusual
+- compare the saved session CSV with the synthetic examples in `examples/session_csv/` if a TA is unsure how to interpret a `row_type`
+
 ## How to estimate achieved rate
 
 ### Continuous labs
@@ -65,6 +70,7 @@ Warning signs:
 
 Use:
 - [Hardware validation checklist template](./hardware_validation_checklist_template.md)
+- [Per-lab validation tables](./lab_validation_tables.md)
 
 ## Screenshot placeholders
 

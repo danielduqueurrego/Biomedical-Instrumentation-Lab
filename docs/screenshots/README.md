@@ -11,6 +11,21 @@ Suggested screenshot types:
 - sensor placement or bench setup
 - validation evidence for known-good runs
 
+Current placeholder assets already included:
+- `student_gui_setup_placeholder.svg`
+- `emg_live_plot_placeholder.svg`
+- `pulse_ox_live_plot_placeholder.svg`
+
+Recommended replacements:
+- replace `student_gui_setup_placeholder.svg` with `student_gui_setup.png`
+- replace `emg_live_plot_placeholder.svg` with `emg_live_plot.png`
+- replace `pulse_ox_live_plot_placeholder.svg` with `pulse_ox_live_plot.png`
+
+Where these belong:
+- `student_gui_setup.png`: root quickstart, `docs/student_setup.md`, and validation notes
+- `emg_live_plot.png`: EMG lab handouts or `docs/labs/emg.md`
+- `pulse_ox_live_plot.png`: PulseOx lab handouts or `docs/labs/pulse_ox.md`
+
 Suggested naming style:
 - `emg_gui_setup.png`
 - `ecg_live_plot.png`

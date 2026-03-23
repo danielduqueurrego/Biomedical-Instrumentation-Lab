@@ -1,0 +1,6 @@
+row_type,packet_type,host_time_iso,host_time_unix_s,device_timestamp_field,device_timestamp,cycle_idx,phase,meta_key,meta_values,error_message,raw_line,Raw Pressure,Filtered Pressure,Red PD,IR PD
+META,META,2026-03-23T14:10:00+00:00,1711203000.000000,,,,acquisition_class,CONT_MED,,,"",,,,
+META,META,2026-03-23T14:10:00+00:00,1711203000.000000,,,,selected_fields,t_ms|Raw Pressure|Filtered Pressure|Red PD|IR PD,,,"",,,,
+DATA,DATA,2026-03-23T14:10:00.020000+00:00,1711203000.020000,t_ms,200,,,,,,"DATA,200,6240,6010,8300,8210",6240,6010,8300,8210
+DATA,DATA,2026-03-23T14:10:00.025000+00:00,1711203000.025000,t_ms,205,,,,,,"DATA,205,6320,6062,8318,8222",6320,6062,8318,8222
+DATA,DATA,2026-03-23T14:10:00.030000+00:00,1711203000.030000,t_ms,210,,,,,,"DATA,210,6404,6110,8330,8235",6404,6110,8330,8235

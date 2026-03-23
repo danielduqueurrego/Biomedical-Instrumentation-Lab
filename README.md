@@ -1,5 +1,40 @@
 Biomedical Instrumentation Lab is organized by acquisition pattern first so students and instructors can reuse one software workflow across multiple lab types.
 
+## Start Here
+
+If you are a student or TA and just want to run a lab, use this short path:
+
+1. Install Conda, then create the Python environment:
+   - `cd python`
+   - `conda env create -f environment.yml`
+   - `conda activate biomed-lab`
+   - `cd ..`
+2. Set up Arduino CLI once:
+   - macOS/Linux: `./tools/setup_arduino_cli.sh`
+   - Windows: `tools\setup_arduino_cli.bat`
+3. Run the system check:
+   - `cd python`
+   - `python system_check.py`
+   - `cd ..`
+4. Launch the student GUI:
+   - Linux: `./launch_student_gui_linux.sh`
+   - macOS: `./launch_student_gui_macos.command`
+   - Windows: `launch_student_gui_windows.bat`
+5. In the GUI:
+   - select the detected board and port
+   - load a lab preset such as `EMG`, `ECG`, `Pulse Oximetry`, or `Blood Pressure`
+   - choose a save folder
+   - compile/upload firmware if needed
+   - click `Start Acquisition`
+6. Your session is saved as one CSV file in the folder you choose.
+   - the shipped presets default to `data/gui_sessions/`
+   - each session CSV uses `row_type` such as `META`, `DATA`, `PHASE`, or `CYCLE`
+
+Full setup details:
+- `docs/student_setup.md`
+- `docs/arduino_cli_setup.md`
+- `examples/session_csv/README.md`
+
 Primary architecture documents:
 - `docs/acquisition_architecture.md`
 - `docs/arduino_cli_setup.md`
@@ -18,6 +53,7 @@ Top-level structure:
 - `python/acquisition/student_gui`: modular student GUI package split into connection, firmware, signal, plotting, session, and status modules
 - `python/apps`: student-facing Python apps built on the shared acquisition helpers
 - `python/session_presets`: reusable JSON presets for common lab sessions
+- `examples/session_csv`: small synthetic session files showing how `row_type` logs look in practice
 - `docs/labs`: classroom-facing lab guides for the major lab workflows
 - `docs/validation`: hardware validation framework and reusable checklists
 
@@ -26,6 +62,7 @@ Current implemented baseline:
 - additional committed `CONT_HIGH` helper sketch for a simpler 1 kHz two-channel EMG reference upload path
 - `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
 - generated student GUI firmware for continuous labs using selected signals, selected analog ports, and the highest selected preset rate
+- committed `PHASED_CYCLE` PulseOx reference sketch for known-good bench validation and protocol checkout
 - generated `PHASED_CYCLE` PulseOx firmware and logging path using shared `A0` to `A3` photodiode channels, `PHASE` and `CYCLE` packets, D6 for RED LED control, and D5 for IR LED control
 - all current UNO R4 WiFi firmware paths set `analogReadResolution(14)` and report `META,adc_resolution_bits,14`
 - refactored Tkinter student GUI with modular internals, session preset save/load, generated firmware compile/upload, collapsible panels, and multi-subplot live plotting
