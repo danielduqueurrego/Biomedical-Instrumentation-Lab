@@ -7,6 +7,7 @@ This repository is organized by acquisition pattern first and by lab second.
 ### `CONT_HIGH`
 - Use for high-rate continuous waveforms such as EMG.
 - Main packets: `META`, `DATA`, `STAT`, `ERR`
+- Timing rule: use `t_us` for waveform timestamps.
 - Design goal: log every sample, plot a decimated rolling view, keep serial output simple.
 
 ### `CONT_MED`
@@ -66,13 +67,18 @@ python/
   - `DARK1`
   - `IR_ON`
   - `DARK2`
-- After `DARK2`, the Arduino side reconstructs one corrected `CYCLE` packet for the configured signals.
+- During every phase, the Arduino side samples the same four physical analog channels:
+  - `A0 = reflective_raw`
+  - `A1 = transmission_raw`
+  - `A2 = reflective_filtered`
+  - `A3 = transmission_filtered`
+- After `DARK2`, the Arduino side reconstructs one corrected `CYCLE` packet with explicit RED-corrected and IR-corrected outputs for each path.
 
 ## Current implementation status
 1. Shared Python packet parsing and CSV logging are implemented for the continuous workflow.
 2. `CONT_MED` is implemented end to end for the reference UNO R4 WiFi demo and the student GUI.
 3. GUI-generated `PHASED_CYCLE` PulseOx firmware is implemented with raw `PHASE` logging and corrected `CYCLE` logging.
-4. `CONT_HIGH` still uses the same shared GUI workflow, but more high-rate validation remains useful on real hardware.
+4. `CONT_HIGH` uses the same shared GUI workflow, now with `t_us` timestamps for high-rate continuous data, and still benefits from more high-rate validation on real hardware.
 
 ## Canonical lab manifest
 - `python/acquisition/lab_manifest.py` is the canonical source for per-lab defaults.

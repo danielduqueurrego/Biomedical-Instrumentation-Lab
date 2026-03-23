@@ -87,7 +87,7 @@ class ThreeChannelLivePlot:
                 continue
 
             sample_count += 1
-            self.time_s.append(packet.device_time_ms / 1000.0)
+            self.time_s.append(packet.device_time_us / 1_000_000.0)
             self.ch1.append(packet.values[0])
             self.ch2.append(packet.values[1])
             self.ch3.append(packet.values[2])

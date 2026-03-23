@@ -33,10 +33,14 @@ From the repository root:
 In the student GUI workflow, firmware compile and upload use a generated Arduino sketch based on the current GUI signal selection:
 - only the selected analog ports are emitted
 - the sample rate is set to the highest default rate among the selected signal presets
+- continuous `CONT_HIGH` sketches emit `t_us` timestamps
+- continuous `CONT_MED` sketches emit `t_ms` timestamps
 - Blood Pressure remains a continuous waveform workflow with no procedure-event packets
 - if the selected signals use the `PulseOx` preset, all active signals must be `PulseOx` signals
+- in PulseOx mode, the generated sketch uses the fixed board mapping `A0=reflective_raw`, `A1=transmission_raw`, `A2=reflective_filtered`, `A3=transmission_filtered`
 - in PulseOx mode, the generated sketch drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
-- in PulseOx mode, the generated sketch emits raw `PHASE` packets and corrected `CYCLE` packets
+- in PulseOx mode, the generated sketch emits raw `PHASE` packets with all four optical channels on every phase
+- in PulseOx mode, the generated sketch emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each optical path
 - the generated Arduino source is saved for review after each successful compile
 
 If auto-detection does not find the correct port, pass it explicitly:
@@ -91,8 +95,36 @@ The helper tool wraps these Arduino CLI operations:
 After each successful compile, the project also saves a timestamped copy of the compiled Arduino sketch source under:
 - `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
 
-The current reference sketch is:
+Committed reference sketches currently included in the repo:
 - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
+- `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
+- `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
+
+## CI smoke tests
+
+GitHub Actions CI uses Arduino CLI as a compile smoke test for firmware health.
+
+Current CI assumptions:
+- runner OS: Ubuntu
+- board core installed in CI: `arduino:renesas_uno`
+- compile target board: `arduino:renesas_uno:unor4wifi`
+
+Current CI compile targets:
+- committed `CONT_MED` reference sketch:
+  - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
+- committed `CONT_HIGH` helper sketch:
+  - `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
+- committed `CONT_HIGH` four-channel sketch:
+  - `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
+
+Both committed `CONT_HIGH` sketches now use `t_us` timestamps, matching the shared protocol and Python logging path for high-rate data.
+- generated example sketches:
+  - `ECG` for `CONT_MED`
+  - `EMG` for `CONT_HIGH`
+  - `Pulse Oximetry` for `PHASED_CYCLE`
+
+The CI workflow is intentionally a compile smoke test only.
+It does not upload to hardware, exercise serial ports, or replace the bench validation process described in `docs/validation/README.md`.
 
 ## If Arduino CLI is installed but not found
 

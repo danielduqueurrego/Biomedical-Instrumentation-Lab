@@ -89,13 +89,17 @@ class DataCsvLogger:
     def __init__(self, csv_path: Path, field_names: tuple[str, ...]):
         self.csv_path = csv_path
         self.field_names = field_names
+        if field_names[0] == "t_us":
+            timestamp_header = "device_time_us"
+        else:
+            timestamp_header = "device_time_ms"
         self._file = csv_path.open("w", newline="", encoding="utf-8")
         self._writer = csv.writer(self._file)
         self._writer.writerow(
             [
                 "host_time_iso",
                 "host_time_unix_s",
-                "device_time_ms",
+                timestamp_header,
                 *field_names[1:],
             ]
         )
@@ -106,7 +110,7 @@ class DataCsvLogger:
             [
                 packet.host_time_iso,
                 f"{packet.host_time_unix_s:.6f}",
-                packet.device_time_ms,
+                packet.device_timestamp,
                 *packet.values,
             ]
         )

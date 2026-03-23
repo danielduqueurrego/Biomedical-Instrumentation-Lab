@@ -4,7 +4,7 @@ This sketch is a fixed reference for high-rate EMG demonstration on Arduino UNO 
 It emits shared-protocol `META` and `DATA` packets at a 1 kHz target rate.
 
 Packet fields:
-- `t_ms`: Arduino `millis()` timestamp
+- `t_us`: Arduino `micros()` timestamp
 - `EMG_A0`: analog sample from `A0`
 - `EMG_A1`: analog sample from `A1`
 

@@ -8,9 +8,14 @@ from queue import SimpleQueue
 
 import serial
 
-from acquisition.gui_models import GuiAcquisitionConfig
 from acquisition.architecture import AcquisitionClass
-from acquisition.presets import get_preset
+from acquisition.gui_models import GuiAcquisitionConfig
+from acquisition.presets import (
+    continuous_acquisition_class_name_for_rate_hz,
+    continuous_timestamp_field_name_for_rate_hz,
+    default_sample_rate_hz_for_signal_configurations,
+    get_preset,
+)
 from acquisition.protocol import (
     DataPacket,
     PACKET_TYPE_CYCLE,
@@ -20,6 +25,10 @@ from acquisition.protocol import (
     PACKET_TYPE_PHASE,
     PACKET_TYPE_STAT,
     PacketParseError,
+    PULSEOX_ANALOG_MAP_FIELDS,
+    PULSEOX_ANALOG_PORTS,
+    PULSEOX_CYCLE_VALUE_FIELDS,
+    PULSEOX_PHASE_VALUE_FIELDS,
     UNO_R4_ANALOG_PORTS,
     parse_csv_packet,
     parse_cycle_packet,
@@ -43,7 +52,7 @@ SERIAL_SHUTDOWN_EXCEPTIONS = (serial.SerialException, OSError, TypeError)
 
 @dataclass(frozen=True, slots=True)
 class SessionSample:
-    device_time_ms: int
+    device_time_us: int
     values: tuple[int, ...]
 
 
@@ -58,16 +67,33 @@ class GuiAcquisitionSession:
 
     def __init__(self, config: GuiAcquisitionConfig):
         self.config = config
-        self.selected_analog_ports = tuple(signal.analog_port for signal in config.signal_configurations)
-        self.selected_field_names = ("t_ms", *(signal.name.strip() for signal in config.signal_configurations))
         self.is_phased_cycle = any(
             get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE
             for signal in config.signal_configurations
         )
+        self.selected_analog_ports = tuple(signal.analog_port for signal in config.signal_configurations)
+        self.continuous_sample_rate_hz = default_sample_rate_hz_for_signal_configurations(config.signal_configurations)
+        self.continuous_acquisition_class = continuous_acquisition_class_name_for_rate_hz(self.continuous_sample_rate_hz)
+        self.continuous_timestamp_field_name = continuous_timestamp_field_name_for_rate_hz(self.continuous_sample_rate_hz)
 
-        self.expected_data_fields = ("t_ms", *self.selected_analog_ports)
-        self.expected_phase_fields = ("t_us", "cycle_idx", "phase", *self.selected_analog_ports)
-        self.expected_cycle_fields = ("t_us", "cycle_idx", *(signal.name.strip() for signal in config.signal_configurations))
+        if self.is_phased_cycle:
+            self.selected_analog_ports = PULSEOX_ANALOG_PORTS
+            self.selected_field_names = ("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS)
+            self.expected_data_fields = ()
+            self.expected_phase_fields = ("t_us", "cycle_idx", "phase", *PULSEOX_PHASE_VALUE_FIELDS)
+            self.expected_cycle_fields = ("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS)
+            self.phase_value_fields = PULSEOX_PHASE_VALUE_FIELDS
+            self.plot_series_names = PULSEOX_CYCLE_VALUE_FIELDS
+        else:
+            self.selected_field_names = (
+                self.continuous_timestamp_field_name,
+                *(signal.name.strip() for signal in config.signal_configurations),
+            )
+            self.expected_data_fields = (self.continuous_timestamp_field_name, *self.selected_analog_ports)
+            self.expected_phase_fields = ()
+            self.expected_cycle_fields = ()
+            self.phase_value_fields = ()
+            self.plot_series_names = self.selected_field_names[1:]
 
         self.sample_queue: SimpleQueue[SessionSample] = SimpleQueue()
         self.message_queue: SimpleQueue[SessionMessage] = SimpleQueue()
@@ -98,8 +124,8 @@ class GuiAcquisitionSession:
             self.parse_error_logger = ParseErrorLogger(session_paths.parse_errors_path)
 
             if self.is_phased_cycle:
-                self.phase_logger = PhaseCsvLogger(session_paths.phase_csv_path, self.selected_analog_ports)
-                self.cycle_logger = CycleCsvLogger(session_paths.cycle_csv_path, self.selected_field_names[1:])
+                self.phase_logger = PhaseCsvLogger(session_paths.phase_csv_path, self.phase_value_fields)
+                self.cycle_logger = CycleCsvLogger(session_paths.cycle_csv_path, self.plot_series_names)
             else:
                 self.data_logger = DataCsvLogger(session_paths.data_csv_path, self.selected_field_names)
 
@@ -149,11 +175,7 @@ class GuiAcquisitionSession:
         if self.is_phased_cycle:
             acquisition_class = "PHASED_CYCLE"
         else:
-            max_rate_hz = max(
-                get_preset(signal.preset_name).default_sample_rate_hz or 0
-                for signal in self.config.signal_configurations
-            )
-            acquisition_class = "CONT_HIGH" if max_rate_hz > 500 else "CONT_MED"
+            acquisition_class = self.continuous_acquisition_class
         self.metadata_logger.write_meta(host_time_iso, "acquisition_class", (acquisition_class,))
         self.metadata_logger.write_meta(host_time_iso, "board_name", (self.config.board_name,))
         self.metadata_logger.write_meta(host_time_iso, "board_fqbn", (self.config.board_fqbn,))
@@ -163,6 +185,7 @@ class GuiAcquisitionSession:
         self.metadata_logger.write_meta(host_time_iso, "selected_analog_ports", self.selected_analog_ports)
 
         if self.is_phased_cycle:
+            self.metadata_logger.write_meta(host_time_iso, "pulseox_analog_map", PULSEOX_ANALOG_MAP_FIELDS)
             self.metadata_logger.write_meta(host_time_iso, "expected_phase_fields", self.expected_phase_fields)
             self.metadata_logger.write_meta(host_time_iso, "expected_cycle_fields", self.expected_cycle_fields)
         else:
@@ -172,7 +195,6 @@ class GuiAcquisitionSession:
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_name", (signal.name.strip(),))
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_preset", (signal.preset_name,))
             self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_analog_port", (signal.analog_port,))
-            self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_pulseox_role", (signal.pulseox_role,))
 
     def _close_resources(self) -> None:
         with self.shutdown_lock:
@@ -309,13 +331,14 @@ class GuiAcquisitionSession:
         logged_packet = DataPacket(
             host_time_iso=incoming_packet.host_time_iso,
             host_time_unix_s=incoming_packet.host_time_unix_s,
-            device_time_ms=incoming_packet.device_time_ms,
+            timestamp_field_name=self.selected_field_names[0],
+            device_timestamp=incoming_packet.device_timestamp,
             field_names=self.selected_field_names,
             values=incoming_packet.values,
             raw_line=incoming_packet.raw_line,
         )
         self.data_logger.write_sample(logged_packet)
-        self.sample_queue.put(SessionSample(device_time_ms=logged_packet.device_time_ms, values=logged_packet.values))
+        self.sample_queue.put(SessionSample(device_time_us=logged_packet.device_time_us, values=logged_packet.values))
 
     def _handle_phased_cycle_packet(self, packet, host_time_iso: str) -> None:
         assert self.phase_logger is not None
@@ -324,7 +347,7 @@ class GuiAcquisitionSession:
 
         if packet.packet_type == PACKET_TYPE_PHASE:
             try:
-                phase_packet = parse_phase_packet(packet, self.selected_analog_ports)
+                phase_packet = parse_phase_packet(packet, self.phase_value_fields)
             except PacketParseError as error:
                 self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                 return
@@ -334,7 +357,7 @@ class GuiAcquisitionSession:
 
         if packet.packet_type == PACKET_TYPE_CYCLE:
             try:
-                cycle_packet = parse_cycle_packet(packet, self.selected_field_names[1:])
+                cycle_packet = parse_cycle_packet(packet, self.plot_series_names)
             except PacketParseError as error:
                 self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
                 return
@@ -342,7 +365,7 @@ class GuiAcquisitionSession:
             self.cycle_logger.write_cycle(cycle_packet)
             self.sample_queue.put(
                 SessionSample(
-                    device_time_ms=cycle_packet.device_time_us // 1000,
+                    device_time_us=cycle_packet.device_time_us,
                     values=cycle_packet.values,
                 )
             )

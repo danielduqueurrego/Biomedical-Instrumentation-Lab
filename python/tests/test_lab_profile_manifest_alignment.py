@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-from acquisition.architecture import AcquisitionClass
-from acquisition.gui_models import PULSEOX_ROLE_AUTO, PULSEOX_ROLE_IR, PULSEOX_ROLE_RED
+from acquisition.protocol import PULSEOX_ANALOG_PORTS
 from acquisition.lab_manifest import LAB_MANIFEST
 from acquisition.lab_profiles import LAB_PROFILE_ORDER, LAB_PROFILES
 from acquisition.presets import LAB_PRESETS
@@ -32,16 +31,8 @@ def test_all_lab_profile_signal_presets_exist_in_lab_presets() -> None:
             )
 
 
-def test_pulseox_profile_uses_explicit_red_ir_roles_for_phased_cycle_signals() -> None:
+def test_pulseox_profile_uses_fixed_four_channel_mapping() -> None:
     pulseox_profile = LAB_PROFILES["Pulse Oximetry"]
 
-    phased_cycle_signals = [
-        signal
-        for signal in pulseox_profile.signal_configurations
-        if LAB_PRESETS[signal.preset_name].acquisition_class == AcquisitionClass.PHASED_CYCLE
-    ]
-
-    assert phased_cycle_signals, "Pulse Oximetry profile should include PHASED_CYCLE signals."
-    for signal in phased_cycle_signals:
-        assert signal.pulseox_role in (PULSEOX_ROLE_RED, PULSEOX_ROLE_IR)
-        assert signal.pulseox_role != PULSEOX_ROLE_AUTO
+    assert len(pulseox_profile.signal_configurations) == len(PULSEOX_ANALOG_PORTS)
+    assert tuple(signal.analog_port for signal in pulseox_profile.signal_configurations) == PULSEOX_ANALOG_PORTS

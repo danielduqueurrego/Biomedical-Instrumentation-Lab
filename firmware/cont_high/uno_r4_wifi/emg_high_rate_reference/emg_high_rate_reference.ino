@@ -4,8 +4,8 @@
 //   META,lab,CONT_HIGH_EMG_REFERENCE
 //   META,acq_class,CONT_HIGH
 //   META,rate_hz,1000
-//   META,fields,t_ms,EMG_A0,EMG_A1
-//   DATA,t_ms,EMG_A0,EMG_A1
+//   META,fields,t_us,EMG_A0,EMG_A1
+//   DATA,t_us,EMG_A0,EMG_A1
 //
 // Why this sketch exists:
 //   - EMG demonstrations benefit from higher sample rates than slow trend signals.
@@ -31,7 +31,7 @@ void writeMetadata() {
   Serial.println("META,lab,CONT_HIGH_EMG_REFERENCE");
   Serial.println("META,acq_class,CONT_HIGH");
   Serial.println("META,rate_hz,1000");
-  Serial.println("META,fields,t_ms,EMG_A0,EMG_A1");
+  Serial.println("META,fields,t_us,EMG_A0,EMG_A1");
 }
 
 void setup() {
@@ -56,10 +56,8 @@ void loop() {
   // Schedule the next sample first so timing drift stays small.
   nextSampleTimeUs += SAMPLE_PERIOD_US;
 
-  const unsigned long tMs = millis();
-
   Serial.print("DATA,");
-  Serial.print(tMs);
+  Serial.print(nowUs);
 
   for (int index = 0; index < EMG_CHANNEL_COUNT; ++index) {
     Serial.print(",");

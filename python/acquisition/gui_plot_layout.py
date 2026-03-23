@@ -3,9 +3,11 @@ from __future__ import annotations
 from typing import Sequence
 
 from acquisition.gui_models import MAX_SIGNAL_COUNT
+from acquisition.protocol import PULSEOX_CYCLE_VALUE_FIELDS
 
 
-MAX_SUBPLOT_COUNT = MAX_SIGNAL_COUNT
+MAX_PLOT_SERIES_COUNT = max(MAX_SIGNAL_COUNT, len(PULSEOX_CYCLE_VALUE_FIELDS))
+MAX_SUBPLOT_COUNT = MAX_PLOT_SERIES_COUNT
 
 
 def clamp_subplot_count(requested_count: int, signal_count: int | None = None) -> int:
@@ -21,7 +23,7 @@ def clamp_subplot_count(requested_count: int, signal_count: int | None = None) -
 def default_subplot_signal_indices(signal_count: int, subplot_count: int) -> tuple[tuple[int, ...], ...]:
     """Split active signals into contiguous subplot groups."""
 
-    bounded_signal_count = max(0, min(MAX_SIGNAL_COUNT, int(signal_count)))
+    bounded_signal_count = max(0, min(MAX_PLOT_SERIES_COUNT, int(signal_count)))
     bounded_subplot_count = clamp_subplot_count(subplot_count, bounded_signal_count or 1)
 
     if bounded_subplot_count == 1:
@@ -47,7 +49,7 @@ def selected_subplot_signal_indices(
 ) -> tuple[tuple[int, ...], ...]:
     """Read selected signal indices from a Boolean selection grid."""
 
-    bounded_signal_count = max(0, min(MAX_SIGNAL_COUNT, int(signal_count)))
+    bounded_signal_count = max(0, min(MAX_PLOT_SERIES_COUNT, int(signal_count)))
     bounded_subplot_count = clamp_subplot_count(subplot_count, bounded_signal_count or 1)
     subplot_groups = []
 

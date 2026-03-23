@@ -11,11 +11,18 @@ Expected packet mix:
 - optional `STAT`
 - optional `ERR`
 
-Current UNO R4 WiFi reference behavior:
-- `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference/emg_high_rate_reference.ino`
-- streams `EMG_A0` and `EMG_A1` at a 1 kHz target for EMG demonstration
-- emits startup metadata with `acq_class=CONT_HIGH`, `rate_hz=1000`, and `fields=t_ms,EMG_A0,EMG_A1`
+Committed UNO R4 WiFi sketches:
+- `uno_r4_wifi/emg_high_rate_reference`
+- `uno_r4_wifi/emg_four_channel_demo`
+
+Current reference behavior:
+- `emg_high_rate_reference` is a simple 1 kHz two-channel upload helper path
+- `emg_four_channel_demo` is the manifest-aligned four-channel EMG example at `2000` samples/s
+- both sketches follow the shared `CONT_HIGH` timing rule and emit `t_us`
 
 Student helper workflow:
 - one-time setup with `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
-- compile/upload with `tools/upload_cont_high_emg_reference.sh` or `tools/upload_cont_high_emg_reference.bat`
+- compile/upload the simple two-channel reference with `tools/upload_cont_high_emg_reference.sh` or `tools/upload_cont_high_emg_reference.bat`
+
+Expected timing rule:
+- use `t_us` timestamps for shared `CONT_HIGH` waveform packets

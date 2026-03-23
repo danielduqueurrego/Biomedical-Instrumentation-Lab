@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from acquisition.arduino_cli_wrapper import UNO_R4_WIFI_BOARD
-from acquisition.gui_models import PULSEOX_ROLE_IR, PULSEOX_ROLE_RED, SignalConfiguration
+from acquisition.gui_models import SignalConfiguration
 from acquisition.lab_manifest import LAB_MANIFEST, LAB_PROFILE_LABELS, get_lab_name_for_profile
 
 
@@ -20,21 +20,12 @@ class LabProfile:
 
 def _build_signal_configurations(*signal_specs) -> tuple[SignalConfiguration, ...]:
     signal_configurations = []
-    for signal_spec in signal_specs:
-        if len(signal_spec) == 3:
-            name, preset_name, analog_port = signal_spec
-            pulseox_role = "AUTO"
-        elif len(signal_spec) == 4:
-            name, preset_name, analog_port, pulseox_role = signal_spec
-        else:
-            raise ValueError(f"Unsupported signal specification: {signal_spec!r}")
-
+    for name, preset_name, analog_port in signal_specs:
         signal_configurations.append(
             SignalConfiguration(
                 name=name,
                 preset_name=preset_name,
                 analog_port=analog_port,
-                pulseox_role=pulseox_role,
             )
         )
 
@@ -47,7 +38,8 @@ SHARED_FIRMWARE_NOTE = (
 )
 PULSE_OX_NOTE = (
     "This profile runs in PHASED_CYCLE mode. The generated sketch logs raw PHASE packets, "
-    "reconstructed CYCLE packets, and drives D6 for RED and D5 for IR in the sequence "
+    "samples all four optical channels on A0 to A3 during every phase, reconstructs corrected "
+    "RED and IR cycle outputs, and drives D6 for RED and D5 for IR in the sequence "
     "RED_ON, DARK1, IR_ON, DARK2."
 )
 
@@ -58,12 +50,10 @@ PROFILE_SIGNAL_SPECS = {
         ("Comparator Output", "ECG", "A2"),
     ),
     "PulseOx": (
-        ("Raw Red Reflective PD Output", "PulseOx", "A0", PULSEOX_ROLE_RED),
-        ("Raw IR Reflective", "PulseOx", "A1", PULSEOX_ROLE_IR),
-        ("Raw Red Transmission", "PulseOx", "A2", PULSEOX_ROLE_RED),
-        ("Raw IR Transmission", "PulseOx", "A3", PULSEOX_ROLE_IR),
-        ("Amplified and Filtered Red Reflective", "PulseOx", "A4", PULSEOX_ROLE_RED),
-        ("Filtered Red Transmission", "PulseOx", "A5", PULSEOX_ROLE_RED),
+        ("Reflective photodiode raw output", "PulseOx", "A0"),
+        ("Transmission photodiode raw output", "PulseOx", "A1"),
+        ("Filtered reflective photodiode output", "PulseOx", "A2"),
+        ("Filtered transmission photodiode output", "PulseOx", "A3"),
     ),
     "Blood Pressure": (
         ("Raw Pressure", "Blood Pressure", "A0"),

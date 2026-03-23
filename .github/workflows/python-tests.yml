@@ -1,4 +1,4 @@
-name: Python Tests
+name: CI
 
 on:
   push:
@@ -9,6 +9,7 @@ env:
 
 jobs:
   test:
+    name: Python tests
     runs-on: ubuntu-latest
 
     steps:
@@ -22,8 +23,79 @@ jobs:
 
       - name: Install dependencies
         run: |
+          set -euxo pipefail
           python -m pip install --upgrade pip
           pip install pytest matplotlib pyserial
 
-      - name: Run tests
+      - name: Run upstream pytest suite
         run: pytest -q python/tests
+
+      - name: Run repository unittest suite
+        run: |
+          set -euxo pipefail
+          python -m unittest discover -s tests
+
+  firmware-compile:
+    name: Firmware compile smoke tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install Arduino UNO R4 WiFi core
+        run: |
+          set -euxo pipefail
+          arduino-cli version
+          arduino-cli core update-index
+          arduino-cli core install arduino:renesas_uno
+
+      - name: Compile committed CONT_MED reference sketch
+        run: |
+          set -euxo pipefail
+          echo "Compiling firmware/cont_med/uno_r4_wifi/three_channel_data_demo"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi firmware/cont_med/uno_r4_wifi/three_channel_data_demo
+
+      - name: Compile committed CONT_HIGH helper sketch
+        run: |
+          set -euxo pipefail
+          echo "Compiling firmware/cont_high/uno_r4_wifi/emg_high_rate_reference"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi firmware/cont_high/uno_r4_wifi/emg_high_rate_reference
+
+      - name: Compile committed CONT_HIGH four-channel sketch
+        run: |
+          set -euxo pipefail
+          echo "Compiling firmware/cont_high/uno_r4_wifi/emg_four_channel_demo"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi firmware/cont_high/uno_r4_wifi/emg_four_channel_demo
+
+      - name: Generate CI example sketches
+        id: generate
+        run: |
+          set -euxo pipefail
+          python tools/ci/generate_ci_sketches.py --github-output "$GITHUB_OUTPUT"
+
+      - name: Compile generated CONT_MED example
+        run: |
+          set -euxo pipefail
+          echo "Compiling generated CONT_MED example at ${{ steps.generate.outputs.generated_cont_med_sketch_dir }}"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi "${{ steps.generate.outputs.generated_cont_med_sketch_dir }}"
+
+      - name: Compile generated CONT_HIGH example
+        run: |
+          set -euxo pipefail
+          echo "Compiling generated CONT_HIGH example at ${{ steps.generate.outputs.generated_cont_high_sketch_dir }}"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi "${{ steps.generate.outputs.generated_cont_high_sketch_dir }}"
+
+      - name: Compile generated PHASED_CYCLE example
+        run: |
+          set -euxo pipefail
+          echo "Compiling generated PHASED_CYCLE example at ${{ steps.generate.outputs.generated_phased_cycle_sketch_dir }}"
+          arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi "${{ steps.generate.outputs.generated_phased_cycle_sketch_dir }}"

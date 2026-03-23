@@ -31,6 +31,13 @@ The software must support:
 - live plotting
 - CSV export
 
+Current board model:
+- `A0 = reflective photodiode raw output`
+- `A1 = transmission photodiode raw output`
+- `A2 = filtered reflective photodiode output`
+- `A3 = filtered transmission photodiode output`
+- red versus IR is inferred from the acquisition phase, not from separate ADC pins
+
 ## Current implementation direction
 
 The repository currently supports:

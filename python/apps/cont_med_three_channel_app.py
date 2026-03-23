@@ -164,7 +164,8 @@ class ContMedThreeChannelApp:
             data_packet = DataPacket(
                 host_time_iso=incoming_packet.host_time_iso,
                 host_time_unix_s=incoming_packet.host_time_unix_s,
-                device_time_ms=incoming_packet.device_time_ms,
+                timestamp_field_name=self.selected_field_names[0],
+                device_timestamp=incoming_packet.device_timestamp,
                 field_names=self.selected_field_names,
                 values=incoming_packet.values[:3],
                 raw_line=incoming_packet.raw_line,

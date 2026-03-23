@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from acquisition.architecture import AcquisitionClass
-from acquisition.protocol import UNO_R4_ANALOG_PORTS
-from acquisition.presets import LAB_PRESETS, get_preset
+from acquisition.protocol import PULSEOX_ANALOG_PORTS, UNO_R4_ANALOG_PORTS
+from acquisition.presets import LAB_PRESETS
 
 
 MAX_SIGNAL_COUNT = len(UNO_R4_ANALOG_PORTS)
@@ -18,10 +18,6 @@ DEFAULT_SIGNAL_PRESETS = tuple(
 DEFAULT_GUI_BAUD_RATE = 230400
 DEFAULT_BOARD_NAME = "Arduino UNO R4 WiFi"
 DEFAULT_BOARD_FQBN = "arduino:renesas_uno:unor4wifi"
-PULSEOX_ROLE_AUTO = "AUTO"
-PULSEOX_ROLE_RED = "RED"
-PULSEOX_ROLE_IR = "IR"
-PULSEOX_SIGNAL_ROLES = (PULSEOX_ROLE_AUTO, PULSEOX_ROLE_RED, PULSEOX_ROLE_IR)
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +25,6 @@ class SignalConfiguration:
     name: str
     preset_name: str
     analog_port: str
-    pulseox_role: str = PULSEOX_ROLE_AUTO
 
 
 @dataclass(frozen=True, slots=True)
@@ -56,7 +51,6 @@ def default_signal_configurations(count: int = MAX_SIGNAL_COUNT) -> tuple[Signal
                 name=f"Signal {index + 1}",
                 preset_name=preset_name,
                 analog_port=UNO_R4_ANALOG_PORTS[index],
-                pulseox_role=PULSEOX_ROLE_AUTO,
             )
         )
     return tuple(selections)
@@ -103,18 +97,23 @@ def validate_signal_configurations(signal_configurations: tuple[SignalConfigurat
             raise ValueError(f"Analog port {signal.analog_port} is assigned more than once.")
         seen_ports.add(signal.analog_port)
 
-        if signal.pulseox_role not in PULSEOX_SIGNAL_ROLES:
-            raise ValueError(f"Signal {index} uses an unsupported PulseOx role {signal.pulseox_role!r}.")
+    pulseox_signals = [signal for signal in signal_configurations if signal.preset_name == "PulseOx"]
+    if pulseox_signals and len(pulseox_signals) != signal_count:
+        raise ValueError("Do not mix PulseOx signals with continuous presets in the same acquisition.")
 
-    phased_cycle_signals = [
-        signal for signal in signal_configurations if get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE
-    ]
-    if phased_cycle_signals and len(phased_cycle_signals) != signal_count:
-        raise ValueError("Do not mix PHASED_CYCLE signals with continuous presets in the same acquisition.")
+    if pulseox_signals:
+        if signal_count != len(PULSEOX_ANALOG_PORTS):
+            raise ValueError(
+                f"PulseOx uses {len(PULSEOX_ANALOG_PORTS)} fixed analog channels and must enable exactly that many signals."
+            )
 
-    for index, signal in enumerate(signal_configurations, start=1):
-        if get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE and signal.pulseox_role == PULSEOX_ROLE_AUTO:
-            raise ValueError(f"Signal {index} uses a PHASED_CYCLE preset and needs a RED or IR PulseOx role.")
+        selected_ports = tuple(signal.analog_port for signal in signal_configurations)
+        if selected_ports != PULSEOX_ANALOG_PORTS:
+            expected_ports = ", ".join(PULSEOX_ANALOG_PORTS)
+            raise ValueError(
+                "PulseOx uses fixed UNO R4 WiFi wiring and must keep the analog ports in this order: "
+                f"{expected_ports}."
+            )
 
 
 def validate_gui_config(config: GuiAcquisitionConfig) -> None:

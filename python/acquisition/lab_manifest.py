@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from acquisition.architecture import AcquisitionClass, PlotDefaults
+from acquisition.protocol import PULSEOX_CYCLE_VALUE_FIELDS
 
 
 @dataclass(frozen=True, slots=True)
@@ -29,7 +30,7 @@ LAB_MANIFEST = {
         default_sample_rate_hz=2000,
         default_cycle_rate_hz=None,
         packet_types=("META", "DATA", "STAT", "ERR"),
-        default_fields=("t_ms", "ch1"),
+        default_fields=("t_us", "ch1"),
         plotting=PlotDefaults(history_seconds=5.0, update_interval_ms=50),
         notes="High-rate waveform starter preset for student EMG labs.",
     ),
@@ -51,10 +52,13 @@ LAB_MANIFEST = {
         default_sample_rate_hz=None,
         default_cycle_rate_hz=100,
         packet_types=("META", "PHASE", "CYCLE", "STAT", "ERR"),
-        default_fields=("t_us", "cycle_idx", "red_corr", "ir_corr"),
+        default_fields=("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS),
         plotting=PlotDefaults(history_seconds=15.0, update_interval_ms=100),
         phase_names=("RED_ON", "DARK1", "IR_ON", "DARK2"),
-        notes="Cycle rate is a software default for the pulse-ox teaching workflow.",
+        notes=(
+            "Cycle rate is a software default for the pulse-ox teaching workflow. "
+            "The shared firmware samples the same four photodiode outputs during each LED phase."
+        ),
     ),
     "Blood Pressure": LabManifestEntry(
         lab_name="Blood Pressure",

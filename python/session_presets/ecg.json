@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "preset_name": "ECG Lab",
+  "lab_profile_name": "ECG",
+  "acquisition_class": "CONT_MED",
+  "generated_rate_hz": 500,
+  "timestamp_field_name": "t_ms",
+  "board_name": "Arduino UNO R4 WiFi",
+  "save_folder": "data/gui_sessions",
+  "output_basename_prefix": "ecg_lab",
+  "signals": [
+    {
+      "name": "Raw ECG",
+      "preset_name": "ECG",
+      "analog_port": "A0"
+    },
+    {
+      "name": "Amplified ECG",
+      "preset_name": "ECG",
+      "analog_port": "A1"
+    },
+    {
+      "name": "Comparator Output",
+      "preset_name": "ECG",
+      "analog_port": "A2"
+    }
+  ],
+  "plot": {
+    "subplot_count": 2,
+    "series_names": [
+      "Raw ECG",
+      "Amplified ECG",
+      "Comparator Output"
+    ],
+    "selected_series_indices": [
+      [
+        0,
+        1
+      ],
+      [
+        2
+      ]
+    ]
+  }
+}

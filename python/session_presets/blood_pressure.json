@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "preset_name": "Blood Pressure Lab",
+  "lab_profile_name": "Blood Pressure",
+  "acquisition_class": "CONT_MED",
+  "generated_rate_hz": 200,
+  "timestamp_field_name": "t_ms",
+  "board_name": "Arduino UNO R4 WiFi",
+  "save_folder": "data/gui_sessions",
+  "output_basename_prefix": "blood_pressure_lab",
+  "signals": [
+    {
+      "name": "Raw Pressure",
+      "preset_name": "Blood Pressure",
+      "analog_port": "A0"
+    },
+    {
+      "name": "Filtered Pressure",
+      "preset_name": "Blood Pressure",
+      "analog_port": "A1"
+    },
+    {
+      "name": "Red PD",
+      "preset_name": "Blood Pressure",
+      "analog_port": "A2"
+    },
+    {
+      "name": "IR PD",
+      "preset_name": "Blood Pressure",
+      "analog_port": "A3"
+    }
+  ],
+  "plot": {
+    "subplot_count": 2,
+    "series_names": [
+      "Raw Pressure",
+      "Filtered Pressure",
+      "Red PD",
+      "IR PD"
+    ],
+    "selected_series_indices": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  }
+}

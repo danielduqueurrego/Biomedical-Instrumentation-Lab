@@ -4,8 +4,20 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from acquisition.gui_models import PULSEOX_ROLE_RED, validate_signal_configurations
-from acquisition.presets import get_preset, is_phased_cycle_preset
+from acquisition.gui_models import validate_signal_configurations
+from acquisition.presets import (
+    continuous_acquisition_class_name_for_rate_hz,
+    continuous_timestamp_field_name_for_rate_hz,
+    default_sample_rate_hz_for_signal_configurations,
+    is_phased_cycle_preset,
+)
+from acquisition.protocol import (
+    PULSEOX_ANALOG_MAP_FIELDS,
+    PULSEOX_ANALOG_PORTS,
+    PULSEOX_CYCLE_VALUE_FIELDS,
+    PULSEOX_PHASE_NAMES,
+    PULSEOX_PHASE_VALUE_FIELDS,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -38,14 +50,9 @@ def _escape_cpp_string(text: str) -> str:
     return text.replace("\\", "\\\\").replace('"', '\\"')
 
 
-def _signal_rate_hz(signal_configuration) -> int:
-    preset = get_preset(signal_configuration.preset_name)
-    return preset.default_sample_rate_hz or preset.default_cycle_rate_hz or DEFAULT_FALLBACK_RATE_HZ
-
-
 def determine_generated_sample_rate_hz(signal_configurations) -> int:
-    rates = [_signal_rate_hz(signal_configuration) for signal_configuration in signal_configurations]
-    return max(rates, default=DEFAULT_FALLBACK_RATE_HZ)
+    sample_rate_hz = default_sample_rate_hz_for_signal_configurations(signal_configurations)
+    return sample_rate_hz or DEFAULT_FALLBACK_RATE_HZ
 
 
 def uses_pulseox_led_cycle(signal_configurations) -> bool:
@@ -57,11 +64,19 @@ def determine_generated_acquisition_class(signal_configurations) -> str:
         return "PHASED_CYCLE"
 
     sample_rate_hz = determine_generated_sample_rate_hz(signal_configurations)
-    return "CONT_HIGH" if sample_rate_hz > 500 else "CONT_MED"
+    return continuous_acquisition_class_name_for_rate_hz(sample_rate_hz)
 
 
-def _pulseox_role_value(signal_configuration) -> str:
-    return signal_configuration.pulseox_role
+def _pulseox_selected_signal_comments(signal_configurations) -> str:
+    return "\n".join(
+        f"//   {signal_configuration.analog_port} -> {_sanitize_comment_text(signal_configuration.name)}"
+        f" [{signal_configuration.preset_name}]"
+        for signal_configuration in signal_configurations
+    )
+
+
+def _pulseox_board_mapping_comments() -> str:
+    return "\n".join(f"//   {channel_name} on {port_name}" for channel_name, port_name in zip(PULSEOX_PHASE_VALUE_FIELDS, PULSEOX_ANALOG_PORTS))
 
 
 def _render_metadata_block(
@@ -76,9 +91,8 @@ def _render_metadata_block(
     if pulseox_led_cycle:
         cycle_rate_hz = sample_rate_hz
         phase_rate_hz = cycle_rate_hz * 4
-        phase_fields_csv = ",".join(("t_us", "cycle_idx", "phase", *analog_ports))
-        cycle_fields_csv = ",".join(("t_us", "cycle_idx", *(signal.name.strip() for signal in signal_configurations)))
-        role_csv = ",".join(_pulseox_role_value(signal_configuration) for signal_configuration in signal_configurations)
+        phase_fields_csv = ",".join(("t_us", "cycle_idx", "phase", *PULSEOX_PHASE_VALUE_FIELDS))
+        cycle_fields_csv = ",".join(("t_us", "cycle_idx", *PULSEOX_CYCLE_VALUE_FIELDS))
         return "\n".join(
             (
                 '  Serial.println("META,lab,GUI_SELECTED_SIGNALS");',
@@ -89,13 +103,14 @@ def _render_metadata_block(
                 f'  Serial.println("META,phase_fields,{_escape_cpp_string(phase_fields_csv)}");',
                 f'  Serial.println("META,cycle_fields,{_escape_cpp_string(cycle_fields_csv)}");',
                 f'  Serial.println("META,selected_ports,{selected_ports_csv}");',
-                f'  Serial.println("META,pulseox_signal_roles,{role_csv}");',
+                f'  Serial.println("META,pulseox_analog_map,{",".join(PULSEOX_ANALOG_MAP_FIELDS)}");',
                 '  Serial.println("META,pulseox_led_pins,IR_D5,RED_D6");',
-                '  Serial.println("META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2");',
+                f'  Serial.println("META,pulseox_phase_sequence,{",".join(PULSEOX_PHASE_NAMES)}");',
             )
         )
 
-    fields_csv = ",".join(("t_ms", *analog_ports))
+    timestamp_field_name = continuous_timestamp_field_name_for_rate_hz(sample_rate_hz)
+    fields_csv = ",".join((timestamp_field_name, *analog_ports))
     return "\n".join(
         (
             '  Serial.println("META,lab,GUI_SELECTED_SIGNALS");',
@@ -112,12 +127,14 @@ def _render_continuous_sketch(signal_configurations, baud_rate: int) -> str:
     sample_period_us = max(1, round(1_000_000 / sample_rate_hz))
     analog_ports = tuple(signal_configuration.analog_port for signal_configuration in signal_configurations)
     acquisition_class = determine_generated_acquisition_class(signal_configurations)
+    timestamp_field_name = continuous_timestamp_field_name_for_rate_hz(sample_rate_hz)
+    timestamp_expression = "micros()" if timestamp_field_name == "t_us" else "millis()"
     selected_signal_comments = "\n".join(
         f"//   {signal_configuration.analog_port} -> {_sanitize_comment_text(signal_configuration.name)}"
         f" [{signal_configuration.preset_name}]"
         for signal_configuration in signal_configurations
     )
-    fields_csv = ",".join(("t_ms", *analog_ports))
+    fields_csv = ",".join((timestamp_field_name, *analog_ports))
     analog_input_constants = ", ".join(analog_ports)
     metadata_block = _render_metadata_block(
         signal_configurations=signal_configurations,
@@ -173,7 +190,7 @@ void loop() {{
   nextSampleTimeUs += SAMPLE_PERIOD_US;
 
   Serial.print("DATA,");
-  Serial.print(millis());
+  Serial.print({timestamp_expression});
 
   for (int index = 0; index < ANALOG_INPUT_COUNT; ++index) {{
     Serial.print(",");
@@ -189,14 +206,10 @@ def _render_pulseox_sketch(signal_configurations, baud_rate: int) -> str:
     cycle_rate_hz = determine_generated_sample_rate_hz(signal_configurations)
     cycle_period_us = max(1, round(1_000_000 / cycle_rate_hz))
     phase_period_us = max(1, round(cycle_period_us / 4))
-    analog_ports = tuple(signal_configuration.analog_port for signal_configuration in signal_configurations)
-    selected_signal_comments = "\n".join(
-        f"//   {signal_configuration.analog_port} -> {_sanitize_comment_text(signal_configuration.name)}"
-        f" [{signal_configuration.preset_name}, {_pulseox_role_value(signal_configuration)}]"
-        for signal_configuration in signal_configurations
-    )
+    analog_ports = PULSEOX_ANALOG_PORTS
+    selected_signal_comments = _pulseox_selected_signal_comments(signal_configurations)
+    board_mapping_comments = _pulseox_board_mapping_comments()
     analog_input_constants = ", ".join(analog_ports)
-    role_constants = ", ".join("0" if _pulseox_role_value(signal_configuration) == PULSEOX_ROLE_RED else "1" for signal_configuration in signal_configurations)
     metadata_block = _render_metadata_block(
         signal_configurations=signal_configurations,
         acquisition_class="PHASED_CYCLE",
@@ -208,21 +221,24 @@ def _render_pulseox_sketch(signal_configurations, baud_rate: int) -> str:
     return f"""// Generated by the Biomedical Instrumentation Lab GUI.
 //
 // This sketch runs in PHASED_CYCLE mode for PulseOx.
-// It logs raw phase measurements and one corrected cycle value per configured signal.
+// It samples the same four photodiode outputs during each LED phase.
+// Red and IR are distinguished by the active LED phase, not by separate ADC pins.
 // Cycle rate: {cycle_rate_hz} Hz.
 // Phase rate: {cycle_rate_hz * 4} Hz.
-// Selected signals:
+// GUI-selected PulseOx channels:
 {selected_signal_comments}
+// Fixed board mapping used for packet fields:
+{board_mapping_comments}
 //
 // Phase order:
 //   RED_ON -> DARK1 -> IR_ON -> DARK2
 // D6 controls the red LED and D5 controls the IR LED.
 //
 // Shared protocol packets:
-//   META,phase_fields,t_us,cycle_idx,phase,{",".join(analog_ports)}
-//   PHASE,t_us,cycle_idx,phase,{",".join(analog_ports)}
-//   META,cycle_fields,t_us,cycle_idx,{",".join(_sanitize_comment_text(signal.name) for signal in signal_configurations)}
-//   CYCLE,t_us,cycle_idx,<corrected values in configured signal order>
+//   META,phase_fields,t_us,cycle_idx,phase,{",".join(PULSEOX_PHASE_VALUE_FIELDS)}
+//   PHASE,t_us,cycle_idx,phase,{",".join(PULSEOX_PHASE_VALUE_FIELDS)}
+//   META,cycle_fields,t_us,cycle_idx,{",".join(PULSEOX_CYCLE_VALUE_FIELDS)}
+//   CYCLE,t_us,cycle_idx,{",".join(PULSEOX_CYCLE_VALUE_FIELDS)}
 
 const unsigned long BAUD_RATE = {baud_rate};
 const unsigned long CYCLE_RATE_HZ = {cycle_rate_hz};
@@ -236,9 +252,6 @@ const int PHASE_COUNT = 4;
 const int ANALOG_INPUT_PINS[] = {{{analog_input_constants}}};
 const int ANALOG_INPUT_COUNT = sizeof(ANALOG_INPUT_PINS) / sizeof(ANALOG_INPUT_PINS[0]);
 
-// 0 means RED corrected output, 1 means IR corrected output.
-const int SIGNAL_ROLE_CODES[] = {{{role_constants}}};
-
 enum PulseOxPhase {{
   RED_ON = 0,
   DARK1 = 1,
@@ -250,6 +263,13 @@ PulseOxPhase currentPhase = RED_ON;
 unsigned long nextPhaseCaptureUs = 0;
 unsigned long currentCycleIndex = 0;
 int phaseSamples[PHASE_COUNT][ANALOG_INPUT_COUNT];
+
+enum PulseOxChannel {{
+  REFLECTIVE_RAW = 0,
+  TRANSMISSION_RAW = 1,
+  REFLECTIVE_FILTERED = 2,
+  TRANSMISSION_FILTERED = 3,
+}};
 
 void applyPulseOxPhase() {{
   switch (currentPhase) {{
@@ -307,20 +327,35 @@ void emitPhasePacket(unsigned long timestampUs) {{
 }}
 
 void emitCyclePacket(unsigned long timestampUs) {{
+  const long reflectiveRawRedCorrected = phaseSamples[RED_ON][REFLECTIVE_RAW] - phaseSamples[DARK1][REFLECTIVE_RAW];
+  const long reflectiveRawIrCorrected = phaseSamples[IR_ON][REFLECTIVE_RAW] - phaseSamples[DARK2][REFLECTIVE_RAW];
+  const long transmissionRawRedCorrected = phaseSamples[RED_ON][TRANSMISSION_RAW] - phaseSamples[DARK1][TRANSMISSION_RAW];
+  const long transmissionRawIrCorrected = phaseSamples[IR_ON][TRANSMISSION_RAW] - phaseSamples[DARK2][TRANSMISSION_RAW];
+  const long reflectiveFilteredRedCorrected = phaseSamples[RED_ON][REFLECTIVE_FILTERED] - phaseSamples[DARK1][REFLECTIVE_FILTERED];
+  const long reflectiveFilteredIrCorrected = phaseSamples[IR_ON][REFLECTIVE_FILTERED] - phaseSamples[DARK2][REFLECTIVE_FILTERED];
+  const long transmissionFilteredRedCorrected = phaseSamples[RED_ON][TRANSMISSION_FILTERED] - phaseSamples[DARK1][TRANSMISSION_FILTERED];
+  const long transmissionFilteredIrCorrected = phaseSamples[IR_ON][TRANSMISSION_FILTERED] - phaseSamples[DARK2][TRANSMISSION_FILTERED];
+
   Serial.print("CYCLE,");
   Serial.print(timestampUs);
   Serial.print(",");
   Serial.print(currentCycleIndex);
-
-  for (int index = 0; index < ANALOG_INPUT_COUNT; ++index) {{
-    const long darkBaseline = (phaseSamples[DARK1][index] + phaseSamples[DARK2][index]) / 2;
-    const long redCorrected = phaseSamples[RED_ON][index] - darkBaseline;
-    const long irCorrected = phaseSamples[IR_ON][index] - darkBaseline;
-    const long correctedValue = SIGNAL_ROLE_CODES[index] == 0 ? redCorrected : irCorrected;
-
-    Serial.print(",");
-    Serial.print(correctedValue);
-  }}
+  Serial.print(",");
+  Serial.print(reflectiveRawRedCorrected);
+  Serial.print(",");
+  Serial.print(reflectiveRawIrCorrected);
+  Serial.print(",");
+  Serial.print(transmissionRawRedCorrected);
+  Serial.print(",");
+  Serial.print(transmissionRawIrCorrected);
+  Serial.print(",");
+  Serial.print(reflectiveFilteredRedCorrected);
+  Serial.print(",");
+  Serial.print(reflectiveFilteredIrCorrected);
+  Serial.print(",");
+  Serial.print(transmissionFilteredRedCorrected);
+  Serial.print(",");
+  Serial.print(transmissionFilteredIrCorrected);
 
   Serial.println();
 }}
@@ -396,8 +431,10 @@ def create_generated_analog_capture_sketch(signal_configurations, baud_rate: int
 
     sample_rate_hz = determine_generated_sample_rate_hz(signal_configurations)
     sample_period_us = max(1, round(1_000_000 / sample_rate_hz))
-    analog_ports = tuple(signal_configuration.analog_port for signal_configuration in signal_configurations)
     pulseox_led_cycle = uses_pulseox_led_cycle(signal_configurations)
+    analog_ports = PULSEOX_ANALOG_PORTS if pulseox_led_cycle else tuple(
+        signal_configuration.analog_port for signal_configuration in signal_configurations
+    )
     acquisition_class = determine_generated_acquisition_class(signal_configurations)
 
     return GeneratedSketchArtifact(

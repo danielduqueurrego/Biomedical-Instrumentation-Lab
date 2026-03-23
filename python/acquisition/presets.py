@@ -4,6 +4,9 @@ from acquisition.architecture import AcquisitionClass, PlotDefaults
 from acquisition.lab_manifest import LAB_MANIFEST
 
 
+CONT_HIGH_CLASSIFICATION_RATE_HZ = 500
+
+
 @dataclass(frozen=True, slots=True)
 class SamplingPreset:
     lab_name: str
@@ -17,6 +20,8 @@ class SamplingPreset:
     notes: str = ""
 
 
+# This preset table is the canonical lab manifest for default rates, packet types,
+# and default field layouts used elsewhere in the repo.
 LAB_PRESETS = {
     lab_name: SamplingPreset(
         lab_name=entry.lab_name,
@@ -43,3 +48,21 @@ def get_preset(lab_name: str) -> SamplingPreset:
 
 def is_phased_cycle_preset(preset_name: str) -> bool:
     return get_preset(preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE
+
+
+def default_sample_rate_hz_for_signal_configurations(signal_configurations) -> int:
+    rates = []
+    for signal_configuration in signal_configurations:
+        preset = get_preset(signal_configuration.preset_name)
+        rate_hz = preset.default_sample_rate_hz or preset.default_cycle_rate_hz
+        if rate_hz is not None:
+            rates.append(rate_hz)
+    return max(rates, default=0)
+
+
+def continuous_acquisition_class_name_for_rate_hz(sample_rate_hz: int) -> str:
+    return "CONT_HIGH" if sample_rate_hz > CONT_HIGH_CLASSIFICATION_RATE_HZ else "CONT_MED"
+
+
+def continuous_timestamp_field_name_for_rate_hz(sample_rate_hz: int) -> str:
+    return "t_us" if continuous_acquisition_class_name_for_rate_hz(sample_rate_hz) == "CONT_HIGH" else "t_ms"

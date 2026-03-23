@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "preset_name": "Pulse Oximetry Lab",
+  "lab_profile_name": "Pulse Oximetry",
+  "acquisition_class": "PHASED_CYCLE",
+  "generated_rate_hz": 100,
+  "timestamp_field_name": "t_us",
+  "board_name": "Arduino UNO R4 WiFi",
+  "save_folder": "data/gui_sessions",
+  "output_basename_prefix": "pulse_ox_lab",
+  "signals": [
+    {
+      "name": "Reflective photodiode raw output",
+      "preset_name": "PulseOx",
+      "analog_port": "A0"
+    },
+    {
+      "name": "Transmission photodiode raw output",
+      "preset_name": "PulseOx",
+      "analog_port": "A1"
+    },
+    {
+      "name": "Filtered reflective photodiode output",
+      "preset_name": "PulseOx",
+      "analog_port": "A2"
+    },
+    {
+      "name": "Filtered transmission photodiode output",
+      "preset_name": "PulseOx",
+      "analog_port": "A3"
+    }
+  ],
+  "plot": {
+    "subplot_count": 4,
+    "series_names": [
+      "reflective_raw_red_corr",
+      "reflective_raw_ir_corr",
+      "transmission_raw_red_corr",
+      "transmission_raw_ir_corr",
+      "reflective_filtered_red_corr",
+      "reflective_filtered_ir_corr",
+      "transmission_filtered_red_corr",
+      "transmission_filtered_ir_corr"
+    ],
+    "selected_series_indices": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        6,
+        7
+      ]
+    ]
+  }
+}

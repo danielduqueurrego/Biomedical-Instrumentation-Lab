@@ -28,8 +28,28 @@ PACKET_MIN_FIELD_COUNTS = {
 
 UNO_R4_ANALOG_PORTS = ("A0", "A1", "A2", "A3", "A4", "A5")
 UNO_R4_ANALOG_BANK_FIELDS = ("t_ms", *UNO_R4_ANALOG_PORTS)
+UNO_R4_ANALOG_BANK_FIELDS_US = ("t_us", *UNO_R4_ANALOG_PORTS)
 UNO_R4_ANALOG_INDEX = {port_name: index for index, port_name in enumerate(UNO_R4_ANALOG_PORTS)}
 PULSEOX_PHASE_NAMES = ("RED_ON", "DARK1", "IR_ON", "DARK2")
+PULSEOX_ANALOG_CHANNELS = (
+    ("reflective_raw", "A0"),
+    ("transmission_raw", "A1"),
+    ("reflective_filtered", "A2"),
+    ("transmission_filtered", "A3"),
+)
+PULSEOX_PHASE_VALUE_FIELDS = tuple(channel_name for channel_name, _port_name in PULSEOX_ANALOG_CHANNELS)
+PULSEOX_ANALOG_PORTS = tuple(port_name for _channel_name, port_name in PULSEOX_ANALOG_CHANNELS)
+PULSEOX_ANALOG_MAP_FIELDS = tuple(f"{channel_name}={port_name}" for channel_name, port_name in PULSEOX_ANALOG_CHANNELS)
+PULSEOX_CYCLE_VALUE_FIELDS = (
+    "reflective_raw_red_corr",
+    "reflective_raw_ir_corr",
+    "transmission_raw_red_corr",
+    "transmission_raw_ir_corr",
+    "reflective_filtered_red_corr",
+    "reflective_filtered_ir_corr",
+    "transmission_filtered_red_corr",
+    "transmission_filtered_ir_corr",
+)
 
 # The legacy reference CLI app still plots the first three UNO R4 analog inputs.
 DEFAULT_THREE_CHANNEL_FIELDS = ("t_ms", "A0", "A1", "A2")
@@ -56,10 +76,27 @@ class CsvPacket:
 class DataPacket:
     host_time_iso: str
     host_time_unix_s: float
-    device_time_ms: int
+    timestamp_field_name: str
+    device_timestamp: int
     field_names: tuple[str, ...]
     values: tuple[int, ...]
     raw_line: str
+
+    @property
+    def device_time_ms(self) -> int:
+        if self.timestamp_field_name == "t_ms":
+            return self.device_timestamp
+        if self.timestamp_field_name == "t_us":
+            return self.device_timestamp // 1000
+        raise ValueError(f"Unsupported DATA timestamp field {self.timestamp_field_name!r}.")
+
+    @property
+    def device_time_us(self) -> int:
+        if self.timestamp_field_name == "t_us":
+            return self.device_timestamp
+        if self.timestamp_field_name == "t_ms":
+            return self.device_timestamp * 1000
+        raise ValueError(f"Unsupported DATA timestamp field {self.timestamp_field_name!r}.")
 
 
 @dataclass(slots=True)
@@ -123,8 +160,9 @@ def parse_data_packet(packet: CsvPacket, expected_field_names: tuple[str, ...]) 
     if packet.packet_type != PACKET_TYPE_DATA:
         raise PacketParseError("Expected a DATA packet.", packet.raw_line)
 
-    if expected_field_names[0] != "t_ms":
-        raise ValueError("The first expected DATA field must be 't_ms'.")
+    timestamp_field_name = expected_field_names[0]
+    if timestamp_field_name not in ("t_ms", "t_us"):
+        raise ValueError("The first expected DATA field must be 't_ms' or 't_us'.")
 
     if len(packet.payload) != len(expected_field_names):
         raise PacketParseError(
@@ -133,18 +171,19 @@ def parse_data_packet(packet: CsvPacket, expected_field_names: tuple[str, ...]) 
         )
 
     try:
-        device_time_ms = int(packet.payload[0])
+        device_timestamp = int(packet.payload[0])
         values = tuple(int(value) for value in packet.payload[1:])
     except ValueError as error:
         raise PacketParseError("DATA payload contains a non-integer value.", packet.raw_line) from error
 
-    if device_time_ms < 0:
+    if device_timestamp < 0:
         raise PacketParseError("DATA device timestamp must be non-negative.", packet.raw_line)
 
     return DataPacket(
         host_time_iso=packet.host_time_iso,
         host_time_unix_s=packet.host_time_unix_s,
-        device_time_ms=device_time_ms,
+        timestamp_field_name=timestamp_field_name,
+        device_timestamp=device_timestamp,
         field_names=expected_field_names,
         values=values,
         raw_line=packet.raw_line,

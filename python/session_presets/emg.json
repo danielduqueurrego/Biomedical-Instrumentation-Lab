@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "preset_name": "EMG Lab",
+  "lab_profile_name": "EMG",
+  "acquisition_class": "CONT_HIGH",
+  "generated_rate_hz": 2000,
+  "timestamp_field_name": "t_us",
+  "board_name": "Arduino UNO R4 WiFi",
+  "save_folder": "data/gui_sessions",
+  "output_basename_prefix": "emg_lab",
+  "signals": [
+    {
+      "name": "Raw EMG",
+      "preset_name": "EMG",
+      "analog_port": "A0"
+    },
+    {
+      "name": "Rectified EMG",
+      "preset_name": "EMG",
+      "analog_port": "A1"
+    },
+    {
+      "name": "Enveloped EMG",
+      "preset_name": "EMG",
+      "analog_port": "A2"
+    },
+    {
+      "name": "Pressure",
+      "preset_name": "EMG",
+      "analog_port": "A3"
+    }
+  ],
+  "plot": {
+    "subplot_count": 2,
+    "series_names": [
+      "Raw EMG",
+      "Rectified EMG",
+      "Enveloped EMG",
+      "Pressure"
+    ],
+    "selected_series_indices": [
+      [
+        0,
+        1
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  }
+}

@@ -19,6 +19,8 @@ If the selected signals do not use the `PulseOx` preset, the generated sketch:
 - emits only the selected analog ports
 - sends `META,fields,...` and `DATA,...` packets
 - behaves as `CONT_HIGH` or `CONT_MED` depending on the selected rate
+- uses `t_us` timestamps for `CONT_HIGH`
+- uses `t_ms` timestamps for `CONT_MED`
 
 Example:
 - `EMG` at `2000` samples/s
@@ -27,6 +29,7 @@ Example:
 The generated sketch uses:
 - `2000` samples/s
 - continuous `DATA` packets
+- `t_us` timing because the resulting acquisition class is `CONT_HIGH`
 
 ## PulseOx phased-cycle workflow
 
@@ -34,7 +37,11 @@ If the selected signals use the `PulseOx` preset, the generated sketch switches 
 
 Rules:
 - all active signals must be `PulseOx` signals
-- each active signal must declare a `PulseOx role` of `RED` or `IR`
+- PulseOx uses a fixed UNO R4 WiFi analog mapping:
+  - `A0 = reflective_raw`
+  - `A1 = transmission_raw`
+  - `A2 = reflective_filtered`
+  - `A3 = transmission_filtered`
 
 The generated sketch then:
 - drives `D6` for the red LED
@@ -44,8 +51,23 @@ The generated sketch then:
   - `DARK1`
   - `IR_ON`
   - `DARK2`
-- emits one raw `PHASE` packet per phase
-- emits one corrected `CYCLE` packet after `DARK2`
+- samples all four PulseOx analog channels during every phase
+- emits one raw `PHASE` packet per phase with the fields:
+  - `reflective_raw`
+  - `transmission_raw`
+  - `reflective_filtered`
+  - `transmission_filtered`
+- emits one corrected `CYCLE` packet after `DARK2` with the fields:
+  - `reflective_raw_red_corr`
+  - `reflective_raw_ir_corr`
+  - `transmission_raw_red_corr`
+  - `transmission_raw_ir_corr`
+  - `reflective_filtered_red_corr`
+  - `reflective_filtered_ir_corr`
+  - `transmission_filtered_red_corr`
+  - `transmission_filtered_ir_corr`
+
+Red and IR are not separate analog outputs. They are inferred from the active LED phase.
 
 For PulseOx, the GUI:
 - logs raw phase packets to `<output>_phase.csv`
@@ -55,7 +77,7 @@ For PulseOx, the GUI:
 The generated sketch also emits metadata such as:
 - `META,phase_fields,...`
 - `META,cycle_fields,...`
-- `META,pulseox_signal_roles,...`
+- `META,pulseox_analog_map,...`
 - `META,pulseox_led_pins,IR_D5,RED_D6`
 - `META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2`
 
@@ -79,3 +101,8 @@ The temporary generated sketch folders are stored under:
 - `data/generated_arduino_sketches/`
 
 These are runtime artifacts and are not intended to be committed.
+
+## Migration note
+
+- High-rate continuous generated firmware now emits `META,fields,t_us,...` and `DATA,t_us,...`.
+- Medium-rate continuous generated firmware is unchanged and still emits `t_ms`.
