@@ -4,6 +4,7 @@
 //   META,lab,CONT_MED_ANALOG_BANK
 //   META,acq_class,CONT_MED
 //   META,rate_hz,120
+//   META,adc_resolution_bits,14
 //   META,fields,t_ms,A0,A1,A2,A3,A4,A5
 //   DATA,t_ms,A0,A1,A2,A3,A4,A5
 //
@@ -28,6 +29,7 @@ void writeMetadata() {
   Serial.println("META,lab,CONT_MED_ANALOG_BANK");
   Serial.println("META,acq_class,CONT_MED");
   Serial.println("META,rate_hz,120");
+  Serial.println("META,adc_resolution_bits,14");
   Serial.println("META,fields,t_ms,A0,A1,A2,A3,A4,A5");
 }
 
@@ -39,6 +41,7 @@ void setup() {
   while (!Serial && millis() < 3000) {
   }
 
+  analogReadResolution(14);
   writeMetadata();
   nextSampleTimeUs = micros();
 }

@@ -21,6 +21,7 @@ Examples:
 - `META,lab,GUI_SELECTED_SIGNALS`
 - `META,acq_class,CONT_HIGH`
 - `META,rate_hz,2000`
+- `META,adc_resolution_bits,14`
 - `META,fields,t_us,A0,A1,A2,A3`
 - `META,acq_class,CONT_MED`
 - `META,rate_hz,200`
@@ -118,6 +119,7 @@ For `CONT_HIGH`, prefer microsecond timestamps when the error is tied to sample 
 - ECG, EMG, and Blood Pressure use `DATA` packets.
 - `CONT_HIGH` continuous labs emit `META,fields,t_us,...` and `DATA,t_us,...`.
 - `CONT_MED` continuous labs emit `META,fields,t_ms,...` and `DATA,t_ms,...`.
+- Current UNO R4 WiFi firmware paths also emit `META,adc_resolution_bits,14` and call `analogReadResolution(14)` in `setup()`.
 
 ### PulseOx labs
 - If any active signal uses the `PulseOx` preset, the session runs in `PHASED_CYCLE` mode.

@@ -93,6 +93,7 @@ Current toolbar behavior:
 - each lab profile loads the requested signal names and analog-port defaults
 - the GUI compile/upload path generates a shared UNO R4 analog capture sketch from the currently selected signals
 - the generated sketch uses only the selected analog ports and the highest selected preset rate
+- the generated sketch sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
 - when the generated continuous acquisition resolves to `CONT_HIGH`, it emits `t_us` timestamps
 - when the generated continuous acquisition resolves to `CONT_MED`, it emits `t_ms` timestamps
 - Blood Pressure stays on the continuous `DATA` workflow

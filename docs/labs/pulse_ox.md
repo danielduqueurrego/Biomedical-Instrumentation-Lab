@@ -77,6 +77,7 @@ Notes:
 - `PHASE` rows in `<output>.csv` store raw phase samples for all four channels
 - `CYCLE` rows in `<output>.csv` store corrected red and IR outputs by optical path and signal path
 - `META`, `STAT`, `ERR`, and `PARSE_ERROR` rows are stored in the same session CSV
+- current UNO R4 WiFi PulseOx firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
 - the session CSV uses readable PulseOx column labels derived from the configured channel names
 - the live plot shows corrected `CYCLE` values, not every raw phase sample
 - the live plot labels are derived from the four configured left-panel channels, with `RED corrected` and `IR corrected` suffixes

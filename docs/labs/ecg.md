@@ -55,6 +55,7 @@ Continuous ECG sessions create one file:
 Notes:
 - `<output>.csv` stores `META`, `DATA`, and any error rows together
 - ECG `DATA` rows store both host timestamps and Arduino `t_ms`
+- current UNO R4 WiFi ECG firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
 
 ## Common troubleshooting
 

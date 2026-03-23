@@ -16,6 +16,7 @@ This keeps the student workflow simple:
 
 If the selected signals do not use the `PulseOx` preset, the generated sketch:
 - uses the highest default rate among the selected signal presets
+- sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
 - emits only the selected analog ports
 - sends `META,fields,...` and `DATA,...` packets
 - behaves as `CONT_HIGH` or `CONT_MED` depending on the selected rate
@@ -44,6 +45,7 @@ Rules:
   - `A3 = transmission_filtered`
 
 The generated sketch then:
+- sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
 - drives `D6` for the red LED
 - drives `D5` for the IR LED
 - steps through the phase sequence:
@@ -81,6 +83,7 @@ Important distinction:
 - the saved student session CSV and the live plot use readable labels derived from the configured PulseOx channel names
 
 The generated sketch also emits metadata such as:
+- `META,adc_resolution_bits,14`
 - `META,phase_fields,...`
 - `META,cycle_fields,...`
 - `META,pulseox_analog_map,...`

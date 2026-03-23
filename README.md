@@ -27,6 +27,7 @@ Current implemented baseline:
 - `CONT_MED` Arduino UNO R4 WiFi analog-bank demo using the shared `META` and `DATA` packet types
 - generated student GUI firmware for continuous labs using selected signals, selected analog ports, and the highest selected preset rate
 - generated `PHASED_CYCLE` PulseOx firmware and logging path using shared `A0` to `A3` photodiode channels, `PHASE` and `CYCLE` packets, D6 for RED LED control, and D5 for IR LED control
+- all current UNO R4 WiFi firmware paths set `analogReadResolution(14)` and report `META,adc_resolution_bits,14`
 - refactored Tkinter student GUI with modular internals, session preset save/load, generated firmware compile/upload, collapsible panels, and multi-subplot live plotting
 - one student-facing CSV per session, with `row_type` distinguishing `META`, `DATA`, `PHASE`, `CYCLE`, and error rows
 

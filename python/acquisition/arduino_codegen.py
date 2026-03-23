@@ -23,6 +23,7 @@ from acquisition.protocol import (
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATED_ARDUINO_SKETCH_DIR = REPO_ROOT / "data" / "generated_arduino_sketches"
 DEFAULT_FALLBACK_RATE_HZ = 120
+ADC_RESOLUTION_BITS = 14
 
 
 @dataclass(frozen=True, slots=True)
@@ -98,6 +99,7 @@ def _render_metadata_block(
                 '  Serial.println("META,lab,GUI_SELECTED_SIGNALS");',
                 f'  Serial.println("META,acq_class,{acquisition_class}");',
                 f'  Serial.println("META,rate_hz,{cycle_rate_hz}");',
+                f'  Serial.println("META,adc_resolution_bits,{ADC_RESOLUTION_BITS}");',
                 f'  Serial.println("META,cycle_rate_hz,{cycle_rate_hz}");',
                 f'  Serial.println("META,phase_rate_hz,{phase_rate_hz}");',
                 f'  Serial.println("META,phase_fields,{_escape_cpp_string(phase_fields_csv)}");',
@@ -116,6 +118,7 @@ def _render_metadata_block(
             '  Serial.println("META,lab,GUI_SELECTED_SIGNALS");',
             f'  Serial.println("META,acq_class,{acquisition_class}");',
             f'  Serial.println("META,rate_hz,{sample_rate_hz}");',
+            f'  Serial.println("META,adc_resolution_bits,{ADC_RESOLUTION_BITS}");',
             f'  Serial.println("META,fields,{fields_csv}");',
             f'  Serial.println("META,selected_ports,{selected_ports_csv}");',
         )
@@ -148,6 +151,7 @@ def _render_continuous_sketch(signal_configurations, baud_rate: int) -> str:
 //
 // This sketch is generated from the currently selected GUI signals.
 // Highest selected preset rate: {sample_rate_hz} Hz.
+// ADC resolution: {ADC_RESOLUTION_BITS} bits.
 // Selected signals:
 {selected_signal_comments}
 //
@@ -155,6 +159,7 @@ def _render_continuous_sketch(signal_configurations, baud_rate: int) -> str:
 //   META,lab,GUI_SELECTED_SIGNALS
 //   META,acq_class,{acquisition_class}
 //   META,rate_hz,{sample_rate_hz}
+//   META,adc_resolution_bits,{ADC_RESOLUTION_BITS}
 //   META,fields,{fields_csv}
 //   DATA,{fields_csv}
 
@@ -177,6 +182,7 @@ void setup() {{
   while (!Serial && millis() < 3000) {{
   }}
 
+  analogReadResolution({ADC_RESOLUTION_BITS});
   writeMetadata();
   nextSampleTimeUs = micros();
 }}
@@ -225,6 +231,7 @@ def _render_pulseox_sketch(signal_configurations, baud_rate: int) -> str:
 // Red and IR are distinguished by the active LED phase, not by separate ADC pins.
 // Cycle rate: {cycle_rate_hz} Hz.
 // Phase rate: {cycle_rate_hz * 4} Hz.
+// ADC resolution: {ADC_RESOLUTION_BITS} bits.
 // GUI-selected PulseOx channels:
 {selected_signal_comments}
 // Fixed board mapping used for packet fields:
@@ -384,6 +391,7 @@ void setup() {{
   while (!Serial && millis() < 3000) {{
   }}
 
+  analogReadResolution({ADC_RESOLUTION_BITS});
   pinMode(IR_LED_PIN, OUTPUT);
   pinMode(RED_LED_PIN, OUTPUT);
   applyPulseOxPhase();

@@ -17,7 +17,9 @@ def test_continuous_codegen_includes_expected_metadata_lines() -> None:
 
     assert 'Serial.println("META,acq_class,CONT_HIGH");' in sketch
     assert 'Serial.println("META,fields,t_us,A0,A1");' in sketch
+    assert 'Serial.println("META,adc_resolution_bits,14");' in sketch
     assert 'Serial.println("META,selected_ports,A0,A1");' in sketch
+    assert "analogReadResolution(14);" in sketch
     assert "Serial.print(\"DATA,\");" in sketch
 
 
@@ -40,5 +42,7 @@ def test_pulseox_codegen_includes_phase_and_cycle_metadata_and_sequence() -> Non
         f'Serial.println("META,cycle_fields,t_us,cycle_idx,{",".join(PULSEOX_CYCLE_VALUE_FIELDS)}");'
         in sketch
     )
+    assert 'Serial.println("META,adc_resolution_bits,14");' in sketch
     assert 'Serial.println("META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2");' in sketch
+    assert "analogReadResolution(14);" in sketch
     assert "RED_ON -> DARK1 -> IR_ON -> DARK2" in sketch

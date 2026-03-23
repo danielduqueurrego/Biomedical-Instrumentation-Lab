@@ -15,6 +15,7 @@
 //   META,lab,EMG_REFERENCE
 //   META,acq_class,CONT_HIGH
 //   META,rate_hz,2000
+//   META,adc_resolution_bits,14
 //   META,fields,t_us,A0,A1,A2,A3
 //   DATA,t_us,A0,A1,A2,A3
 
@@ -31,6 +32,7 @@ void writeMetadata() {
   Serial.println("META,lab,EMG_REFERENCE");
   Serial.println("META,acq_class,CONT_HIGH");
   Serial.println("META,rate_hz,2000");
+  Serial.println("META,adc_resolution_bits,14");
   Serial.println("META,fields,t_us,A0,A1,A2,A3");
   Serial.println("META,selected_ports,A0,A1,A2,A3");
 }
@@ -41,6 +43,7 @@ void setup() {
   while (!Serial && millis() < 3000) {
   }
 
+  analogReadResolution(14);
   writeMetadata();
   nextSampleTimeUs = micros();
 }

@@ -2,6 +2,8 @@
 
 These presets are software starting points for student labs. They are not hardware guarantees and should be validated on each lab board.
 
+Current UNO R4 WiFi firmware in this repo sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`, so raw analog samples use the board's maximum configured ADC resolution.
+
 ## Acquisition class guidance
 
 ### `CONT_HIGH`
