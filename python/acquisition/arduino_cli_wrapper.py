@@ -41,7 +41,6 @@ class BoardDefinition:
     display_name: str
     fqbn: str
     core: str
-    sketch_dir: Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -63,17 +62,12 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     display_name="Arduino UNO R4 WiFi",
     fqbn="arduino:renesas_uno:unor4wifi",
     core="arduino:renesas_uno",
-    sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
 )
 
-UNO_R4_WIFI_CONT_HIGH_EMG_BOARD = BoardDefinition(
-    display_name="Arduino UNO R4 WiFi",
-    fqbn="arduino:renesas_uno:unor4wifi",
-    core="arduino:renesas_uno",
-    sketch_dir=REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference",
-)
+CONT_MED_UNO_R4_DEMO_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo"
+CONT_HIGH_UNO_R4_EMG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference"
 
-SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD, UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
+SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD,)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
 
 
@@ -127,16 +121,20 @@ class ArduinoCli:
         result = self.run(["version"], capture_output=True)
         return result.stdout.strip()
 
+    @staticmethod
+    def _normalize_hardware_name(name: str) -> str:
+        return re.sub(r"[^a-z0-9]+", "", name.lower())
+
     def _match_supported_board(self, board_name: str, fqbn: str, description: str) -> BoardDefinition | None:
-        normalized_name = board_name.lower()
-        normalized_description = description.lower()
+        normalized_name = self._normalize_hardware_name(board_name)
+        normalized_description = self._normalize_hardware_name(description)
 
         for board in SUPPORTED_BOARDS:
             if fqbn == board.fqbn:
                 return board
 
-            display_name = board.display_name.lower()
-            if display_name in normalized_name or display_name in normalized_description:
+            display_name = self._normalize_hardware_name(board.display_name)
+            if display_name and (display_name in normalized_name or display_name in normalized_description):
                 return board
 
         return None
@@ -312,9 +310,15 @@ class ArduinoCli:
 
     def detect_port_for_board(self, board: BoardDefinition) -> str:
         matches = []
+        normalized_display_name = self._normalize_hardware_name(board.display_name)
 
         for detected in self.list_supported_board_ports():
-            if detected.matched_board == board:
+            matched_by_fqbn = bool(detected.fqbn) and detected.fqbn == board.fqbn
+            matched_by_name = normalized_display_name and (
+                normalized_display_name in self._normalize_hardware_name(detected.board_name)
+                or normalized_display_name in self._normalize_hardware_name(detected.description)
+            )
+            if matched_by_fqbn or matched_by_name:
                 matches.append(detected.port)
 
         unique_matches = sorted(set(matches))
@@ -453,46 +457,46 @@ def main() -> int:
             for board_port in cli.list_board_ports():
                 print(board_port.description)
         elif args.command == "compile-demo":
-            print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
-            snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
+            print(f"Compiling {CONT_MED_UNO_R4_DEMO_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+            snapshot_dir = cli.compile(CONT_MED_UNO_R4_DEMO_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
             print("Compile finished.")
             print(f"Saved Arduino code copy to: {snapshot_dir}")
         elif args.command == "compile-cont-high-emg":
-            print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+            print(f"Compiling {CONT_HIGH_UNO_R4_EMG_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
             snapshot_dir = cli.compile(
-                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
-                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                CONT_HIGH_UNO_R4_EMG_SKETCH_DIR,
+                UNO_R4_WIFI_BOARD.fqbn,
                 verbose=args.verbose,
             )
             print("Compile finished.")
             print(f"Saved Arduino code copy to: {snapshot_dir}")
         elif args.command == "upload-demo":
             if not args.skip_compile:
-                print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
-                snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
+                print(f"Compiling {CONT_MED_UNO_R4_DEMO_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+                snapshot_dir = cli.compile(CONT_MED_UNO_R4_DEMO_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
                 print("Compile finished.")
                 print(f"Saved Arduino code copy to: {snapshot_dir}")
 
             selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
-            print(f"Uploading {UNO_R4_WIFI_BOARD.sketch_dir.name} to {selected_port}...")
-            cli.upload(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
+            print(f"Uploading {CONT_MED_UNO_R4_DEMO_SKETCH_DIR.name} to {selected_port}...")
+            cli.upload(CONT_MED_UNO_R4_DEMO_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
             print("Upload finished.")
         elif args.command == "upload-cont-high-emg":
             if not args.skip_compile:
-                print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+                print(f"Compiling {CONT_HIGH_UNO_R4_EMG_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
                 snapshot_dir = cli.compile(
-                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
-                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                    CONT_HIGH_UNO_R4_EMG_SKETCH_DIR,
+                    UNO_R4_WIFI_BOARD.fqbn,
                     verbose=args.verbose,
                 )
                 print("Compile finished.")
                 print(f"Saved Arduino code copy to: {snapshot_dir}")
 
-            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
-            print(f"Uploading {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} to {selected_port}...")
+            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
+            print(f"Uploading {CONT_HIGH_UNO_R4_EMG_SKETCH_DIR.name} to {selected_port}...")
             cli.upload(
-                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
-                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                CONT_HIGH_UNO_R4_EMG_SKETCH_DIR,
+                UNO_R4_WIFI_BOARD.fqbn,
                 selected_port,
                 verbose=args.verbose,
             )
