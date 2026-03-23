@@ -41,6 +41,7 @@ class BoardDefinition:
     display_name: str
     fqbn: str
     core: str
+    sketch_dir: Path | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,6 +63,7 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     display_name="Arduino UNO R4 WiFi",
     fqbn="arduino:renesas_uno:unor4wifi",
     core="arduino:renesas_uno",
+    sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
 )
 
 CONT_MED_UNO_R4_DEMO_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo"

@@ -37,5 +37,5 @@ def test_validate_signal_configurations_rejects_mixed_pulseox_and_continuous_pre
         SignalConfiguration(name="EMG Signal", preset_name="EMG", analog_port="A1", pulseox_role=PULSEOX_ROLE_AUTO),
     )
 
-    with pytest.raises(ValueError, match="Do not mix PulseOx signals"):
+    with pytest.raises(ValueError, match="Do not mix PHASED_CYCLE signals"):
         validate_signal_configurations(signals)
