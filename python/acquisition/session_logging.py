@@ -4,13 +4,15 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from acquisition.protocol import DataPacket
+from acquisition.protocol import CyclePacket, DataPacket, PhasePacket
 
 
 @dataclass(slots=True)
 class SessionPaths:
     session_dir: Path
     data_csv_path: Path
+    cycle_csv_path: Path
+    phase_csv_path: Path
     metadata_csv_path: Path
     parse_errors_path: Path
 
@@ -20,6 +22,8 @@ class NamedSessionPaths:
     output_dir: Path
     output_basename: str
     data_csv_path: Path
+    cycle_csv_path: Path
+    phase_csv_path: Path
     metadata_csv_path: Path
     parse_errors_path: Path
 
@@ -32,6 +36,8 @@ def create_session_paths(base_output_dir: Path) -> SessionPaths:
     return SessionPaths(
         session_dir=session_dir,
         data_csv_path=session_dir / "data_samples.csv",
+        cycle_csv_path=session_dir / "cycle_samples.csv",
+        phase_csv_path=session_dir / "phase_samples.csv",
         metadata_csv_path=session_dir / "metadata.csv",
         parse_errors_path=session_dir / "parse_errors.log",
     )
@@ -51,13 +57,21 @@ def create_named_session_paths(output_dir: Path, output_basename: str) -> NamedS
         output_dir=output_dir,
         output_basename=safe_basename,
         data_csv_path=output_dir / f"{safe_basename}_data.csv",
+        cycle_csv_path=output_dir / f"{safe_basename}_cycle.csv",
+        phase_csv_path=output_dir / f"{safe_basename}_phase.csv",
         metadata_csv_path=output_dir / f"{safe_basename}_metadata.csv",
         parse_errors_path=output_dir / f"{safe_basename}_errors.log",
     )
 
     existing_paths = [
         path.name
-        for path in (paths.data_csv_path, paths.metadata_csv_path, paths.parse_errors_path)
+        for path in (
+            paths.data_csv_path,
+            paths.cycle_csv_path,
+            paths.phase_csv_path,
+            paths.metadata_csv_path,
+            paths.parse_errors_path,
+        )
         if path.exists()
     ]
     if existing_paths:
@@ -114,6 +128,78 @@ class MetadataLogger:
 
     def write_meta(self, host_time_iso: str, key: str, values: tuple[str, ...]) -> None:
         self._writer.writerow([host_time_iso, key, "|".join(values)])
+        self._file.flush()
+
+    def close(self) -> None:
+        self._file.close()
+
+
+class PhaseCsvLogger:
+    """Writes every valid PHASE packet to CSV and flushes each row for reliability."""
+
+    def __init__(self, csv_path: Path, field_names: tuple[str, ...]):
+        self.csv_path = csv_path
+        self.field_names = field_names
+        self._file = csv_path.open("w", newline="", encoding="utf-8")
+        self._writer = csv.writer(self._file)
+        self._writer.writerow(
+            [
+                "host_time_iso",
+                "host_time_unix_s",
+                "device_time_us",
+                "cycle_idx",
+                "phase",
+                *field_names,
+            ]
+        )
+        self._file.flush()
+
+    def write_phase(self, packet: PhasePacket) -> None:
+        self._writer.writerow(
+            [
+                packet.host_time_iso,
+                f"{packet.host_time_unix_s:.6f}",
+                packet.device_time_us,
+                packet.cycle_index,
+                packet.phase_name,
+                *packet.values,
+            ]
+        )
+        self._file.flush()
+
+    def close(self) -> None:
+        self._file.close()
+
+
+class CycleCsvLogger:
+    """Writes reconstructed CYCLE packets to CSV and flushes each row for reliability."""
+
+    def __init__(self, csv_path: Path, field_names: tuple[str, ...]):
+        self.csv_path = csv_path
+        self.field_names = field_names
+        self._file = csv_path.open("w", newline="", encoding="utf-8")
+        self._writer = csv.writer(self._file)
+        self._writer.writerow(
+            [
+                "host_time_iso",
+                "host_time_unix_s",
+                "device_time_us",
+                "cycle_idx",
+                *field_names,
+            ]
+        )
+        self._file.flush()
+
+    def write_cycle(self, packet: CyclePacket) -> None:
+        self._writer.writerow(
+            [
+                packet.host_time_iso,
+                f"{packet.host_time_unix_s:.6f}",
+                packet.device_time_us,
+                packet.cycle_index,
+                *packet.values,
+            ]
+        )
         self._file.flush()
 
     def close(self) -> None:

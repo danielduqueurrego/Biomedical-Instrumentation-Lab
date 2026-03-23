@@ -5,44 +5,66 @@ This document describes what the student GUI does when it compiles or uploads Ar
 ## Why generated firmware is used
 
 The student GUI does not always compile the fixed reference sketch directly.
-Instead, it can generate a temporary Arduino UNO R4 WiFi sketch from the current GUI signal selection.
+Instead, it generates a temporary Arduino UNO R4 WiFi sketch from the current GUI signal selection.
 
 This keeps the student workflow simple:
 - choose a lab profile or custom signal setup
 - compile or upload from the GUI
 - review the exact Arduino code that was used
 
-## What the generated sketch includes
+## Continuous workflow
 
-For the current GUI signal selection, the generated sketch:
-- emits only the selected analog ports
+If the selected signals do not use the `PulseOx` preset, the generated sketch:
 - uses the highest default rate among the selected signal presets
-- writes matching `META,rate_hz,...` and `META,fields,...` packets
-- saves a timestamped copy of the generated Arduino code for review
+- emits only the selected analog ports
+- sends `META,fields,...` and `DATA,...` packets
+- behaves as `CONT_HIGH` or `CONT_MED` depending on the selected rate
 
-## Example rate rule
-
-If the selected signals include:
+Example:
 - `EMG` at `2000` samples/s
 - `Blood Pressure` at `200` samples/s
 
-the generated sketch uses:
+The generated sketch uses:
 - `2000` samples/s
+- continuous `DATA` packets
 
-## Pulse oximetry LED handling
+## PulseOx phased-cycle workflow
 
-If any selected signal uses the `PulseOx` preset, the generated sketch also adds LED phase control:
-- `D6` controls the red LED
-- `D5` controls the IR LED
-- phase sequence: `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
+If the selected signals use the `PulseOx` preset, the generated sketch switches to `PHASED_CYCLE` mode.
 
-The generated sketch emits metadata such as:
+Rules:
+- all active signals must be `PulseOx` signals
+- each active signal must declare a `PulseOx role` of `RED` or `IR`
+
+The generated sketch then:
+- drives `D6` for the red LED
+- drives `D5` for the IR LED
+- steps through the phase sequence:
+  - `RED_ON`
+  - `DARK1`
+  - `IR_ON`
+  - `DARK2`
+- emits one raw `PHASE` packet per phase
+- emits one corrected `CYCLE` packet after `DARK2`
+
+For PulseOx, the GUI:
+- logs raw phase packets to `<output>_phase.csv`
+- logs corrected cycle packets to `<output>_cycle.csv`
+- plots the corrected `CYCLE` values live
+
+The generated sketch also emits metadata such as:
+- `META,phase_fields,...`
+- `META,cycle_fields,...`
+- `META,pulseox_signal_roles,...`
 - `META,pulseox_led_pins,IR_D5,RED_D6`
 - `META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2`
 
-Current limitation:
-- the GUI still logs `DATA` packets for the selected analog ports
-- this does not yet replace the full future `PHASED_CYCLE` PulseOx implementation
+## Blood pressure note
+
+Blood pressure now uses the continuous workflow.
+
+- The project does not emit procedure stage packets for blood pressure.
+- Students manually inflate and deflate the cuff while the waveform is logged continuously.
 
 ## Saved Arduino code copies
 

@@ -22,12 +22,6 @@ These presets are software starting points for student labs. They are not hardwa
 - Logging rule: keep both raw `PHASE` packets and reconstructed `CYCLE` packets
 - Plotting rule: emphasize corrected cycle values instead of every raw phase
 
-### `PROC_CONT`
-- Target use: continuous measurements with procedure stages
-- Typical range: 50 to 500 samples per second
-- Logging rule: save the waveform with `DATA` and stage changes with `EVENT`
-- Plotting rule: show the waveform and mark stage transitions clearly
-
 ## Default presets
 
 | Lab | Acquisition class | Default rate | Primary packets | Default fields | Plot default |
@@ -35,17 +29,22 @@ These presets are software starting points for student labs. They are not hardwa
 | EMG | `CONT_HIGH` | 2000 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_ms`, `ch1` | 5 s window, 50 ms redraw |
 | ECG | `CONT_MED` | 500 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_ms`, `ch1` | 10 s window, 100 ms redraw |
 | PulseOx | `PHASED_CYCLE` | 100 cycles/s | `META`, `PHASE`, `CYCLE`, `STAT`, `ERR` | `t_us`, `cycle_idx`, corrected values | 15 s window, 100 ms redraw |
-| Blood Pressure | `PROC_CONT` | 200 samples/s | `META`, `DATA`, `EVENT`, `STAT`, `ERR` | `t_ms`, `pressure` | 20 s window, 200 ms redraw |
+| Blood Pressure | `CONT_MED` | 200 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_ms`, `pressure` | 20 s window, 200 ms redraw |
 
-## Blood pressure staging
+## Blood pressure note
 
-Blood pressure uses continuous `DATA` packets plus procedure `EVENT` packets.
+Blood pressure is treated as a continuous waveform lab.
 
-Recommended default stage names:
-- `BASELINE`
-- `INFLATE`
-- `HOLD`
-- `DEFLATE`
-- `COMPLETE`
+- Students manually control cuff inflation and deflation.
+- The software logs the waveform continuously with `DATA`.
+- The project does not emit procedure-stage packets for blood pressure.
 
-Each stage change should emit an `EVENT` packet so the saved CSV data can be aligned with the procedure timeline.
+## PulseOx note
+
+PulseOx uses four optical phases per cycle:
+- `RED_ON`
+- `DARK1`
+- `IR_ON`
+- `DARK2`
+
+The GUI-generated firmware logs every phase sample with `PHASE`, then reconstructs corrected cycle values with `CYCLE`.

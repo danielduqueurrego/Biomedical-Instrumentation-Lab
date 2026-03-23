@@ -10,7 +10,7 @@ This repository is organized by acquisition pattern first and by lab second.
 - Design goal: log every sample, plot a decimated rolling view, keep serial output simple.
 
 ### `CONT_MED`
-- Use for medium-rate continuous waveforms such as ECG and general analog streaming demos.
+- Use for medium-rate continuous waveforms such as ECG, Blood Pressure, and general analog streaming demos.
 - Main packets: `META`, `DATA`, `STAT`, `ERR`
 - Design goal: one timestamped CSV packet per sample with beginner-friendly live plotting.
 
@@ -18,11 +18,6 @@ This repository is organized by acquisition pattern first and by lab second.
 - Use for timed phase sequences that reconstruct one cycle from several phase measurements, such as pulse oximetry.
 - Main packets: `META`, `PHASE`, `CYCLE`, `STAT`, `ERR`
 - Design goal: keep raw phase logs and reconstructed cycle logs in the same protocol family.
-
-### `PROC_CONT`
-- Use for continuous acquisitions that also need procedure or stage events, such as blood pressure.
-- Main packets: `META`, `DATA`, `EVENT`, `STAT`, `ERR`
-- Design goal: continuous waveform logging plus explicit stage markers for later analysis.
 
 ## Pattern-first repository layout
 
@@ -35,9 +30,6 @@ firmware/
     uno_r4_wifi/
       <lab_name>/
   phased_cycle/
-    uno_r4_wifi/
-      <lab_name>/
-  proc_cont/
     uno_r4_wifi/
       <lab_name>/
 
@@ -60,17 +52,24 @@ python/
 - EMG: `CONT_HIGH`
 - ECG: `CONT_MED`
 - PulseOx: `PHASED_CYCLE`
-- Blood Pressure: `PROC_CONT`
+- Blood Pressure: `CONT_MED`
 
 ## Blood pressure rule
-- Blood pressure is modeled as `PROC_CONT`.
-- The pressure waveform is sent with `DATA`.
-- Procedure changes are sent with `EVENT`.
-- Recommended default stage names are `BASELINE`, `INFLATE`, `HOLD`, `DEFLATE`, `COMPLETE`.
+- Blood pressure is modeled as `CONT_MED`.
+- The pressure waveform and supporting channels are sent with `DATA`.
+- Students manually inflate and deflate the cuff, so the project does not model separate procedure `EVENT` packets.
 
-## First implementation order
-1. Finish the shared Python packet parser and CSV logger around `META`, `DATA`, and `ERR`.
-2. Stabilize one `CONT_MED` reference app because it is the easiest end-to-end student workflow.
-3. Add `CONT_HIGH` support with the same logging stack but faster plot decimation and buffering.
-4. Add `PHASED_CYCLE` support for PulseOx using shared metadata and cycle reconstruction helpers.
-5. Add `PROC_CONT` support for Blood Pressure with stage-event handling and summary statistics.
+## PulseOx rule
+- PulseOx is modeled as `PHASED_CYCLE`.
+- The Arduino side logs one `PHASE` packet for each optical phase:
+  - `RED_ON`
+  - `DARK1`
+  - `IR_ON`
+  - `DARK2`
+- After `DARK2`, the Arduino side reconstructs one corrected `CYCLE` packet for the configured signals.
+
+## Current implementation status
+1. Shared Python packet parsing and CSV logging are implemented for the continuous workflow.
+2. `CONT_MED` is implemented end to end for the reference UNO R4 WiFi demo and the student GUI.
+3. GUI-generated `PHASED_CYCLE` PulseOx firmware is implemented with raw `PHASE` logging and corrected `CYCLE` logging.
+4. `CONT_HIGH` still uses the same shared GUI workflow, but more high-rate validation remains useful on real hardware.

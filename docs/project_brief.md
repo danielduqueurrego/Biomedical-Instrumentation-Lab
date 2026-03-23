@@ -12,7 +12,7 @@ This repository supports biomedical instrumentation labs built around Arduino bo
 ## Lab types
 
 ### 1. Continuous stream labs
-Examples: EMG, ECG
+Examples: EMG, ECG, Blood Pressure
 
 Expected output:
 - timestamp
@@ -31,16 +31,13 @@ The software must support:
 - live plotting
 - CSV export
 
-### 3. Procedure-driven continuous labs
-Examples: blood pressure
+## Current implementation direction
 
-Expected output:
-- continuous waveform samples
-- explicit stage events
-- summary statistics when needed
-
-## First milestone
-Create one working end-to-end `CONT_MED` example, define the shared serial protocol, and scaffold the repository for `CONT_HIGH`, `PHASED_CYCLE`, and `PROC_CONT`.
+The repository currently supports:
+- one working end-to-end `CONT_MED` example
+- generated firmware for student GUI workflows
+- true `PHASED_CYCLE` PulseOx support using `PHASE` and `CYCLE` packets
+- a shared serial protocol across all supported acquisition classes
 
 ## Constraints
 - Keep the stack free and student-friendly
@@ -55,7 +52,7 @@ A major goal of this repository is student usability.
 The software must be designed so that students can install and run it with minimal setup burden. Prefer a single free software ecosystem for the computer side, ideally a Conda-based Python installation. Avoid requiring multiple separate software tools unless absolutely necessary.
 
 The preferred student setup is:
-- Arduino IDE for uploading firmware
+- Arduino CLI behind scripts or the GUI for firmware upload
 - one Conda-based Python installation for acquisition software
 - one environment file
 - one launch command or launcher script

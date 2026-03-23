@@ -22,6 +22,8 @@ from acquisition.arduino_cli_wrapper import (
 from acquisition.gui_models import (
     DEFAULT_ACTIVE_SIGNAL_COUNT,
     MAX_SIGNAL_COUNT,
+    PULSEOX_ROLE_AUTO,
+    PULSEOX_SIGNAL_ROLES,
     GuiAcquisitionConfig,
     SignalConfiguration,
     default_gui_config,
@@ -72,7 +74,7 @@ class StudentAcquisitionGui:
         self.controls_toggle_label_var = tk.StringVar(value="Hide Left Panel")
         self.status_toggle_label_var = tk.StringVar(value="Hide Status Log")
         self.firmware_summary_var = tk.StringVar(
-            value="Firmware: UNO R4 WiFi Analog Bank Foundation. No lab profile loaded yet."
+            value="Firmware: Generated UNO R4 WiFi Acquisition Firmware. No lab profile loaded yet."
         )
         self.plot_signal_reference_var = tk.StringVar(value="Signals: none configured yet.")
 
@@ -81,7 +83,9 @@ class StudentAcquisitionGui:
         self.signal_name_vars: list[tk.StringVar] = []
         self.signal_preset_vars: list[tk.StringVar] = []
         self.signal_port_vars: list[tk.StringVar] = []
+        self.signal_role_vars: list[tk.StringVar] = []
         self.signal_rows: list[tuple[ttk.Frame, ttk.Label]] = []
+        self.signal_role_combos: list[ttk.Combobox] = []
         self.lab_profile_combo: ttk.Combobox | None = None
         self.current_lab_profile: LabProfile | None = None
         self.subplot_count_spinbox: ttk.Spinbox | None = None
@@ -389,6 +393,7 @@ class StudentAcquisitionGui:
         defaults = self.default_config.signal_configurations
         preset_names = list(LAB_PRESETS)
         analog_port_names = list(UNO_R4_ANALOG_PORTS)
+        pulseox_role_names = list(PULSEOX_SIGNAL_ROLES)
 
         for index in range(MAX_SIGNAL_COUNT):
             signal_frame = ttk.Frame(frame, padding=(0, 8, 0, 0))
@@ -398,10 +403,13 @@ class StudentAcquisitionGui:
             name_var = tk.StringVar(value=defaults[index].name)
             preset_var = tk.StringVar(value=defaults[index].preset_name)
             port_var = tk.StringVar(value=defaults[index].analog_port)
+            role_var = tk.StringVar(value=defaults[index].pulseox_role)
             self.signal_name_vars.append(name_var)
             self.signal_preset_vars.append(preset_var)
             self.signal_port_vars.append(port_var)
+            self.signal_role_vars.append(role_var)
             name_var.trace_add("write", lambda *_args: self._refresh_signal_reference_text())
+            role_var.trace_add("write", lambda *_args, row_index=index: self._update_signal_preset_info(row_index))
 
             ttk.Label(signal_frame, text=f"Signal {index + 1} name").grid(row=0, column=0, sticky="w")
             name_entry = ttk.Entry(signal_frame, textvariable=name_var)
@@ -417,8 +425,19 @@ class StudentAcquisitionGui:
             port_combo.grid(row=5, column=0, sticky="ew", pady=(4, 4))
             self._bind_combobox_scroll_guard(port_combo)
 
+            ttk.Label(signal_frame, text="PulseOx role").grid(row=6, column=0, sticky="w")
+            role_combo = ttk.Combobox(
+                signal_frame,
+                textvariable=role_var,
+                values=pulseox_role_names,
+                state="disabled",
+            )
+            role_combo.grid(row=7, column=0, sticky="ew", pady=(4, 4))
+            self._bind_combobox_scroll_guard(role_combo)
+            self.signal_role_combos.append(role_combo)
+
             info_label = ttk.Label(signal_frame, text="", wraplength=300, justify="left")
-            info_label.grid(row=6, column=0, sticky="w")
+            info_label.grid(row=8, column=0, sticky="w")
             self.signal_rows.append((signal_frame, info_label))
 
             preset_var.trace_add("write", lambda *_args, row_index=index: self._update_signal_preset_info(row_index))
@@ -679,12 +698,14 @@ class StudentAcquisitionGui:
             self.signal_name_vars[index].set(signal.name)
             self.signal_preset_vars[index].set(signal.preset_name)
             self.signal_port_vars[index].set(signal.analog_port)
+            self.signal_role_vars[index].set(signal.pulseox_role)
 
         for index in range(len(profile.signal_configurations), MAX_SIGNAL_COUNT):
             default_signal = self.default_config.signal_configurations[index]
             self.signal_name_vars[index].set(default_signal.name)
             self.signal_preset_vars[index].set(default_signal.preset_name)
             self.signal_port_vars[index].set(default_signal.analog_port)
+            self.signal_role_vars[index].set(default_signal.pulseox_role)
 
         self.current_lab_var.set(f"Loaded lab: {profile.display_name}")
         self.firmware_summary_var.set(f"Firmware: {profile.firmware_label}. {profile.note}")
@@ -698,7 +719,7 @@ class StudentAcquisitionGui:
     def _selected_firmware_label(self) -> str:
         if self.current_lab_profile is not None:
             return self.current_lab_profile.firmware_label
-        return "UNO R4 WiFi Analog Bank Foundation"
+        return "Generated UNO R4 WiFi Acquisition Firmware"
 
     def _setup_arduino_cli(self) -> None:
         self._run_cli_task("Arduino CLI setup", self._setup_arduino_cli_task)
@@ -755,7 +776,21 @@ class StudentAcquisitionGui:
                 self.background_queue.put(("message", SessionMessage(level="error", text=f"{task_name} failed: {error}")))
             else:
                 self.background_queue.put(("message", SessionMessage(level="info", text=f"{task_name} finished.")))
-                if result and hasattr(result, "sample_rate_hz") and hasattr(result, "analog_ports"):
+                if result and getattr(result, "acquisition_class", "") == "PHASED_CYCLE":
+                    joined_ports = ", ".join(result.analog_ports)
+                    self.background_queue.put(
+                        (
+                            "message",
+                            SessionMessage(
+                                level="info",
+                                text=(
+                                    f"Generated PHASED_CYCLE Arduino code at {result.cycle_rate_hz} cycles/s "
+                                    f"({result.phase_rate_hz} phase samples/s) for ports {joined_ports}."
+                                ),
+                            ),
+                        )
+                    )
+                elif result and hasattr(result, "sample_rate_hz") and hasattr(result, "analog_ports"):
                     joined_ports = ", ".join(result.analog_ports)
                     self.background_queue.put(
                         (
@@ -772,7 +807,7 @@ class StudentAcquisitionGui:
                             "message",
                             SessionMessage(
                                 level="info",
-                                text="PulseOx LED cycle enabled: D6=RED, D5=IR, phases RED_ON/DARK1/IR_ON/DARK2.",
+                                text="PulseOx phased cycle enabled: D6=RED, D5=IR, PHASE packets plus corrected CYCLE packets.",
                             ),
                         )
                     )
@@ -810,6 +845,7 @@ class StudentAcquisitionGui:
                 name=self.signal_name_vars[index].get().strip(),
                 preset_name=self.signal_preset_vars[index].get(),
                 analog_port=self.signal_port_vars[index].get(),
+                pulseox_role=self.signal_role_vars[index].get(),
             )
             for index in range(signal_count)
         )
@@ -914,9 +950,11 @@ class StudentAcquisitionGui:
     def _update_signal_preset_info(self, row_index: int) -> None:
         preset_name = self.signal_preset_vars[row_index].get()
         info_label = self.signal_rows[row_index][1]
+        role_combo = self.signal_role_combos[row_index]
 
         if preset_name not in LAB_PRESETS:
             info_label.configure(text="Unknown preset")
+            role_combo.configure(state="disabled")
             return
 
         preset = get_preset(preset_name)
@@ -926,6 +964,19 @@ class StudentAcquisitionGui:
             else f"{preset.default_cycle_rate_hz} cycles/s"
         )
         packets = "/".join(preset.packet_types)
+        if preset_name == "PulseOx":
+            role_combo.configure(state="readonly")
+            role_text = self.signal_role_vars[row_index].get()
+            if role_text == PULSEOX_ROLE_AUTO:
+                role_note = "Choose RED or IR"
+            else:
+                role_note = f"Role: {role_text}"
+            info_label.configure(text=f"{preset.acquisition_class} | {rate_text} | {packets} | {role_note}")
+            return
+
+        if self.signal_role_vars[row_index].get() != PULSEOX_ROLE_AUTO:
+            self.signal_role_vars[row_index].set(PULSEOX_ROLE_AUTO)
+        role_combo.configure(state="disabled")
         info_label.configure(
             text=f"{preset.acquisition_class} | {rate_text} | {packets}",
         )
@@ -940,6 +991,7 @@ class StudentAcquisitionGui:
                     name=self.signal_name_vars[index].get().strip(),
                     preset_name=self.signal_preset_vars[index].get(),
                     analog_port=self.signal_port_vars[index].get(),
+                    pulseox_role=self.signal_role_vars[index].get(),
                 )
             )
 
@@ -1003,12 +1055,16 @@ class StudentAcquisitionGui:
             children = self.signal_rows[index][0].winfo_children()
             for widget in children:
                 if isinstance(widget, ttk.Combobox):
-                    widget.configure(state=combo_state)
+                    widget.configure(state="disabled" if running else combo_state)
                 elif isinstance(widget, ttk.Entry):
                     widget.configure(state=entry_state)
 
         self.start_button.configure(state="disabled" if running else "normal")
         self.stop_button.configure(state="normal" if running else "disabled")
+
+        if not running:
+            for index in range(MAX_SIGNAL_COUNT):
+                self._update_signal_preset_info(index)
 
     def _reset_plot(self, signal_configurations: tuple[SignalConfiguration, ...]) -> None:
         self.plot_time_s = deque(maxlen=2500)

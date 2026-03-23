@@ -72,18 +72,16 @@ Supported acquisition classes:
 - CONT_HIGH: high-rate continuous waveform acquisition
 - CONT_MED: medium-rate continuous waveform acquisition
 - PHASED_CYCLE: multi-phase acquisition where one final sample is reconstructed from several timed phases
-- PROC_CONT: continuous acquisition with procedure/state events
 
 Every lab must declare:
 - acquisition class
 - default sampling rate
 - packet types used
 - fields emitted
-- optional stage names
 - plotting defaults
 
 All serial packets must use a shared protocol with packet prefixes such as:
-META, DATA, PHASE, CYCLE, EVENT, STAT, ERR
+META, DATA, PHASE, CYCLE, STAT, ERR
 
 Keep student installation simple:
 - minimal dependencies

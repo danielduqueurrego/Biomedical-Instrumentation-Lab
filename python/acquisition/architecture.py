@@ -6,7 +6,6 @@ class AcquisitionClass(StrEnum):
     CONT_HIGH = "CONT_HIGH"
     CONT_MED = "CONT_MED"
     PHASED_CYCLE = "PHASED_CYCLE"
-    PROC_CONT = "PROC_CONT"
 
 
 @dataclass(frozen=True, slots=True)
@@ -45,12 +44,5 @@ PATTERN_DEFINITIONS = {
         primary_packets=("META", "PHASE", "CYCLE", "STAT", "ERR"),
         rate_guidance="Use when several timed phases produce one meaningful cycle result.",
         plotting_guidance="Plot corrected cycle values and keep raw phase logging available for review.",
-    ),
-    AcquisitionClass.PROC_CONT: PatternDefinition(
-        acquisition_class=AcquisitionClass.PROC_CONT,
-        summary="Continuous acquisition with procedure or state events.",
-        primary_packets=("META", "DATA", "EVENT", "STAT", "ERR"),
-        rate_guidance="Use when a waveform must be aligned with procedure stages.",
-        plotting_guidance="Plot the waveform and mark stage transitions from EVENT packets.",
     ),
 }

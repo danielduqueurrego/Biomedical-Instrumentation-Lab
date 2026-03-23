@@ -121,6 +121,7 @@ The first GUI allows students to:
 - use an auto-updated timestamp suffix in the output filename
 - choose between 1 and 6 active signals
 - assign a name, preset, and analog port to each active signal
+- assign a `PulseOx role` of `RED` or `IR` when the `PulseOx` preset is used
 - choose how many live subplots to display
 - choose which configured signals appear in each subplot
 - review preset sampling defaults
@@ -134,7 +135,11 @@ The GUI-generated firmware workflow:
 - uses the highest selected preset rate
 - emits only the selected analog ports
 - saves a timestamped copy of the compiled Arduino code for review
+- keeps Blood Pressure on the continuous `DATA` workflow
+- if the selected signals use the `PulseOx` preset, all active signals must be `PulseOx`
 - adds PulseOx LED sequencing on `D6` and `D5` when the `PulseOx` preset is used
+- emits raw `PHASE` packets and corrected `CYCLE` packets for PulseOx
+- saves PulseOx raw phases to `<output>_phase.csv` and corrected cycles to `<output>_cycle.csv`
 
 The live-plot workflow:
 - uses `S1` to `S6` as short signal labels in the plot-layout controls

@@ -26,10 +26,13 @@ class GeneratedCompileArtifact:
     sketch_dir: Path
     sketch_path: Path
     snapshot_path: Path
+    acquisition_class: str
     sample_rate_hz: int
     sample_period_us: int
     analog_ports: tuple[str, ...]
     uses_pulseox_led_cycle: bool
+    phase_rate_hz: int | None = None
+    cycle_rate_hz: int | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -253,10 +256,13 @@ class ArduinoCli:
             sketch_dir=generated_sketch.sketch_dir,
             sketch_path=generated_sketch.sketch_path,
             snapshot_path=snapshot_path,
+            acquisition_class=generated_sketch.acquisition_class,
             sample_rate_hz=generated_sketch.sample_rate_hz,
             sample_period_us=generated_sketch.sample_period_us,
             analog_ports=generated_sketch.analog_ports,
             uses_pulseox_led_cycle=generated_sketch.uses_pulseox_led_cycle,
+            phase_rate_hz=generated_sketch.phase_rate_hz,
+            cycle_rate_hz=generated_sketch.cycle_rate_hz,
         )
 
     def upload(self, sketch_dir: Path, fqbn: str, port: str, verbose: bool = False) -> None:

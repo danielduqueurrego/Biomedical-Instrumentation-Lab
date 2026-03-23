@@ -37,6 +37,7 @@ The GUI lets students:
 - choose a save folder and filename
 - choose 1 to 6 signals
 - assign each signal a name, preset, and analog port from `A0` to `A5`
+- assign a `PulseOx role` of `RED` or `IR` when using the `PulseOx` preset
 - review preset sampling defaults
 - start and stop acquisition
 - choose how many live subplots to show
@@ -50,7 +51,10 @@ Current toolbar behavior:
 - each lab profile loads the requested signal names and analog-port defaults
 - the GUI compile/upload path generates a shared UNO R4 analog capture sketch from the currently selected signals
 - the generated sketch uses only the selected analog ports and the highest selected preset rate
-- when any selected signal uses the `PulseOx` preset, the generated sketch also drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
+- Blood Pressure stays on the continuous `DATA` workflow
+- when the selected signals use the `PulseOx` preset, all active signals must be `PulseOx` signals
+- in PulseOx mode, the generated sketch drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
+- in PulseOx mode, the generated sketch emits raw `PHASE` packets and corrected `CYCLE` packets
 - each successful firmware compile saves a timestamped Arduino code copy named `arduino_code_YYYY_MM_DD_HH_MM_SS.ino` under `../data/arduino_code_snapshots/`
 
 Current live-plot behavior:
@@ -60,6 +64,7 @@ Current live-plot behavior:
 - the signal reference line above the plot explains which configured signal each `S#` label represents
 - the top toolbar can hide or restore the left setup panel and the bottom status log
 - subplot legends are shown on the left side of each graph so the newest signal updates remain easier to see on the right
+- PulseOx sessions plot corrected `CYCLE` values while raw `PHASE` values are still saved to CSV
 
 See also:
 - `../docs/generated_firmware_workflow.md`

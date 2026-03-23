@@ -4,6 +4,7 @@ Place medium-rate continuous waveform sketches here.
 
 Typical labs:
 - ECG
+- Blood Pressure
 - general analog streaming demos
 
 Expected packet mix:
@@ -24,3 +25,4 @@ GUI-generated behavior:
 - compile and upload a temporary Arduino sketch from the current GUI signal selection
 - use only the selected analog ports
 - set the sample rate to the highest selected preset rate
+- keep Blood Pressure on the same continuous `DATA` workflow

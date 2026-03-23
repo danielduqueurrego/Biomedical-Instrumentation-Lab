@@ -12,7 +12,6 @@ class SamplingPreset:
     packet_types: tuple[str, ...]
     default_fields: tuple[str, ...]
     plotting: PlotDefaults
-    stage_names: tuple[str, ...] = ()
     phase_names: tuple[str, ...] = ()
     notes: str = ""
 
@@ -51,14 +50,13 @@ LAB_PRESETS = {
     ),
     "Blood Pressure": SamplingPreset(
         lab_name="Blood Pressure",
-        acquisition_class=AcquisitionClass.PROC_CONT,
+        acquisition_class=AcquisitionClass.CONT_MED,
         default_sample_rate_hz=200,
         default_cycle_rate_hz=None,
-        packet_types=("META", "DATA", "EVENT", "STAT", "ERR"),
+        packet_types=("META", "DATA", "STAT", "ERR"),
         default_fields=("t_ms", "pressure"),
         plotting=PlotDefaults(history_seconds=20.0, update_interval_ms=200),
-        stage_names=("BASELINE", "INFLATE", "HOLD", "DEFLATE", "COMPLETE"),
-        notes="Procedure stages are emitted as EVENT packets alongside the waveform.",
+        notes="Blood pressure is treated as a continuous waveform lab with manual cuff control.",
     ),
 }
 
