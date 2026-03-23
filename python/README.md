@@ -19,6 +19,17 @@ This folder contains the shared Python acquisition code plus student-facing laun
 5. Run the system check:
    `python system_check.py`
 
+## Development checks (optional for contributors)
+Student setup stays minimal with `environment.yml`.
+
+If you are contributing and want local tests, from `python/` create the dev environment:
+- `conda env create -f environment-dev.yml`
+- `conda activate biomed-lab-dev`
+
+Run tests with either path style:
+- from repository root: `pytest -q python/tests`
+- from `python/`: `pytest -q tests`
+
 ## Main student GUI
 The first student-facing GUI is a shared Arduino UNO R4 WiFi acquisition app built around the six standard analog inputs `A0` to `A5`.
 
