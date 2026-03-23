@@ -65,7 +65,14 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
 )
 
-SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD,)
+UNO_R4_WIFI_CONT_HIGH_EMG_BOARD = BoardDefinition(
+    display_name="Arduino UNO R4 WiFi",
+    fqbn="arduino:renesas_uno:unor4wifi",
+    core="arduino:renesas_uno",
+    sketch_dir=REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference",
+)
+
+SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD, UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
 
 
@@ -291,10 +298,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
     compile_parser = subparsers.add_parser("compile-demo", help="Compile the CONT_MED UNO R4 analog-bank reference sketch.")
     compile_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
+    compile_cont_high_parser = subparsers.add_parser(
+        "compile-cont-high-emg",
+        help="Compile the CONT_HIGH UNO R4 EMG high-rate reference sketch.",
+    )
+    compile_cont_high_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
     upload_parser = subparsers.add_parser("upload-demo", help="Compile and upload the CONT_MED UNO R4 analog-bank sketch.")
     upload_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
     upload_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
     upload_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
+    upload_cont_high_parser = subparsers.add_parser(
+        "upload-cont-high-emg",
+        help="Compile and upload the CONT_HIGH UNO R4 EMG high-rate reference sketch.",
+    )
+    upload_cont_high_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
+    upload_cont_high_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
+    upload_cont_high_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
     return parser
 
@@ -323,6 +344,15 @@ def main() -> int:
             snapshot_dir = cli.compile(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, verbose=args.verbose)
             print("Compile finished.")
             print(f"Saved Arduino code copy to: {snapshot_dir}")
+        elif args.command == "compile-cont-high-emg":
+            print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+            snapshot_dir = cli.compile(
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                verbose=args.verbose,
+            )
+            print("Compile finished.")
+            print(f"Saved Arduino code copy to: {snapshot_dir}")
         elif args.command == "upload-demo":
             if not args.skip_compile:
                 print(f"Compiling {UNO_R4_WIFI_BOARD.sketch_dir.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
@@ -333,6 +363,26 @@ def main() -> int:
             selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
             print(f"Uploading {UNO_R4_WIFI_BOARD.sketch_dir.name} to {selected_port}...")
             cli.upload(UNO_R4_WIFI_BOARD.sketch_dir, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
+            print("Upload finished.")
+        elif args.command == "upload-cont-high-emg":
+            if not args.skip_compile:
+                print(f"Compiling {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} for {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn}...")
+                snapshot_dir = cli.compile(
+                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                    UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                    verbose=args.verbose,
+                )
+                print("Compile finished.")
+                print(f"Saved Arduino code copy to: {snapshot_dir}")
+
+            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_CONT_HIGH_EMG_BOARD)
+            print(f"Uploading {UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir.name} to {selected_port}...")
+            cli.upload(
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.sketch_dir,
+                UNO_R4_WIFI_CONT_HIGH_EMG_BOARD.fqbn,
+                selected_port,
+                verbose=args.verbose,
+            )
             print("Upload finished.")
         else:
             raise ArduinoCliError(f"Unsupported command: {args.command}")
