@@ -6,7 +6,8 @@ This folder contains the shared Python acquisition code plus student-facing laun
 - `acquisition/`: shared protocol, preset, serial, logging, and plotting helpers
 - `apps/`: student-facing apps built from the shared acquisition helpers
 - `run_*.py`: simple entry points for each app
-- `launch_*.sh` and `launch_*.bat`: beginner-friendly launcher scripts
+- `launch_*.sh` and `launch_*.bat`: fallback launchers inside `python/`
+- top-level `launch_student_gui_*`: primary beginner launchers for each OS
 
 ## Minimal setup
 1. Install a free Conda-based Python distribution such as Miniconda or Anaconda.
@@ -25,10 +26,20 @@ Before running the Python app, upload the matching firmware from the repository 
 - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
 - Windows: `tools\\upload_cont_med_three_channel.bat`
 
-Run it from this folder with:
+Primary beginner launch (run from repository root):
+- Linux: `./launch_student_gui_linux.sh`
+- macOS: `./launch_student_gui_macos.command`
+- Windows: `launch_student_gui_windows.bat`
+
+Fallback launchers from this `python` folder (older path kept for compatibility):
 - `python run_student_acquisition_gui.py`
 - `./launch_student_acquisition_gui.sh`
 - `launch_student_acquisition_gui.bat`
+
+If a launcher reports Conda or `biomed-lab` errors, fix setup with:
+1. `cd python`
+2. `conda env create -f environment.yml`
+3. return to repository root and re-run your OS launcher
 
 The GUI lets students:
 - use a top toolbar to load ready-made lab profiles for ECG, Pulse Oximetry, Blood Pressure, and EMG

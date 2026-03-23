@@ -13,7 +13,7 @@ After that, the intended workflow is:
 1. create one Conda environment,
 2. run one system check,
 3. compile or upload firmware from the GUI or Arduino CLI,
-4. launch the Python GUI,
+4. launch the Python GUI from a top-level starter script,
 5. save data automatically.
 
 ## Windows
@@ -33,15 +33,17 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
-   `tools\\setup_arduino_cli.bat`
+   `tools\setup_arduino_cli.bat`
 3. Upload the reference firmware:
-   `tools\\upload_cont_med_three_channel.bat`
-4. Go back to the `python` folder.
-5. Launch the GUI:
-   `launch_student_acquisition_gui.bat`
+   `tools\upload_cont_med_three_channel.bat`
+4. Launch the GUI from the repository root:
+   `launch_student_gui_windows.bat`
+
+If needed, the older fallback launcher still works from the `python` folder:
+- `python\launch_student_acquisition_gui.bat`
 
 ## macOS
 
@@ -60,15 +62,17 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
 3. Upload the reference firmware:
    `./tools/upload_cont_med_three_channel.sh`
-4. Go back to the `python` folder.
-5. Launch the GUI:
-   `./launch_student_acquisition_gui.sh`
+4. Launch the GUI from the repository root:
+   `./launch_student_gui_macos.command`
+
+If needed, the older fallback launcher still works from the `python` folder:
+- `./python/launch_student_acquisition_gui.sh`
 
 ## Linux
 
@@ -88,15 +92,26 @@ After that, the intended workflow is:
 5. Run the system check:
    `python system_check.py`
 
-### First run
+### First run (primary beginner path)
 1. Go to the repository root.
 2. Prepare Arduino CLI once:
    `./tools/setup_arduino_cli.sh`
 3. Upload the reference firmware:
    `./tools/upload_cont_med_three_channel.sh`
-4. Go back to the `python` folder.
-5. Launch the GUI:
-   `./launch_student_acquisition_gui.sh`
+4. Launch the GUI from the repository root:
+   `./launch_student_gui_linux.sh`
+
+If needed, the older fallback launcher still works from the `python` folder:
+- `./python/launch_student_acquisition_gui.sh`
+
+## If a launcher reports Conda errors
+
+The new top-level launchers check for Conda and the `biomed-lab` environment before opening the GUI.
+If a launcher says Conda or the environment is missing, run these exact commands:
+
+1. `cd python`
+2. `conda env create -f environment.yml`
+3. return to repository root and run your OS launcher again
 
 ## What the system check verifies
 
