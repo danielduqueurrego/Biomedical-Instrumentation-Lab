@@ -25,13 +25,16 @@ After that, the intended workflow is:
 
 ### Project setup
 1. Open Command Prompt or PowerShell.
-2. Go to the repository `python` folder.
+2. Go to the repository root, then enter `python`:
+   `cd python`
 3. Create the Conda environment:
    `conda env create -f environment.yml`
 4. Activate it:
    `conda activate biomed-lab`
 5. Run the system check:
    `python system_check.py`
+6. Return to the repository root before first run:
+   `cd ..`
 
 ### First run (primary beginner path)
 1. Go to the repository root.
@@ -42,15 +45,14 @@ After that, the intended workflow is:
 4. Launch the GUI from the repository root:
    `launch_student_gui_windows.bat`
 
-If needed, the older fallback launcher still works from the `python` folder:
-- `python\launch_student_acquisition_gui.bat`
-   `tools\\setup_arduino_cli.bat`
-3. Upload a reference firmware (choose one):
-   `tools\\upload_cont_med_three_channel.bat`
-   `tools\\upload_cont_high_emg_reference.bat`
-4. Go back to the `python` folder.
-5. Launch the GUI:
+### Fallback / advanced launch path
+If needed, the older launcher still works from the `python` folder:
+1. From the repository root, enter `python`:
+   `cd python`
+2. Launch the GUI:
    `launch_student_acquisition_gui.bat`
+3. Return to the repository root when finished:
+   `cd ..`
 
 ## macOS
 
@@ -61,13 +63,16 @@ If needed, the older fallback launcher still works from the `python` folder:
 
 ### Project setup
 1. Open Terminal.
-2. Go to the repository `python` folder.
+2. Go to the repository root, then enter `python`:
+   `cd python`
 3. Create the Conda environment:
    `conda env create -f environment.yml`
 4. Activate it:
    `conda activate biomed-lab`
 5. Run the system check:
    `python system_check.py`
+6. Return to the repository root before first run:
+   `cd ..`
 
 ### First run (primary beginner path)
 1. Go to the repository root.
@@ -76,9 +81,17 @@ If needed, the older fallback launcher still works from the `python` folder:
 3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
    `./tools/upload_cont_high_emg_reference.sh`
-4. Go back to the `python` folder.
-5. Launch the GUI:
+4. Launch the GUI from the repository root:
+   `./launch_student_gui_macos.command`
+
+### Fallback / advanced launch path
+If needed, the older launcher still works from the `python` folder:
+1. From the repository root, enter `python`:
+   `cd python`
+2. Launch the GUI:
    `./launch_student_acquisition_gui.sh`
+3. Return to the repository root when finished:
+   `cd ..`
 
 ## Linux
 
@@ -90,13 +103,16 @@ If needed, the older fallback launcher still works from the `python` folder:
 
 ### Project setup
 1. Open Terminal.
-2. Go to the repository `python` folder.
+2. Go to the repository root, then enter `python`:
+   `cd python`
 3. Create the Conda environment:
    `conda env create -f environment.yml`
 4. Activate it:
    `conda activate biomed-lab`
 5. Run the system check:
    `python system_check.py`
+6. Return to the repository root before first run:
+   `cd ..`
 
 ### First run (primary beginner path)
 1. Go to the repository root.
@@ -105,9 +121,17 @@ If needed, the older fallback launcher still works from the `python` folder:
 3. Upload a reference firmware (choose one):
    `./tools/upload_cont_med_three_channel.sh`
    `./tools/upload_cont_high_emg_reference.sh`
-4. Go back to the `python` folder.
-5. Launch the GUI:
+4. Launch the GUI from the repository root:
+   `./launch_student_gui_linux.sh`
+
+### Fallback / advanced launch path
+If needed, the older launcher still works from the `python` folder:
+1. From the repository root, enter `python`:
+   `cd python`
+2. Launch the GUI:
    `./launch_student_acquisition_gui.sh`
+3. Return to the repository root when finished:
+   `cd ..`
 
 ## What the system check verifies
 
@@ -119,7 +143,10 @@ The system check script verifies:
 - visible serial ports
 
 Run it with:
-- `python system_check.py`
+- from the repository root:
+  - `cd python`
+  - `python system_check.py`
+  - `cd ..`
 
 ## What the first GUI supports
 
