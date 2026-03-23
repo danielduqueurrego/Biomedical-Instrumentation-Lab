@@ -107,11 +107,15 @@ If needed, the older fallback launcher still works from the `python` folder:
 ## If a launcher reports Conda errors
 
 The new top-level launchers check for Conda and the `biomed-lab` environment before opening the GUI.
+They first look on your terminal `PATH`, then check common Conda install folders.
+
 If a launcher says Conda or the environment is missing, run these exact commands:
 
 1. `cd python`
 2. `conda env create -f environment.yml`
 3. return to repository root and run your OS launcher again
+
+If Conda is installed but still not found, close and reopen your terminal, then try the launcher again.
 
 ## What the system check verifies
 

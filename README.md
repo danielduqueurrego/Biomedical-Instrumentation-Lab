@@ -36,3 +36,8 @@ Each successful firmware compile also saves a timestamped Arduino code copy unde
 Python student entry points:
 - `python/system_check.py`
 - `python/run_student_acquisition_gui.py`
+
+Top-level student GUI launchers:
+- Linux: `./launch_student_gui_linux.sh`
+- macOS: `./launch_student_gui_macos.command`
+- Windows: `launch_student_gui_windows.bat`

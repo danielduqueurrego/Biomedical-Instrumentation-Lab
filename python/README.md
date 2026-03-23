@@ -36,6 +36,8 @@ Fallback launchers from this `python` folder (older path kept for compatibility)
 - `./launch_student_acquisition_gui.sh`
 - `launch_student_acquisition_gui.bat`
 
+The new top-level launchers check PATH first and then common Conda install locations.
+
 If a launcher reports Conda or `biomed-lab` errors, fix setup with:
 1. `cd python`
 2. `conda env create -f environment.yml`
