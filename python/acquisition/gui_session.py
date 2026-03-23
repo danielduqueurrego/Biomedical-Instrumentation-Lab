@@ -39,11 +39,7 @@ from acquisition.protocol import (
 )
 from acquisition.serial_tools import open_serial_connection
 from acquisition.session_logging import (
-    CycleCsvLogger,
-    DataCsvLogger,
-    MetadataLogger,
-    ParseErrorLogger,
-    PhaseCsvLogger,
+    SessionCsvLogger,
     create_named_session_paths,
 )
 
@@ -108,11 +104,7 @@ class GuiAcquisitionSession:
         self.reader_error: Exception | None = None
 
         self.serial_connection: serial.Serial | None = None
-        self.data_logger: DataCsvLogger | None = None
-        self.phase_logger: PhaseCsvLogger | None = None
-        self.cycle_logger: CycleCsvLogger | None = None
-        self.metadata_logger: MetadataLogger | None = None
-        self.parse_error_logger: ParseErrorLogger | None = None
+        self.session_logger: SessionCsvLogger | None = None
         self.running = False
 
     def start(self) -> None:
@@ -124,14 +116,17 @@ class GuiAcquisitionSession:
 
         try:
             self.serial_connection = open_serial_connection(self.config.port, self.config.baud_rate)
-            self.metadata_logger = MetadataLogger(session_paths.metadata_csv_path)
-            self.parse_error_logger = ParseErrorLogger(session_paths.parse_errors_path)
-
             if self.is_phased_cycle:
-                self.phase_logger = PhaseCsvLogger(session_paths.phase_csv_path, self.phase_value_fields)
-                self.cycle_logger = CycleCsvLogger(session_paths.cycle_csv_path, self.cycle_value_fields)
+                self.session_logger = SessionCsvLogger(
+                    session_paths.session_csv_path,
+                    phase_value_headers=tuple(signal.name.strip() for signal in self.config.signal_configurations),
+                    cycle_value_headers=self.plot_series_names,
+                )
             else:
-                self.data_logger = DataCsvLogger(session_paths.data_csv_path, self.selected_field_names)
+                self.session_logger = SessionCsvLogger(
+                    session_paths.session_csv_path,
+                    data_value_headers=self.selected_field_names[1:],
+                )
 
             self._write_session_metadata()
 
@@ -146,15 +141,12 @@ class GuiAcquisitionSession:
         if self.is_phased_cycle:
             self._publish_message(
                 "info",
-                (
-                    f"Started PHASED_CYCLE acquisition on {self.config.port}. "
-                    f"Saving phases to {session_paths.phase_csv_path.name} and cycles to {session_paths.cycle_csv_path.name}."
-                ),
+                f"Started PHASED_CYCLE acquisition on {self.config.port}. Saving to {session_paths.session_csv_path.name}.",
             )
         else:
             self._publish_message(
                 "info",
-                f"Started acquisition on {self.config.port}. Saving to {session_paths.data_csv_path.name}",
+                f"Started acquisition on {self.config.port}. Saving to {session_paths.session_csv_path.name}",
             )
 
     def stop(self) -> None:
@@ -173,32 +165,33 @@ class GuiAcquisitionSession:
         return self.running
 
     def _write_session_metadata(self) -> None:
-        assert self.metadata_logger is not None
+        assert self.session_logger is not None
 
         host_time_iso = datetime.now(timezone.utc).isoformat()
+        host_time_unix_s = time.time()
         if self.is_phased_cycle:
             acquisition_class = "PHASED_CYCLE"
         else:
             acquisition_class = self.continuous_acquisition_class
-        self.metadata_logger.write_meta(host_time_iso, "acquisition_class", (acquisition_class,))
-        self.metadata_logger.write_meta(host_time_iso, "board_name", (self.config.board_name,))
-        self.metadata_logger.write_meta(host_time_iso, "board_fqbn", (self.config.board_fqbn,))
-        self.metadata_logger.write_meta(host_time_iso, "selected_port", (self.config.port,))
-        self.metadata_logger.write_meta(host_time_iso, "baud_rate", (str(self.config.baud_rate),))
-        self.metadata_logger.write_meta(host_time_iso, "available_analog_ports", UNO_R4_ANALOG_PORTS)
-        self.metadata_logger.write_meta(host_time_iso, "selected_analog_ports", self.selected_analog_ports)
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "acquisition_class", (acquisition_class,))
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "board_name", (self.config.board_name,))
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "board_fqbn", (self.config.board_fqbn,))
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "selected_port", (self.config.port,))
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "baud_rate", (str(self.config.baud_rate),))
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "available_analog_ports", UNO_R4_ANALOG_PORTS)
+        self.session_logger.write_meta(host_time_iso, host_time_unix_s, "selected_analog_ports", self.selected_analog_ports)
 
         if self.is_phased_cycle:
-            self.metadata_logger.write_meta(host_time_iso, "pulseox_analog_map", PULSEOX_ANALOG_MAP_FIELDS)
-            self.metadata_logger.write_meta(host_time_iso, "expected_phase_fields", self.expected_phase_fields)
-            self.metadata_logger.write_meta(host_time_iso, "expected_cycle_fields", self.expected_cycle_fields)
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, "pulseox_analog_map", PULSEOX_ANALOG_MAP_FIELDS)
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, "expected_phase_fields", self.expected_phase_fields)
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, "expected_cycle_fields", self.expected_cycle_fields)
         else:
-            self.metadata_logger.write_meta(host_time_iso, "selected_fields", self.selected_field_names)
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, "selected_fields", self.selected_field_names)
 
         for index, signal in enumerate(self.config.signal_configurations, start=1):
-            self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_name", (signal.name.strip(),))
-            self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_preset", (signal.preset_name,))
-            self.metadata_logger.write_meta(host_time_iso, f"signal_{index}_analog_port", (signal.analog_port,))
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, f"signal_{index}_name", (signal.name.strip(),))
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, f"signal_{index}_preset", (signal.preset_name,))
+            self.session_logger.write_meta(host_time_iso, host_time_unix_s, f"signal_{index}_analog_port", (signal.analog_port,))
 
     def _close_resources(self) -> None:
         with self.shutdown_lock:
@@ -210,32 +203,15 @@ class GuiAcquisitionSession:
                     pass
                 self.serial_connection = None
 
-            if self.data_logger is not None:
-                self.data_logger.close()
-                self.data_logger = None
-
-            if self.phase_logger is not None:
-                self.phase_logger.close()
-                self.phase_logger = None
-
-            if self.cycle_logger is not None:
-                self.cycle_logger.close()
-                self.cycle_logger = None
-
-            if self.metadata_logger is not None:
-                self.metadata_logger.close()
-                self.metadata_logger = None
-
-            if self.parse_error_logger is not None:
-                self.parse_error_logger.close()
-                self.parse_error_logger = None
+            if self.session_logger is not None:
+                self.session_logger.close()
+                self.session_logger = None
 
             self.running = False
 
     def _reader_loop(self) -> None:
         assert self.serial_connection is not None
-        assert self.metadata_logger is not None
-        assert self.parse_error_logger is not None
+        assert self.session_logger is not None
 
         try:
             while not self.stop_event.is_set():
@@ -260,7 +236,7 @@ class GuiAcquisitionSession:
                 try:
                     packet = parse_csv_packet(raw_line, host_time_iso, host_time_unix_s)
                 except PacketParseError as error:
-                    self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+                    self.session_logger.write_error(host_time_iso, host_time_unix_s, str(error), error.raw_line)
                     continue
 
                 if packet.packet_type == PACKET_TYPE_META:
@@ -268,11 +244,18 @@ class GuiAcquisitionSession:
                     continue
 
                 if packet.packet_type == PACKET_TYPE_STAT:
-                    self.metadata_logger.write_meta(host_time_iso, "stat_packet", packet.payload)
+                    self.session_logger.write_stat(host_time_iso, host_time_unix_s, packet.payload, packet.raw_line)
                     continue
 
                 if packet.packet_type == PACKET_TYPE_ERR:
-                    self.parse_error_logger.write_error(host_time_iso, "Device ERR packet", packet.raw_line)
+                    self.session_logger.write_error(
+                        host_time_iso,
+                        host_time_unix_s,
+                        "Device ERR packet",
+                        packet.raw_line,
+                        row_type="ERR",
+                        packet_type=PACKET_TYPE_ERR,
+                    )
                     self._publish_message("error", f"Device error: {packet.raw_line}")
                     continue
 
@@ -287,40 +270,42 @@ class GuiAcquisitionSession:
             self._close_resources()
 
     def _handle_meta_packet(self, packet, host_time_iso: str) -> None:
-        assert self.metadata_logger is not None
-        assert self.parse_error_logger is not None
+        assert self.session_logger is not None
 
         key, values = parse_meta_packet(packet)
-        self.metadata_logger.write_meta(host_time_iso, key, values)
+        self.session_logger.write_meta(host_time_iso, packet.host_time_unix_s, key, values, raw_line=packet.raw_line)
 
         if not self.is_phased_cycle and key == "fields" and tuple(values) != self.expected_data_fields:
-            self.parse_error_logger.write_error(
+            self.session_logger.write_error(
                 host_time_iso,
+                packet.host_time_unix_s,
                 f"Unexpected DATA field layout {values}. Expected {self.expected_data_fields}.",
                 packet.raw_line,
             )
 
         if self.is_phased_cycle and key == "phase_fields" and tuple(values) != self.expected_phase_fields:
-            self.parse_error_logger.write_error(
+            self.session_logger.write_error(
                 host_time_iso,
+                packet.host_time_unix_s,
                 f"Unexpected PHASE field layout {values}. Expected {self.expected_phase_fields}.",
                 packet.raw_line,
             )
 
         if self.is_phased_cycle and key == "cycle_fields" and tuple(values) != self.expected_cycle_fields:
-            self.parse_error_logger.write_error(
+            self.session_logger.write_error(
                 host_time_iso,
+                packet.host_time_unix_s,
                 f"Unexpected CYCLE field layout {values}. Expected {self.expected_cycle_fields}.",
                 packet.raw_line,
             )
 
     def _handle_continuous_packet(self, packet, host_time_iso: str) -> None:
-        assert self.data_logger is not None
-        assert self.parse_error_logger is not None
+        assert self.session_logger is not None
 
         if packet.packet_type != PACKET_TYPE_DATA:
-            self.parse_error_logger.write_error(
+            self.session_logger.write_error(
                 host_time_iso,
+                packet.host_time_unix_s,
                 f"Unexpected packet type {packet.packet_type!r} for the continuous GUI workflow.",
                 packet.raw_line,
             )
@@ -329,7 +314,7 @@ class GuiAcquisitionSession:
         try:
             incoming_packet = parse_data_packet(packet, self.expected_data_fields)
         except PacketParseError as error:
-            self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+            self.session_logger.write_error(host_time_iso, packet.host_time_unix_s, str(error), error.raw_line)
             return
 
         logged_packet = DataPacket(
@@ -341,32 +326,30 @@ class GuiAcquisitionSession:
             values=incoming_packet.values,
             raw_line=incoming_packet.raw_line,
         )
-        self.data_logger.write_sample(logged_packet)
+        self.session_logger.write_data(logged_packet)
         self.sample_queue.put(SessionSample(device_time_us=logged_packet.device_time_us, values=logged_packet.values))
 
     def _handle_phased_cycle_packet(self, packet, host_time_iso: str) -> None:
-        assert self.phase_logger is not None
-        assert self.cycle_logger is not None
-        assert self.parse_error_logger is not None
+        assert self.session_logger is not None
 
         if packet.packet_type == PACKET_TYPE_PHASE:
             try:
                 phase_packet = parse_phase_packet(packet, self.phase_value_fields)
             except PacketParseError as error:
-                self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+                self.session_logger.write_error(host_time_iso, packet.host_time_unix_s, str(error), error.raw_line)
                 return
 
-            self.phase_logger.write_phase(phase_packet)
+            self.session_logger.write_phase(phase_packet)
             return
 
         if packet.packet_type == PACKET_TYPE_CYCLE:
             try:
                 cycle_packet = parse_cycle_packet(packet, self.cycle_value_fields)
             except PacketParseError as error:
-                self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+                self.session_logger.write_error(host_time_iso, packet.host_time_unix_s, str(error), error.raw_line)
                 return
 
-            self.cycle_logger.write_cycle(cycle_packet)
+            self.session_logger.write_cycle(cycle_packet)
             self.sample_queue.put(
                 SessionSample(
                     device_time_us=cycle_packet.device_time_us,
@@ -375,8 +358,9 @@ class GuiAcquisitionSession:
             )
             return
 
-        self.parse_error_logger.write_error(
+        self.session_logger.write_error(
             host_time_iso,
+            packet.host_time_unix_s,
             f"Unexpected packet type {packet.packet_type!r} for the PHASED_CYCLE GUI workflow.",
             packet.raw_line,
         )

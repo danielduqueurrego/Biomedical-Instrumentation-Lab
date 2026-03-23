@@ -49,14 +49,12 @@ The GUI will generate the Arduino code from the current signal selection and the
 
 ## Expected output files
 
-Continuous ECG sessions create:
-- `<output>_data.csv`
-- `<output>_metadata.csv`
-- `<output>_errors.log`
+Continuous ECG sessions create one file:
+- `<output>.csv`
 
 Notes:
-- `<output>_data.csv` stores both host timestamps and Arduino `t_ms`
-- the GUI does not create PulseOx-style `_phase.csv` or `_cycle.csv` files for ECG
+- `<output>.csv` stores `META`, `DATA`, and any error rows together
+- ECG `DATA` rows store both host timestamps and Arduino `t_ms`
 
 ## Common troubleshooting
 
@@ -65,11 +63,11 @@ Notes:
 - Comparator output looks flat:
   Verify the comparator channel is actually wired to `A2`.
 - Sampling looks slower than expected:
-  Check `<output>_metadata.csv` for the declared `CONT_MED` rate and use the hardware validation checklist.
+  Check the `META` rows in `<output>.csv` for the declared `CONT_MED` rate and use the hardware validation checklist.
 - File overwrite warning appears:
   Stop acquisition and use the auto-refreshed timestamped output basename.
 - Parse errors appear:
-  Inspect `<output>_errors.log` for malformed lines or unexpected text.
+  Inspect the `PARSE_ERROR` or `ERR` rows in `<output>.csv`.
 
 ## Suggested screenshots
 

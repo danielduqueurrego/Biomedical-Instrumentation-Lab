@@ -70,15 +70,14 @@ The GUI-generated firmware will:
 
 ## Expected output files
 
-PulseOx sessions create:
-- `<output>_phase.csv`
-- `<output>_cycle.csv`
-- `<output>_metadata.csv`
-- `<output>_errors.log`
+PulseOx sessions create one file:
+- `<output>.csv`
 
 Notes:
-- `<output>_phase.csv` stores raw phase samples for all four channels
-- `<output>_cycle.csv` stores corrected red and IR outputs by optical path and signal path
+- `PHASE` rows in `<output>.csv` store raw phase samples for all four channels
+- `CYCLE` rows in `<output>.csv` store corrected red and IR outputs by optical path and signal path
+- `META`, `STAT`, `ERR`, and `PARSE_ERROR` rows are stored in the same session CSV
+- the session CSV uses readable PulseOx column labels derived from the configured channel names
 - the live plot shows corrected `CYCLE` values, not every raw phase sample
 - the live plot labels are derived from the four configured left-panel channels, with `RED corrected` and `IR corrected` suffixes
 
@@ -89,7 +88,7 @@ Notes:
 - Red and IR seem mixed up:
   Check the LED wiring on `D6` and `D5`. Red versus IR comes from phase timing, not from separate analog pins.
 - No corrected cycle plot appears:
-  Confirm the session is logging both `PHASE` and `CYCLE` packets and inspect `<output>_errors.log`.
+  Confirm the session CSV contains both `PHASE` and `CYCLE` rows and inspect any `PARSE_ERROR` or `ERR` rows.
 - Signals are noisy or close to zero:
   Check the photodiode board power, LED wiring, and optical alignment.
 - Packet layout mismatch appears in logs:

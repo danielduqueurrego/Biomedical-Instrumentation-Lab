@@ -20,7 +20,7 @@ from acquisition.protocol import (
     parse_meta_packet,
 )
 from acquisition.serial_tools import DEFAULT_BAUD_RATE, choose_serial_port, open_serial_connection
-from acquisition.session_logging import DataCsvLogger, MetadataLogger, ParseErrorLogger, create_session_paths
+from acquisition.session_logging import SessionCsvLogger, create_session_paths
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -45,9 +45,7 @@ class ContMedThreeChannelApp:
         self.session_paths = create_session_paths(args.output_dir)
         self.expected_data_fields = UNO_R4_ANALOG_BANK_FIELDS
         self.selected_field_names = DEFAULT_THREE_CHANNEL_FIELDS
-        self.csv_logger = DataCsvLogger(self.session_paths.data_csv_path, self.selected_field_names)
-        self.metadata_logger = MetadataLogger(self.session_paths.metadata_csv_path)
-        self.parse_error_logger = ParseErrorLogger(self.session_paths.parse_errors_path)
+        self.csv_logger = SessionCsvLogger(self.session_paths.session_csv_path, data_value_headers=self.selected_field_names[1:])
 
         self.plotter = ThreeChannelLivePlot(
             packet_queue=self.packet_queue,
@@ -61,9 +59,7 @@ class ContMedThreeChannelApp:
         self.reader_thread.start()
 
         print(f"Connected to {self.serial_port_name} at {self.args.baud_rate} baud.")
-        print(f"Saving data CSV to: {self.session_paths.data_csv_path}")
-        print(f"Saving metadata CSV to: {self.session_paths.metadata_csv_path}")
-        print(f"Saving parse errors to: {self.session_paths.parse_errors_path}")
+        print(f"Saving session CSV to: {self.session_paths.session_csv_path}")
         print("Close the plot window to stop acquisition.")
 
         try:
@@ -101,8 +97,6 @@ class ContMedThreeChannelApp:
                 pass
 
             self.csv_logger.close()
-            self.metadata_logger.close()
-            self.parse_error_logger.close()
             self.resources_closed = True
 
     def _reader_loop(self) -> None:
@@ -132,24 +126,26 @@ class ContMedThreeChannelApp:
                     host_time_unix_s=host_time_unix_s,
                 )
             except PacketParseError as error:
-                self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+                self.csv_logger.write_error(host_time_iso, host_time_unix_s, str(error), error.raw_line)
                 continue
 
             if packet.packet_type == PACKET_TYPE_META:
                 key, values = parse_meta_packet(packet)
-                self.metadata_logger.write_meta(host_time_iso, key, values)
+                self.csv_logger.write_meta(host_time_iso, host_time_unix_s, key, values, raw_line=packet.raw_line)
 
                 if key == "fields" and tuple(values) != self.expected_data_fields:
-                    self.parse_error_logger.write_error(
+                    self.csv_logger.write_error(
                         host_time_iso,
+                        host_time_unix_s,
                         f"Unexpected DATA field layout {values}. Expected {self.expected_data_fields}.",
                         packet.raw_line,
                     )
                 continue
 
             if packet.packet_type != PACKET_TYPE_DATA:
-                self.parse_error_logger.write_error(
+                self.csv_logger.write_error(
                     host_time_iso,
+                    host_time_unix_s,
                     f"Unexpected packet type {packet.packet_type!r} for the CONT_MED A0-A2 reference app.",
                     packet.raw_line,
                 )
@@ -158,7 +154,7 @@ class ContMedThreeChannelApp:
             try:
                 incoming_packet = parse_data_packet(packet, self.expected_data_fields)
             except PacketParseError as error:
-                self.parse_error_logger.write_error(host_time_iso, str(error), error.raw_line)
+                self.csv_logger.write_error(host_time_iso, host_time_unix_s, str(error), error.raw_line)
                 continue
 
             data_packet = DataPacket(
@@ -170,7 +166,7 @@ class ContMedThreeChannelApp:
                 values=incoming_packet.values[:3],
                 raw_line=incoming_packet.raw_line,
             )
-            self.csv_logger.write_sample(data_packet)
+            self.csv_logger.write_data(data_packet)
             self.packet_queue.put(data_packet)
 
 

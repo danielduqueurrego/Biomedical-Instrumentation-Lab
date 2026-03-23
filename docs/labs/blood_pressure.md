@@ -56,13 +56,12 @@ The GUI will generate the Arduino code from the current signal selection and the
 
 ## Expected output files
 
-Blood Pressure sessions create:
-- `<output>_data.csv`
-- `<output>_metadata.csv`
-- `<output>_errors.log`
+Blood Pressure sessions create one file:
+- `<output>.csv`
 
 Notes:
-- `<output>_data.csv` stores both host timestamps and Arduino `t_ms`
+- `<output>.csv` stores `META`, `DATA`, and any error rows together
+- Blood Pressure `DATA` rows store both host timestamps and Arduino `t_ms`
 - the output stays on the continuous `DATA` workflow during manual cuff inflation and deflation
 
 ## Common troubleshooting
@@ -74,7 +73,7 @@ Notes:
 - Students started too early or too late:
   Note the timing in bench notes and repeat the capture rather than editing timestamps by hand.
 - Serial drops during the procedure:
-  Inspect `<output>_errors.log` and repeat the session with a shorter USB cable if needed.
+  Inspect `PARSE_ERROR` or `ERR` rows in `<output>.csv` and repeat the session with a shorter USB cable if needed.
 - Board detection fails:
   Confirm the Arduino UNO R4 WiFi is still present in Arduino CLI and click `Refresh Ports`.
 

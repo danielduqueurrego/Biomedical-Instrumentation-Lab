@@ -53,14 +53,13 @@ For the normal student workflow, prefer the GUI lab profile or GUI preset.
 
 ## Expected output files
 
-Continuous EMG sessions create:
-- `<output>_data.csv`
-- `<output>_metadata.csv`
-- `<output>_errors.log`
+Continuous EMG sessions create one file:
+- `<output>.csv`
 
 Notes:
-- `<output>_data.csv` stores both host timestamps and Arduino `t_us`
-- `<output>_errors.log` should stay empty during a healthy session
+- `<output>.csv` stores `META`, `DATA`, and any error rows together
+- EMG `DATA` rows store both host timestamps and Arduino `t_us`
+- `PARSE_ERROR` and `ERR` rows should stay absent during a healthy session
 
 ## Common troubleshooting
 
@@ -69,11 +68,11 @@ Notes:
 - Upload fails on Linux:
   Confirm the user has serial-port permission such as `dialout`.
 - Plot looks frozen:
-  Confirm acquisition actually started and check whether `<output>_data.csv` is growing.
+  Confirm acquisition actually started and check whether `<output>.csv` is growing with new `DATA` rows.
 - Signals look swapped:
   Re-check the board wiring against `A0` to `A3`.
 - Parsing errors appear:
-  Open `<output>_errors.log` and check whether unexpected serial text or malformed packets were received.
+  Open `<output>.csv` and check whether `PARSE_ERROR` rows contain unexpected serial text or malformed packets.
 
 ## Suggested screenshots
 

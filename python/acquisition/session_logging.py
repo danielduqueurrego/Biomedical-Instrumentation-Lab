@@ -10,22 +10,14 @@ from acquisition.protocol import CyclePacket, DataPacket, PhasePacket
 @dataclass(slots=True)
 class SessionPaths:
     session_dir: Path
-    data_csv_path: Path
-    cycle_csv_path: Path
-    phase_csv_path: Path
-    metadata_csv_path: Path
-    parse_errors_path: Path
+    session_csv_path: Path
 
 
 @dataclass(slots=True)
 class NamedSessionPaths:
     output_dir: Path
     output_basename: str
-    data_csv_path: Path
-    cycle_csv_path: Path
-    phase_csv_path: Path
-    metadata_csv_path: Path
-    parse_errors_path: Path
+    session_csv_path: Path
 
 
 def create_session_paths(base_output_dir: Path) -> SessionPaths:
@@ -35,11 +27,7 @@ def create_session_paths(base_output_dir: Path) -> SessionPaths:
 
     return SessionPaths(
         session_dir=session_dir,
-        data_csv_path=session_dir / "data_samples.csv",
-        cycle_csv_path=session_dir / "cycle_samples.csv",
-        phase_csv_path=session_dir / "phase_samples.csv",
-        metadata_csv_path=session_dir / "metadata.csv",
-        parse_errors_path=session_dir / "parse_errors.log",
+        session_csv_path=session_dir / "session.csv",
     )
 
 
@@ -56,24 +44,10 @@ def create_named_session_paths(output_dir: Path, output_basename: str) -> NamedS
     paths = NamedSessionPaths(
         output_dir=output_dir,
         output_basename=safe_basename,
-        data_csv_path=output_dir / f"{safe_basename}_data.csv",
-        cycle_csv_path=output_dir / f"{safe_basename}_cycle.csv",
-        phase_csv_path=output_dir / f"{safe_basename}_phase.csv",
-        metadata_csv_path=output_dir / f"{safe_basename}_metadata.csv",
-        parse_errors_path=output_dir / f"{safe_basename}_errors.log",
+        session_csv_path=output_dir / f"{safe_basename}.csv",
     )
 
-    existing_paths = [
-        path.name
-        for path in (
-            paths.data_csv_path,
-            paths.cycle_csv_path,
-            paths.phase_csv_path,
-            paths.metadata_csv_path,
-            paths.parse_errors_path,
-        )
-        if path.exists()
-    ]
+    existing_paths = [paths.session_csv_path.name] if paths.session_csv_path.exists() else []
     if existing_paths:
         joined = ", ".join(existing_paths)
         raise FileExistsError(
@@ -81,6 +55,180 @@ def create_named_session_paths(output_dir: Path, output_basename: str) -> NamedS
         )
 
     return paths
+
+
+class SessionCsvLogger:
+    """Write one student-facing CSV per session, regardless of acquisition mode."""
+
+    BASE_COLUMNS = (
+        "row_type",
+        "packet_type",
+        "host_time_iso",
+        "host_time_unix_s",
+        "device_timestamp_field",
+        "device_timestamp",
+        "cycle_idx",
+        "phase",
+        "meta_key",
+        "meta_values",
+        "error_message",
+        "raw_line",
+    )
+
+    def __init__(
+        self,
+        csv_path: Path,
+        data_value_headers: tuple[str, ...] = (),
+        phase_value_headers: tuple[str, ...] = (),
+        cycle_value_headers: tuple[str, ...] = (),
+    ):
+        self.csv_path = csv_path
+        self.data_value_headers = data_value_headers
+        self.phase_value_headers = phase_value_headers
+        self.cycle_value_headers = cycle_value_headers
+        self._file = csv_path.open("w", newline="", encoding="utf-8")
+        self._writer = csv.writer(self._file)
+        self._writer.writerow(
+            [
+                *self.BASE_COLUMNS,
+                *self.data_value_headers,
+                *self.phase_value_headers,
+                *self.cycle_value_headers,
+            ]
+        )
+        self._file.flush()
+
+    def _write_row(
+        self,
+        *,
+        row_type: str,
+        packet_type: str = "",
+        host_time_iso: str,
+        host_time_unix_s: float | str = "",
+        device_timestamp_field: str = "",
+        device_timestamp: int | str = "",
+        cycle_idx: int | str = "",
+        phase: str = "",
+        meta_key: str = "",
+        meta_values: tuple[str, ...] | str = "",
+        error_message: str = "",
+        raw_line: str = "",
+        data_values: tuple[int, ...] = (),
+        phase_values: tuple[int, ...] = (),
+        cycle_values: tuple[int, ...] = (),
+    ) -> None:
+        meta_text = "|".join(meta_values) if isinstance(meta_values, tuple) else meta_values
+        padded_data_values = [*data_values, *([""] * max(0, len(self.data_value_headers) - len(data_values)))]
+        padded_phase_values = [*phase_values, *([""] * max(0, len(self.phase_value_headers) - len(phase_values)))]
+        padded_cycle_values = [*cycle_values, *([""] * max(0, len(self.cycle_value_headers) - len(cycle_values)))]
+        self._writer.writerow(
+            [
+                row_type,
+                packet_type,
+                host_time_iso,
+                f"{host_time_unix_s:.6f}" if isinstance(host_time_unix_s, float) else host_time_unix_s,
+                device_timestamp_field,
+                device_timestamp,
+                cycle_idx,
+                phase,
+                meta_key,
+                meta_text,
+                error_message,
+                raw_line,
+                *padded_data_values,
+                *padded_phase_values,
+                *padded_cycle_values,
+            ]
+        )
+        self._file.flush()
+
+    def write_meta(
+        self,
+        host_time_iso: str,
+        host_time_unix_s: float,
+        key: str,
+        values: tuple[str, ...],
+        raw_line: str = "",
+    ) -> None:
+        self._write_row(
+            row_type="META",
+            packet_type="META",
+            host_time_iso=host_time_iso,
+            host_time_unix_s=host_time_unix_s,
+            meta_key=key,
+            meta_values=values,
+            raw_line=raw_line,
+        )
+
+    def write_stat(self, host_time_iso: str, host_time_unix_s: float, values: tuple[str, ...], raw_line: str) -> None:
+        self._write_row(
+            row_type="STAT",
+            packet_type="STAT",
+            host_time_iso=host_time_iso,
+            host_time_unix_s=host_time_unix_s,
+            meta_values=values,
+            raw_line=raw_line,
+        )
+
+    def write_data(self, packet: DataPacket) -> None:
+        self._write_row(
+            row_type="DATA",
+            packet_type="DATA",
+            host_time_iso=packet.host_time_iso,
+            host_time_unix_s=packet.host_time_unix_s,
+            device_timestamp_field=packet.timestamp_field_name,
+            device_timestamp=packet.device_timestamp,
+            raw_line=packet.raw_line,
+            data_values=packet.values,
+        )
+
+    def write_phase(self, packet: PhasePacket) -> None:
+        self._write_row(
+            row_type="PHASE",
+            packet_type="PHASE",
+            host_time_iso=packet.host_time_iso,
+            host_time_unix_s=packet.host_time_unix_s,
+            device_timestamp_field="t_us",
+            device_timestamp=packet.device_time_us,
+            cycle_idx=packet.cycle_index,
+            phase=packet.phase_name,
+            raw_line=packet.raw_line,
+            phase_values=packet.values,
+        )
+
+    def write_cycle(self, packet: CyclePacket) -> None:
+        self._write_row(
+            row_type="CYCLE",
+            packet_type="CYCLE",
+            host_time_iso=packet.host_time_iso,
+            host_time_unix_s=packet.host_time_unix_s,
+            device_timestamp_field="t_us",
+            device_timestamp=packet.device_time_us,
+            cycle_idx=packet.cycle_index,
+            raw_line=packet.raw_line,
+            cycle_values=packet.values,
+        )
+
+    def write_error(
+        self,
+        host_time_iso: str,
+        host_time_unix_s: float,
+        error_message: str,
+        raw_line: str,
+        row_type: str = "PARSE_ERROR",
+        packet_type: str = "",
+    ) -> None:
+        self._write_row(
+            row_type=row_type,
+            packet_type=packet_type,
+            host_time_iso=host_time_iso,
+            host_time_unix_s=host_time_unix_s,
+            error_message=error_message,
+            raw_line=raw_line,
+        )
+
+    def close(self) -> None:
+        self._file.close()
 
 
 class DataCsvLogger:

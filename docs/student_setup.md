@@ -200,7 +200,8 @@ The GUI-generated firmware workflow:
 - adds PulseOx LED sequencing on `D6` and `D5` when the `PulseOx` preset is used
 - emits raw `PHASE` packets with all four optical channels during every phase
 - emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each optical path
-- saves PulseOx raw phases to `<output>_phase.csv` and corrected cycles to `<output>_cycle.csv`
+- saves one session CSV per run instead of several separate CSV files
+- stores PulseOx raw phases as `PHASE` rows and corrected cycle values as `CYCLE` rows in that same CSV
 - uses readable PulseOx plot labels derived from the four configured channel names, instead of raw protocol field names
 
 The live-plot workflow:

@@ -48,11 +48,12 @@ Use this template as a bench-test record for any lab station.
 
 ## Output files reviewed
 
-- `<output>_data.csv` reviewed:
-- `<output>_phase.csv` reviewed if applicable:
-- `<output>_cycle.csv` reviewed if applicable:
-- `<output>_metadata.csv` reviewed:
-- `<output>_errors.log` reviewed:
+- `<output>.csv` reviewed:
+- `DATA` rows reviewed if applicable:
+- `PHASE` rows reviewed if applicable:
+- `CYCLE` rows reviewed if applicable:
+- `META` rows reviewed:
+- `PARSE_ERROR` and `ERR` rows reviewed:
 
 ## Bench notes
 

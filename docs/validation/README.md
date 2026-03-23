@@ -20,14 +20,14 @@ Each validation session should record at least:
 2. Load the matching GUI lab profile or session preset.
 3. Compile and upload firmware from the GUI.
 4. Run a short acquisition, usually 30 to 60 seconds.
-5. Save the output files and complete the validation checklist.
+5. Save the session CSV and complete the validation checklist.
 6. Keep screenshots or wiring photos if they help explain a failure or a good known setup.
 
 ## How to estimate achieved rate
 
 ### Continuous labs
 
-Use `<output>_data.csv`.
+Use the `DATA` rows in `<output>.csv`.
 
 One simple estimate is:
 - `achieved_rate_hz = (sample_count - 1) / ((last_device_time - first_device_time) / time_scale)`
@@ -38,7 +38,7 @@ Use:
 
 ### PulseOx
 
-Use `<output>_cycle.csv` to estimate achieved cycle rate and `<output>_phase.csv` to estimate achieved phase rate.
+Use the `CYCLE` rows in `<output>.csv` to estimate achieved cycle rate and the `PHASE` rows in the same file to estimate achieved phase rate.
 
 One simple estimate is:
 - `achieved_cycle_rate_hz = (cycle_count - 1) / ((last_device_time_us - first_device_time_us) / 1000000)`
@@ -46,13 +46,13 @@ One simple estimate is:
 
 ## How to check packet quality
 
-Use these saved files:
-- `<output>_errors.log`
-- `<output>_metadata.csv`
+Use the saved session CSV:
+- review `PARSE_ERROR` and `ERR` rows for problems
+- review `META` rows for declared field layouts and rates
 
 Healthy signs:
-- the error log is empty or only contains explained test interruptions
-- the metadata matches the expected field layout for the lab
+- `PARSE_ERROR` and `ERR` rows are absent or only contain explained test interruptions
+- the `META` rows match the expected field layout for the lab
 - the GUI plot updates smoothly enough to follow the signal during class use
 
 Warning signs:

@@ -128,10 +128,20 @@ The original reference CLI app is still available from this folder with:
 If only one serial port is present, the app can auto-select it. If several ports are present, use `--port`.
 
 ## Output files
-The student GUI saves files under the folder you choose, using your selected output filename.
+The student GUI now saves one CSV per session under the folder you choose, using your selected output filename.
+
+That session CSV contains:
+- `META` rows for session and firmware metadata
+- `DATA` rows for continuous labs
+- `PHASE` and `CYCLE` rows for PulseOx
+- `STAT`, `ERR`, or `PARSE_ERROR` rows when relevant
+
+Use the `row_type` column to filter the rows you care about during analysis.
 
 The CLI reference app still saves one session folder under:
 - `../data/cont_med/three_channel_data_demo/<timestamp>/`
+
+Inside that folder, the reference app also writes one `session.csv` file.
 
 See `../docs/student_setup.md` for the Windows, macOS, and Linux setup path.
 

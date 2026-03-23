@@ -28,6 +28,7 @@ Current implemented baseline:
 - generated student GUI firmware for continuous labs using selected signals, selected analog ports, and the highest selected preset rate
 - generated `PHASED_CYCLE` PulseOx firmware and logging path using shared `A0` to `A3` photodiode channels, `PHASE` and `CYCLE` packets, D6 for RED LED control, and D5 for IR LED control
 - refactored Tkinter student GUI with modular internals, session preset save/load, generated firmware compile/upload, collapsible panels, and multi-subplot live plotting
+- one student-facing CSV per session, with `row_type` distinguishing `META`, `DATA`, `PHASE`, `CYCLE`, and error rows
 
 Student setup stays minimal:
 - one Conda environment
