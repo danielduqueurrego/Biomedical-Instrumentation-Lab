@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from acquisition.architecture import AcquisitionClass, PlotDefaults
+from acquisition.lab_manifest import LAB_MANIFEST
 
 
 @dataclass(frozen=True, slots=True)
@@ -17,47 +18,18 @@ class SamplingPreset:
 
 
 LAB_PRESETS = {
-    "EMG": SamplingPreset(
-        lab_name="EMG",
-        acquisition_class=AcquisitionClass.CONT_HIGH,
-        default_sample_rate_hz=2000,
-        default_cycle_rate_hz=None,
-        packet_types=("META", "DATA", "STAT", "ERR"),
-        default_fields=("t_ms", "ch1"),
-        plotting=PlotDefaults(history_seconds=5.0, update_interval_ms=50),
-        notes="High-rate waveform starter preset for student EMG labs.",
-    ),
-    "ECG": SamplingPreset(
-        lab_name="ECG",
-        acquisition_class=AcquisitionClass.CONT_MED,
-        default_sample_rate_hz=500,
-        default_cycle_rate_hz=None,
-        packet_types=("META", "DATA", "STAT", "ERR"),
-        default_fields=("t_ms", "ch1"),
-        plotting=PlotDefaults(history_seconds=10.0, update_interval_ms=100),
-        notes="Medium-rate waveform starter preset for student ECG labs.",
-    ),
-    "PulseOx": SamplingPreset(
-        lab_name="PulseOx",
-        acquisition_class=AcquisitionClass.PHASED_CYCLE,
-        default_sample_rate_hz=None,
-        default_cycle_rate_hz=100,
-        packet_types=("META", "PHASE", "CYCLE", "STAT", "ERR"),
-        default_fields=("t_us", "cycle_idx", "red_corr", "ir_corr"),
-        plotting=PlotDefaults(history_seconds=15.0, update_interval_ms=100),
-        phase_names=("RED_ON", "DARK1", "IR_ON", "DARK2"),
-        notes="Cycle rate is a software default for the pulse-ox teaching workflow.",
-    ),
-    "Blood Pressure": SamplingPreset(
-        lab_name="Blood Pressure",
-        acquisition_class=AcquisitionClass.CONT_MED,
-        default_sample_rate_hz=200,
-        default_cycle_rate_hz=None,
-        packet_types=("META", "DATA", "STAT", "ERR"),
-        default_fields=("t_ms", "pressure"),
-        plotting=PlotDefaults(history_seconds=20.0, update_interval_ms=200),
-        notes="Blood pressure is treated as a continuous waveform lab with manual cuff control.",
-    ),
+    lab_name: SamplingPreset(
+        lab_name=entry.lab_name,
+        acquisition_class=entry.acquisition_class,
+        default_sample_rate_hz=entry.default_sample_rate_hz,
+        default_cycle_rate_hz=entry.default_cycle_rate_hz,
+        packet_types=entry.packet_types,
+        default_fields=entry.default_fields,
+        plotting=entry.plotting,
+        phase_names=entry.phase_names,
+        notes=entry.notes,
+    )
+    for lab_name, entry in LAB_MANIFEST.items()
 }
 
 
@@ -67,3 +39,7 @@ def get_preset(lab_name: str) -> SamplingPreset:
     except KeyError as error:
         available = ", ".join(sorted(LAB_PRESETS))
         raise KeyError(f"Unknown lab preset {lab_name!r}. Available presets: {available}") from error
+
+
+def is_phased_cycle_preset(preset_name: str) -> bool:
+    return get_preset(preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE

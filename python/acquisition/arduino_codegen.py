@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 
 from acquisition.gui_models import PULSEOX_ROLE_RED, validate_signal_configurations
-from acquisition.presets import get_preset
+from acquisition.presets import get_preset, is_phased_cycle_preset
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -49,7 +49,7 @@ def determine_generated_sample_rate_hz(signal_configurations) -> int:
 
 
 def uses_pulseox_led_cycle(signal_configurations) -> bool:
-    return any(signal_configuration.preset_name == "PulseOx" for signal_configuration in signal_configurations)
+    return any(is_phased_cycle_preset(signal_configuration.preset_name) for signal_configuration in signal_configurations)
 
 
 def determine_generated_acquisition_class(signal_configurations) -> str:

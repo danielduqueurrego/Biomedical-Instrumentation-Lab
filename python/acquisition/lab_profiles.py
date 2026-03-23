@@ -5,6 +5,7 @@ from pathlib import Path
 
 from acquisition.arduino_cli_wrapper import UNO_R4_WIFI_BOARD
 from acquisition.gui_models import PULSEOX_ROLE_IR, PULSEOX_ROLE_RED, SignalConfiguration
+from acquisition.lab_manifest import LAB_MANIFEST, LAB_PROFILE_LABELS, get_lab_name_for_profile
 
 
 @dataclass(frozen=True, slots=True)
@@ -50,68 +51,58 @@ PULSE_OX_NOTE = (
     "RED_ON, DARK1, IR_ON, DARK2."
 )
 
-LAB_PROFILES = {
-    "ECG": LabProfile(
-        display_name="ECG",
-        output_basename="ecg_lab",
-        signal_configurations=_build_signal_configurations(
-            ("Raw ECG", "ECG", "A0"),
-            ("Amplified ECG", "ECG", "A1"),
-            ("Comparator Output", "ECG", "A2"),
-        ),
-        sketch_dir=UNO_R4_WIFI_BOARD.sketch_dir,
-        firmware_label=SHARED_FIRMWARE_LABEL,
-        note=SHARED_FIRMWARE_NOTE,
+PROFILE_SIGNAL_SPECS = {
+    "ECG": (
+        ("Raw ECG", "ECG", "A0"),
+        ("Amplified ECG", "ECG", "A1"),
+        ("Comparator Output", "ECG", "A2"),
     ),
-    "Pulse Oximetry": LabProfile(
-        display_name="Pulse Oximetry",
-        output_basename="pulse_ox_lab",
-        signal_configurations=_build_signal_configurations(
-            ("Raw Red Reflective PD Output", "PulseOx", "A0", PULSEOX_ROLE_RED),
-            ("Raw IR Reflective", "PulseOx", "A1", PULSEOX_ROLE_IR),
-            ("Raw Red Transmission", "PulseOx", "A2", PULSEOX_ROLE_RED),
-            ("Raw IR Transmission", "PulseOx", "A3", PULSEOX_ROLE_IR),
-            ("Amplified and Filtered Red Reflective", "PulseOx", "A4", PULSEOX_ROLE_RED),
-            ("Filtered Red Transmission", "PulseOx", "A5", PULSEOX_ROLE_RED),
-        ),
-        sketch_dir=UNO_R4_WIFI_BOARD.sketch_dir,
-        firmware_label=SHARED_FIRMWARE_LABEL,
-        note=PULSE_OX_NOTE,
+    "PulseOx": (
+        ("Raw Red Reflective PD Output", "PulseOx", "A0", PULSEOX_ROLE_RED),
+        ("Raw IR Reflective", "PulseOx", "A1", PULSEOX_ROLE_IR),
+        ("Raw Red Transmission", "PulseOx", "A2", PULSEOX_ROLE_RED),
+        ("Raw IR Transmission", "PulseOx", "A3", PULSEOX_ROLE_IR),
+        ("Amplified and Filtered Red Reflective", "PulseOx", "A4", PULSEOX_ROLE_RED),
+        ("Filtered Red Transmission", "PulseOx", "A5", PULSEOX_ROLE_RED),
     ),
-    "Blood Pressure": LabProfile(
-        display_name="Blood Pressure",
-        output_basename="blood_pressure_lab",
-        signal_configurations=_build_signal_configurations(
-            ("Raw Pressure", "Blood Pressure", "A0"),
-            ("Filtered Pressure", "Blood Pressure", "A1"),
-            ("Red PD", "Blood Pressure", "A2"),
-            ("IR PD", "Blood Pressure", "A3"),
-        ),
-        sketch_dir=UNO_R4_WIFI_BOARD.sketch_dir,
-        firmware_label=SHARED_FIRMWARE_LABEL,
-        note=SHARED_FIRMWARE_NOTE,
+    "Blood Pressure": (
+        ("Raw Pressure", "Blood Pressure", "A0"),
+        ("Filtered Pressure", "Blood Pressure", "A1"),
+        ("Red PD", "Blood Pressure", "A2"),
+        ("IR PD", "Blood Pressure", "A3"),
     ),
-    "EMG": LabProfile(
-        display_name="EMG",
-        output_basename="emg_lab",
-        signal_configurations=_build_signal_configurations(
-            ("Raw EMG", "EMG", "A0"),
-            ("Rectified EMG", "EMG", "A1"),
-            ("Enveloped EMG", "EMG", "A2"),
-            ("Pressure", "EMG", "A3"),
-        ),
-        sketch_dir=UNO_R4_WIFI_BOARD.sketch_dir,
-        firmware_label=SHARED_FIRMWARE_LABEL,
-        note=SHARED_FIRMWARE_NOTE,
+    "EMG": (
+        ("Raw EMG", "EMG", "A0"),
+        ("Rectified EMG", "EMG", "A1"),
+        ("Enveloped EMG", "EMG", "A2"),
+        ("Pressure", "EMG", "A3"),
     ),
 }
 
-LAB_PROFILE_ORDER = ("ECG", "Pulse Oximetry", "Blood Pressure", "EMG")
+PROFILE_OUTPUT_BASENAMES = {
+    "ECG": "ecg_lab",
+    "PulseOx": "pulse_ox_lab",
+    "Blood Pressure": "blood_pressure_lab",
+    "EMG": "emg_lab",
+}
+
+
+LAB_PROFILES = {
+    manifest_entry.profile_label: LabProfile(
+        display_name=manifest_entry.profile_label,
+        output_basename=PROFILE_OUTPUT_BASENAMES[manifest_entry.lab_name],
+        signal_configurations=_build_signal_configurations(*PROFILE_SIGNAL_SPECS[manifest_entry.lab_name]),
+        sketch_dir=UNO_R4_WIFI_BOARD.sketch_dir,
+        firmware_label=SHARED_FIRMWARE_LABEL,
+        note=PULSE_OX_NOTE if manifest_entry.lab_name == "PulseOx" else SHARED_FIRMWARE_NOTE,
+    )
+    for manifest_entry in LAB_MANIFEST.values()
+}
+
+LAB_PROFILE_ORDER = LAB_PROFILE_LABELS
 
 
 def get_lab_profile(profile_name: str) -> LabProfile:
-    try:
-        return LAB_PROFILES[profile_name]
-    except KeyError as error:
-        available = ", ".join(LAB_PROFILE_ORDER)
-        raise KeyError(f"Unknown lab profile {profile_name!r}. Available profiles: {available}") from error
+    lab_name = get_lab_name_for_profile(profile_name)
+    profile_label = LAB_MANIFEST[lab_name].profile_label
+    return LAB_PROFILES[profile_label]
