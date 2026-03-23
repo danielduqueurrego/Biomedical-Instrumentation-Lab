@@ -3,13 +3,18 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+from acquisition.architecture import AcquisitionClass
 from acquisition.protocol import UNO_R4_ANALOG_PORTS
-from acquisition.presets import LAB_PRESETS
+from acquisition.presets import LAB_PRESETS, get_preset
 
 
 MAX_SIGNAL_COUNT = len(UNO_R4_ANALOG_PORTS)
 DEFAULT_ACTIVE_SIGNAL_COUNT = 3
-DEFAULT_SIGNAL_PRESETS = ("EMG", "ECG", "Blood Pressure")
+DEFAULT_SIGNAL_PRESETS = tuple(
+    preset_name
+    for preset_name, preset in LAB_PRESETS.items()
+    if preset.acquisition_class != AcquisitionClass.PHASED_CYCLE
+)
 DEFAULT_GUI_BAUD_RATE = 230400
 DEFAULT_BOARD_NAME = "Arduino UNO R4 WiFi"
 DEFAULT_BOARD_FQBN = "arduino:renesas_uno:unor4wifi"
@@ -101,13 +106,15 @@ def validate_signal_configurations(signal_configurations: tuple[SignalConfigurat
         if signal.pulseox_role not in PULSEOX_SIGNAL_ROLES:
             raise ValueError(f"Signal {index} uses an unsupported PulseOx role {signal.pulseox_role!r}.")
 
-    pulseox_signals = [signal for signal in signal_configurations if signal.preset_name == "PulseOx"]
-    if pulseox_signals and len(pulseox_signals) != signal_count:
-        raise ValueError("Do not mix PulseOx signals with continuous presets in the same acquisition.")
+    phased_cycle_signals = [
+        signal for signal in signal_configurations if get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE
+    ]
+    if phased_cycle_signals and len(phased_cycle_signals) != signal_count:
+        raise ValueError("Do not mix PHASED_CYCLE signals with continuous presets in the same acquisition.")
 
     for index, signal in enumerate(signal_configurations, start=1):
-        if signal.preset_name == "PulseOx" and signal.pulseox_role == PULSEOX_ROLE_AUTO:
-            raise ValueError(f"Signal {index} uses the PulseOx preset and needs a RED or IR PulseOx role.")
+        if get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE and signal.pulseox_role == PULSEOX_ROLE_AUTO:
+            raise ValueError(f"Signal {index} uses a PHASED_CYCLE preset and needs a RED or IR PulseOx role.")
 
 
 def validate_gui_config(config: GuiAcquisitionConfig) -> None:

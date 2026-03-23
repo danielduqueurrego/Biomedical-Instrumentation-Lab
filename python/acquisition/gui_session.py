@@ -9,6 +9,7 @@ from queue import SimpleQueue
 import serial
 
 from acquisition.gui_models import GuiAcquisitionConfig
+from acquisition.architecture import AcquisitionClass
 from acquisition.presets import get_preset
 from acquisition.protocol import (
     DataPacket,
@@ -59,7 +60,10 @@ class GuiAcquisitionSession:
         self.config = config
         self.selected_analog_ports = tuple(signal.analog_port for signal in config.signal_configurations)
         self.selected_field_names = ("t_ms", *(signal.name.strip() for signal in config.signal_configurations))
-        self.is_phased_cycle = any(signal.preset_name == "PulseOx" for signal in config.signal_configurations)
+        self.is_phased_cycle = any(
+            get_preset(signal.preset_name).acquisition_class == AcquisitionClass.PHASED_CYCLE
+            for signal in config.signal_configurations
+        )
 
         self.expected_data_fields = ("t_ms", *self.selected_analog_ports)
         self.expected_phase_fields = ("t_us", "cycle_idx", "phase", *self.selected_analog_ports)
