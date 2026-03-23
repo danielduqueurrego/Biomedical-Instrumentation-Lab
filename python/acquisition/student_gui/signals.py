@@ -74,6 +74,9 @@ class SignalConfigurationMixin:
             self.signal_rows.append((signal_frame, info_label))
 
             preset_var.trace_add("write", lambda *_args, row_index=index: self._update_signal_preset_info(row_index))
+
+        # Wait until all signal rows exist before running info-refresh logic.
+        for index in range(MAX_SIGNAL_COUNT):
             self._update_signal_preset_info(index)
 
     def _on_lab_profile_selected(self, _event=None) -> None:
@@ -120,13 +123,19 @@ class SignalConfigurationMixin:
 
     def _selected_signal_configurations(self) -> tuple[SignalConfiguration, ...]:
         signal_count = int(self.signal_count_var.get())
+        available_count = min(
+            signal_count,
+            len(self.signal_name_vars),
+            len(self.signal_preset_vars),
+            len(self.signal_port_vars),
+        )
         return tuple(
             SignalConfiguration(
                 name=self.signal_name_vars[index].get().strip(),
                 preset_name=self.signal_preset_vars[index].get(),
                 analog_port=self.signal_port_vars[index].get(),
             )
-            for index in range(signal_count)
+            for index in range(available_count)
         )
 
     def _preview_signal_configurations(self) -> tuple[SignalConfiguration, ...]:
