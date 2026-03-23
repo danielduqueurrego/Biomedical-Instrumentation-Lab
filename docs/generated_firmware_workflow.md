@@ -48,6 +48,7 @@ The generated sketch then:
 - sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
 - drives `D6` for the red LED
 - drives `D5` for the IR LED
+- discards the first ADC read after each channel switch and averages two settled reads per channel
 - steps through the phase sequence:
   - `RED_ON`
   - `DARK1`
@@ -81,6 +82,9 @@ For PulseOx, the GUI:
 Important distinction:
 - the serial protocol still uses explicit field names such as `reflective_raw_red_corr`
 - the saved student session CSV and the live plot use readable labels derived from the configured PulseOx channel names
+
+Implementation note:
+- the extra dummy-read-plus-average step is there to reduce occasional spike-like artifacts caused by fast ADC input switching between `A0` and `A3`
 
 The generated sketch also emits metadata such as:
 - `META,adc_resolution_bits,14`

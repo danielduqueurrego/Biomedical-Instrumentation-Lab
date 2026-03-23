@@ -65,6 +65,7 @@ Use one of these:
 The GUI-generated firmware will:
 - drive `D6` and `D5`
 - sample `A0` to `A3` during every phase
+- discard the first ADC read after each channel switch and average two settled reads per channel
 - emit raw `PHASE` packets
 - emit corrected `CYCLE` packets
 
@@ -92,6 +93,8 @@ Notes:
   Confirm the session CSV contains both `PHASE` and `CYCLE` rows and inspect any `PARSE_ERROR` or `ERR` rows.
 - Signals are noisy or close to zero:
   Check the photodiode board power, LED wiring, and optical alignment.
+- Short spike-like peaks still appear:
+  Recompile and upload from the GUI so the PulseOx firmware includes the settled-read ADC helper, then verify the sensor board does not present unusually high source impedance.
 - Packet layout mismatch appears in logs:
   Recompile and upload from the GUI so the firmware and Python expectations match.
 

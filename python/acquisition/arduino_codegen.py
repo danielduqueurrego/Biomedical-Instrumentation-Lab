@@ -255,6 +255,7 @@ const unsigned long PHASE_PERIOD_US = {phase_period_us};
 const int IR_LED_PIN = 5;
 const int RED_LED_PIN = 6;
 const int PHASE_COUNT = 4;
+const int ADC_SETTLED_SAMPLE_COUNT = 2;
 
 const int ANALOG_INPUT_PINS[] = {{{analog_input_constants}}};
 const int ANALOG_INPUT_COUNT = sizeof(ANALOG_INPUT_PINS) / sizeof(ANALOG_INPUT_PINS[0]);
@@ -367,9 +368,23 @@ void emitCyclePacket(unsigned long timestampUs) {{
   Serial.println();
 }}
 
+int readSettledPulseOxChannel(int analogPin) {{
+  // The first ADC result after switching inputs can carry some residual charge
+  // from the previous channel. Discard one read, then average two settled reads
+  // to reduce occasional spike-like artifacts in the corrected cycle plot.
+  analogRead(analogPin);
+
+  long accumulatedValue = 0;
+  for (int sampleIndex = 0; sampleIndex < ADC_SETTLED_SAMPLE_COUNT; ++sampleIndex) {{
+    accumulatedValue += analogRead(analogPin);
+  }}
+
+  return static_cast<int>(accumulatedValue / ADC_SETTLED_SAMPLE_COUNT);
+}}
+
 void captureCurrentPhase(unsigned long timestampUs) {{
   for (int index = 0; index < ANALOG_INPUT_COUNT; ++index) {{
-    phaseSamples[currentPhase][index] = analogRead(ANALOG_INPUT_PINS[index]);
+    phaseSamples[currentPhase][index] = readSettledPulseOxChannel(ANALOG_INPUT_PINS[index]);
   }}
 
   emitPhasePacket(timestampUs);

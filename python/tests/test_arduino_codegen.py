@@ -45,4 +45,6 @@ def test_pulseox_codegen_includes_phase_and_cycle_metadata_and_sequence() -> Non
     assert 'Serial.println("META,adc_resolution_bits,14");' in sketch
     assert 'Serial.println("META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2");' in sketch
     assert "analogReadResolution(14);" in sketch
+    assert "int readSettledPulseOxChannel(int analogPin)" in sketch
+    assert "phaseSamples[currentPhase][index] = readSettledPulseOxChannel(ANALOG_INPUT_PINS[index]);" in sketch
     assert "RED_ON -> DARK1 -> IR_ON -> DARK2" in sketch
