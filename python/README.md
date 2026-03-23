@@ -30,6 +30,8 @@ Run tests with either path style:
 - from repository root: `pytest -q python/tests`
 - from `python/`: `pytest -q tests`
 
+Pull requests are expected to keep this fast test suite passing before merge.
+
 ## Main student GUI
 The first student-facing GUI is a shared Arduino UNO R4 WiFi acquisition app built around the six standard analog inputs `A0` to `A5`.
 
