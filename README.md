@@ -1,63 +1,106 @@
 # Biomedical Instrumentation Lab
 
-An open, teaching-focused platform for **biomedical instrumentation laboratories** built around a custom PCB, Arduino-based acquisition, and a student-friendly Python GUI.
+> Open educational hardware and software for hands-on biomedical instrumentation laboratories.
 
-This repository brings together the pieces needed to run hands-on labs in signals and instrumentation such as:
+Biomedical Instrumentation Lab is a teaching-focused platform built around a **custom PCB**, **Arduino UNO R4 WiFi firmware**, and a **student-friendly Python GUI** for acquiring, visualizing, and saving physiological signals in the lab.
+
+It is designed to support practical laboratory experiences in:
 
 - **EMG**
 - **ECG**
 - **Pulse oximetry**
 - **Blood pressure**
-- other analog and phased-cycle biomedical sensing activities
+- and other analog or multi-phase biomedical sensing activities
+
+---
 
 ## Why this project exists
 
-Biomedical instrumentation is often taught with a gap between theory and practice: students learn signal conditioning, filtering, sampling, and physiological measurement concepts, but may not always get a reusable, transparent, and low-cost platform they can explore themselves.
+Biomedical instrumentation courses often teach important concepts such as signal conditioning, filtering, amplification, sampling, and physiological sensing, but students do not always get a reusable, transparent, and affordable platform they can explore themselves.
 
-This project was created to help close that gap by providing:
+This project was created to help close that gap.
 
-- a **custom educational PCB**
-- **open firmware workflows**
-- a **cross-platform acquisition GUI**
-- reusable lab presets and examples
-- a structure that supports both **teaching** and **iteration**
+The goals are to:
 
-The goal is to make biomedical instrumentation more accessible, reproducible, and hands-on for students and instructors.
+- make biomedical instrumentation more **hands-on**
+- provide a platform that is **transparent and modifiable**
+- reduce barriers for students and instructors
+- support both **teaching** and **iterative development**
+- connect circuit design, embedded acquisition, and signal analysis in one workflow
+
+This repository brings together the hardware, firmware, desktop tools, examples, and documentation needed to support that vision.
+
+---
+
+## Project highlights
+
+- **Custom educational PCB** for biomedical instrumentation labs
+- **Arduino UNO R4 WiFi** firmware workflows
+- **Cross-platform Python GUI** for student acquisition
+- **Minimal setup path** using Conda + Arduino CLI
+- Support for multiple acquisition models:
+  - `CONT_HIGH`
+  - `CONT_MED`
+  - `PHASED_CYCLE`
+- Session presets, validation tools, and example output files
+- Teaching-oriented design with reusable lab workflows
+
+---
+
+## The board
+
+The current PCB design is published on **OSHWLab**:
+
+**Biomedical Instrumentation Board**  
+[View the current PCB project on OSHWLab](https://oshwlab.com/dd00055/biomedical-instrumentation-board)
+
+<!-- Replace this with your actual image path if you add a board render or photo -->
+<p align="center">
+  <img src="docs/images/board_render_placeholder.png" alt="Biomedical Instrumentation Board render" width="700">
+</p>
+
+This board serves as the hardware foundation for the lab workflows in this repository and is being developed as an open educational platform for biosignal acquisition and instrumentation teaching.
+
+---
 
 ## What this repository includes
 
-- **Hardware-oriented workflows** for a biomedical instrumentation board
-- **Arduino UNO R4 WiFi firmware** for multiple acquisition patterns
-- a **Python GUI** for student data collection
-- support for:
-  - continuous high-rate acquisition
-  - continuous medium-rate acquisition
-  - phased-cycle optical acquisition
-- example CSV outputs
-- validation checklists
-- student setup documentation
-- tools for compile/upload workflows using **Arduino CLI**
+This repository currently includes:
 
-## Current PCB design
+- reference Arduino firmware for continuous and phased-cycle acquisition
+- generated firmware workflows for student-configured lab sessions
+- a modular Python GUI for student use
+- session presets for common lab types
+- example CSV outputs showing the logging format
+- setup documentation for students and instructors
+- validation checklists and test workflows
+- firmware compile checks and automated software tests
 
-The current board design is published on OSHWLab:
+The public repository currently includes the following main areas: `docs`, `examples/session_csv`, `firmware`, `python`, `tests`, and `tools`, along with launch scripts for Linux, macOS, and Windows. :contentReference[oaicite:1]{index=1}
 
-**PCB project:** [Biomedical Instrumentation Board](https://oshwlab.com/dd00055/biomedical-instrumentation-board)
+---
 
-This board is intended as the hardware foundation for the labs in this repository and is being developed as an educational platform for biosignal acquisition and analysis.
+## How it works
 
-## Project philosophy
+The repository is organized by **acquisition pattern first**, rather than only by sensor type. This allows one software workflow to be reused across several lab activities. The repo’s current architecture and top-level organization reflect this pattern-first approach. :contentReference[oaicite:2]{index=2}
 
-This repository is organized by **acquisition pattern first**, not only by signal type.  
-That allows one software workflow to be reused across multiple labs.
+### Acquisition classes
 
-Current acquisition classes include:
+- **CONT_HIGH**  
+  High-rate continuous waveform acquisition  
+  Example: EMG
 
-- **CONT_HIGH** – high-rate continuous waveform acquisition
-- **CONT_MED** – medium-rate continuous waveform acquisition
-- **PHASED_CYCLE** – multi-phase acquisition such as pulse oximetry
+- **CONT_MED**  
+  Medium-rate continuous waveform acquisition  
+  Examples: ECG, blood pressure, classroom analog demos
 
-This makes it easier to extend the platform to new labs while keeping the student experience consistent.
+- **PHASED_CYCLE**  
+  Multi-phase acquisition where signal meaning depends on timing phase  
+  Example: pulse oximetry
+
+This design helps keep the student experience consistent while still supporting very different lab types.
+
+---
 
 ## Student workflow
 
@@ -65,24 +108,187 @@ The intended student workflow is:
 
 1. connect the board
 2. launch the GUI
-3. select a lab preset
+3. load a lab preset
 4. choose a save folder
-5. upload firmware if needed
+5. compile/upload firmware if needed
 6. start acquisition
-7. save a single CSV session file
+7. save one session CSV
 
-The repository is designed to keep installation simple by using:
+The current public repo already presents a “Start Here” path based on Conda, Arduino CLI, a system check, and launch scripts for Linux, macOS, and Windows. :contentReference[oaicite:3]{index=3}
 
-- **Conda** for the Python environment
-- **Arduino CLI** for compile/upload workflows
-- a **Python GUI** for routine student use
+---
+
+## Quick start
+
+### 1. Create the Python environment
+
+```bash
+cd python
+conda env create -f environment.yml
+conda activate biomed-lab
+cd ..
+```
+
+### 2. Set up Arduino CLI
+- macOS / Linux
+```bash
+./tools/setup_arduino_cli.sh
+```
+
+- Windows
+```bat
+tools\setup_arduino_cli.bat
+```
+### 3. Run the system check
+cd python
+python system_check.py
+cd ..
+### 4. Launch the student GUI
+Linux
+./launch_student_gui_linux.sh
+macOS
+./launch_student_gui_macos.command
+Windows
+launch_student_gui_windows.bat
+### 5. In the GUI
+- select the detected board and port
+- load a lab preset such as EMG, ECG, Pulse Oximetry, or Blood Pressure
+- choose a save folder
+- compile/upload firmware if needed
+- click Start Acquisition
+
+Each session is saved as a CSV file, and the current repo documentation notes that the logs use row_type values such as META, DATA, PHASE, and CYCLE.
+
+## Example applications
+
+This platform is currently designed to support lab activities such as:
+
+- EMG acquisition and live viewing
+- ECG waveform capture
+- Pulse oximetry with phased LED timing
+- Blood pressure and analog pressure waveform acquisition
+- student exploration of sampling, filtering, and signal interpretation
 
 ## Repository structure
+```
+docs/                 Documentation, setup, lab guides, validation
+examples/session_csv/ Example session output files
+firmware/             Arduino firmware organized by acquisition class
+python/               GUI, acquisition logic, presets, utilities
+tests/                Automated tests
+tools/                Arduino CLI helper scripts
+```
+Additional important areas
+python/acquisition/ – shared protocol, serial, logging, plotting, and preset helpers
+python/acquisition/student_gui/ – modular student GUI internals
+python/apps/ – student-facing Python apps
+python/session_presets/ – reusable session configurations
+docs/labs/ – classroom-facing lab guides
+docs/validation/ – validation framework and checklists
 
-```text
-docs/        Documentation, lab guides, setup, validation
-examples/    Example session CSV files and reference outputs
-firmware/    Arduino firmware organized by acquisition class
-python/      Acquisition code, GUI, presets, and utilities
-tests/       Automated tests
-tools/       Arduino CLI setup/upload helper scripts
+These areas are visible in the current public repo and README structure.
+
+## Current PCB and design workflow
+
+This project combines:
+
+- PCB design and iteration
+- embedded firmware development
+- desktop acquisition software
+- laboratory teaching workflows
+
+The current board design is hosted on OSHWLab and developed as part of an open, education-oriented workflow centered on prototyping and hands-on learning.
+
+## Screenshots
+<!-- Replace placeholders with real screenshots when ready -->
+GUI setup
+<p align="center"> <img src="docs/images/gui_setup_placeholder.png" alt="GUI setup screenshot" width="800"> </p>
+EMG live plot
+<p align="center"> <img src="docs/images/emg_live_plot_placeholder.png" alt="EMG live plot screenshot" width="800"> </p>
+Pulse oximetry live plot
+<p align="center"> <img src="docs/images/pulseox_live_plot_placeholder.png" alt="Pulse oximetry live plot screenshot" width="800"> </p>
+
+## Author
+
+Daniel Duque Urrego
+Ph.D. Student in Biomedical Engineering
+West Virginia University
+
+## Sponsors and support
+
+This project is currently supported by:
+
+- WVU Department of Chemical and Biomedical Engineering
+- OSHWLab
+- EasyEDA
+- JLCPCB
+
+Their support helps advance open, hands-on biomedical engineering education and prototype development.
+
+Acknowledgments
+
+This project benefits from the broader ecosystem of open hardware, educational prototyping, and accessible design/manufacturing tools that make iterative teaching platforms possible.
+
+Special thanks to the people, platforms, and organizations supporting biomedical engineering education through practical, buildable learning experiences.
+
+Documentation
+
+For more details, start with:
+
+docs/student_setup.md
+docs/arduino_cli_setup.md
+docs/labs/README.md
+docs/acquisition_architecture.md
+docs/sampling_strategy.md
+docs/serial_protocol.md
+docs/generated_firmware_workflow.md
+docs/validation/README.md
+examples/session_csv/README.md
+
+The current public README also points readers to these same architecture and setup documents.
+
+Roadmap
+
+Current and future improvements include:
+
+real GUI screenshots and board photos
+more polished wiring and lab visuals
+expanded validation datasets
+additional reference firmware
+more analysis examples and lab materials
+continued refinement of the student acquisition workflow
+Important note
+
+This project is intended for education, prototyping, and research.
+
+It is not a medical device and is not intended for clinical, diagnostic, or therapeutic use.
+
+Contributing
+
+Suggestions, issues, and contributions are welcome.
+
+If you use this repository in a course, lab, workshop, or educational project, feel free to open an issue or share feedback.
+
+Citation
+
+If this repository supports your teaching, project, or publication, please cite the repository appropriately and acknowledge the platform where relevant.
+
+License
+
+See the repository license information for details.
+
+
+A few finishing touches I’d also do on GitHub itself:
+
+- Add a short repo description like:  
+  **Open educational hardware and software for hands-on biomedical instrumentation labs**
+- Add topics such as:  
+  `biomedical-engineering`, `arduino`, `biosignals`, `emg`, `ecg`, `pulse-oximetry`, `blood-pressure`, `education`, `open-hardware`, `easyeda`, `jlcpcb`
+- Replace the placeholder images with:
+  - a PCB render from OSHWLab/EasyEDA
+  - one GUI screenshot
+  - one EMG plot screenshot
+  - one PulseOx plot screenshot
+
+I could not reliably load the OSHWLab and WVU pages from this environment, so I kept those references aligned to the links and sponsor names you provided rather than adding extra claims beyond that. The repo structure and current front-page workflow were verifiable from the public GitHub page. :contentReference[oaicite:7]{index=7}
+::contentReference[oaicite:8]{index=8}
