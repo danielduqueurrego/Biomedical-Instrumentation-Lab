@@ -76,7 +76,7 @@ This repository currently includes:
 - validation checklists and test workflows
 - firmware compile checks and automated software tests
 
-The public repository currently includes the following main areas: `docs`, `examples/session_csv`, `firmware`, `python`, `tests`, and `tools`, along with launch scripts for Linux, macOS, and Windows. :contentReference[oaicite:1]{index=1}
+The public repository currently includes the following main areas: `docs`, `examples/session_csv`, `firmware`, `python`, `tests`, and `tools`, along with launch scripts for Linux, macOS, and Windows.
 
 ---
 
@@ -139,17 +139,28 @@ cd ..
 ```bat
 tools\setup_arduino_cli.bat
 ```
+
 ### 3. Run the system check
+```bash
 cd python
 python system_check.py
 cd ..
+```
+
 ### 4. Launch the student GUI
-Linux
+- Linux
+```bash
 ./launch_student_gui_linux.sh
-macOS
+```
+- macOS
+```bash
 ./launch_student_gui_macos.command
-Windows
+```
+- Windows
+```bat
 launch_student_gui_windows.bat
+```
+
 ### 5. In the GUI
 - select the detected board and port
 - load a lab preset such as EMG, ECG, Pulse Oximetry, or Blood Pressure
@@ -157,7 +168,9 @@ launch_student_gui_windows.bat
 - compile/upload firmware if needed
 - click Start Acquisition
 
-Each session is saved as a CSV file, and the current repo documentation notes that the logs use row_type values such as META, DATA, PHASE, and CYCLE.
+Each session is saved as a CSV file, and the current repo documentation notes that the logs use row_type values such as `META`, `DATA`, `PHASE`, and `CYCLE`.
+
+---
 
 ## Example applications
 
@@ -169,6 +182,8 @@ This platform is currently designed to support lab activities such as:
 - Blood pressure and analog pressure waveform acquisition
 - student exploration of sampling, filtering, and signal interpretation
 
+---
+
 ## Repository structure
 ```
 docs/                 Documentation, setup, lab guides, validation
@@ -178,15 +193,18 @@ python/               GUI, acquisition logic, presets, utilities
 tests/                Automated tests
 tools/                Arduino CLI helper scripts
 ```
+
 Additional important areas
-python/acquisition/ – shared protocol, serial, logging, plotting, and preset helpers
-python/acquisition/student_gui/ – modular student GUI internals
-python/apps/ – student-facing Python apps
-python/session_presets/ – reusable session configurations
-docs/labs/ – classroom-facing lab guides
-docs/validation/ – validation framework and checklists
+`python/acquisition/` – shared protocol, serial, logging, plotting, and preset helpers
+`python/acquisition/student_gui/` – modular student GUI internals
+`python/apps/` – student-facing Python apps
+`python/session_presets/` – reusable session configurations
+`docs/labs/` – classroom-facing lab guides
+`docs/validation/` – validation framework and checklists
 
 These areas are visible in the current public repo and README structure.
+
+---
 
 ## Current PCB and design workflow
 
@@ -207,7 +225,7 @@ EMG live plot
 <p align="center"> <img src="docs/images/emg_live_plot_placeholder.png" alt="EMG live plot screenshot" width="800"> </p>
 Pulse oximetry live plot
 <p align="center"> <img src="docs/images/pulseox_live_plot_placeholder.png" alt="Pulse oximetry live plot screenshot" width="800"> </p>
-
+---
 ## Author
 
 Daniel Duque Urrego
@@ -217,11 +235,12 @@ West Virginia University
 ## Sponsors and support
 
 This project is currently supported by:
-
-- WVU Department of Chemical and Biomedical Engineering
-- OSHWLab
-- EasyEDA
-- JLCPCB
+|Sponsor|   |
+| --- | --- |
+|WVU Department of Chemical and Biomedical Engineering| <img src="WVU CBE.png" alt="WVU CBE Logo" height="200"> |
+| OSHWLab | <img src="oshwlab.png" alt="OSHWLab Logo" height="200"> |
+| EasyEDA | <img src="EasyEDA_logo.svg" alt="EasyEDA Logo" height="200"> |
+| JLCPCB | <img src="JLCPCB_Logo.svg" alt="JLCPCB Logo" height="200"> |
 
 Their support helps advance open, hands-on biomedical engineering education and prototype development.
 
@@ -235,15 +254,15 @@ Special thanks to the people, platforms, and organizations supporting biomedical
 
 For more details, start with:
 
-docs/student_setup.md
-docs/arduino_cli_setup.md
-docs/labs/README.md
-docs/acquisition_architecture.md
-docs/sampling_strategy.md
-docs/serial_protocol.md
-docs/generated_firmware_workflow.md
-docs/validation/README.md
-examples/session_csv/README.md
+- `docs/student_setup.md`
+- `docs/arduino_cli_setup.md`
+- `docs/labs/README.md`
+- `docs/acquisition_architecture.md`
+- `docs/sampling_strategy.md`
+- `docs/serial_protocol.md`
+- `docs/generated_firmware_workflow.md`
+- `docs/validation/README.md`
+- `examples/session_csv/README.md`
 
 The current public README also points readers to these same architecture and setup documents.
 
@@ -251,12 +270,12 @@ The current public README also points readers to these same architecture and set
 
 Current and future improvements include:
 
-real GUI screenshots and board photos
-more polished wiring and lab visuals
-expanded validation datasets
-additional reference firmware
-more analysis examples and lab materials
-continued refinement of the student acquisition workflow
+- real GUI screenshots and board photos
+- more polished wiring and lab visuals
+- expanded validation datasets
+- additional reference firmware
+- more analysis examples and lab materials
+- continued refinement of the student acquisition workflow
 
 ## Important note
 
