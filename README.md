@@ -225,13 +225,13 @@ This project is currently supported by:
 
 Their support helps advance open, hands-on biomedical engineering education and prototype development.
 
-Acknowledgments
+## Acknowledgments
 
 This project benefits from the broader ecosystem of open hardware, educational prototyping, and accessible design/manufacturing tools that make iterative teaching platforms possible.
 
 Special thanks to the people, platforms, and organizations supporting biomedical engineering education through practical, buildable learning experiences.
 
-Documentation
+## Documentation
 
 For more details, start with:
 
@@ -247,7 +247,7 @@ examples/session_csv/README.md
 
 The current public README also points readers to these same architecture and setup documents.
 
-Roadmap
+## Roadmap
 
 Current and future improvements include:
 
@@ -257,38 +257,23 @@ expanded validation datasets
 additional reference firmware
 more analysis examples and lab materials
 continued refinement of the student acquisition workflow
-Important note
+
+## Important note
 
 This project is intended for education, prototyping, and research.
 
 It is not a medical device and is not intended for clinical, diagnostic, or therapeutic use.
 
-Contributing
+## Contributing
 
 Suggestions, issues, and contributions are welcome.
 
 If you use this repository in a course, lab, workshop, or educational project, feel free to open an issue or share feedback.
 
-Citation
+## Citation
 
 If this repository supports your teaching, project, or publication, please cite the repository appropriately and acknowledge the platform where relevant.
 
-License
+## License
 
 See the repository license information for details.
-
-
-A few finishing touches I’d also do on GitHub itself:
-
-- Add a short repo description like:  
-  **Open educational hardware and software for hands-on biomedical instrumentation labs**
-- Add topics such as:  
-  `biomedical-engineering`, `arduino`, `biosignals`, `emg`, `ecg`, `pulse-oximetry`, `blood-pressure`, `education`, `open-hardware`, `easyeda`, `jlcpcb`
-- Replace the placeholder images with:
-  - a PCB render from OSHWLab/EasyEDA
-  - one GUI screenshot
-  - one EMG plot screenshot
-  - one PulseOx plot screenshot
-
-I could not reliably load the OSHWLab and WVU pages from this environment, so I kept those references aligned to the links and sponsor names you provided rather than adding extra claims beyond that. The repo structure and current front-page workflow were verifiable from the public GitHub page. :contentReference[oaicite:7]{index=7}
-::contentReference[oaicite:8]{index=8}
