@@ -214,14 +214,17 @@ This project combines:
 
 The current board design is hosted on OSHWLab and developed as part of an open, education-oriented workflow centered on prototyping and hands-on learning.
 
+---
+
 ## Screenshots
-<!-- Replace placeholders with real screenshots when ready -->
-GUI setup
-<p align="center"> <img src="docs/screenshots/student_gui_setup_placeholder.svg" alt="GUI setup screenshot placeholder" width="800"> </p>
-EMG live plot
-<p align="center"> <img src="docs/screenshots/emg_live_plot_placeholder.svg" alt="EMG live plot screenshot placeholder" width="800"> </p>
-Pulse oximetry live plot
-<p align="center"> <img src="docs/screenshots/pulse_ox_live_plot_placeholder.svg" alt="Pulse oximetry live plot screenshot placeholder" width="800"> </p>
+
+- **GUI setup**
+<p align="center"> <img src="docs/screenshots/GUI.png" alt="GUI setup screenshot placeholder" width="800"> </p>
+
+- **EMG live plot**
+
+- **Pulse oximetry live plot**
+
 
 ---
 
