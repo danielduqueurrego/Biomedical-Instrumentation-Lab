@@ -1,64 +1,118 @@
-# Sampling strategy
+# Sampling Strategy
 
-These presets are software starting points for student labs. They are not hardware guarantees and should be validated on each lab board.
+> Default sampling guidance for the current labs and acquisition classes.
 
-Current UNO R4 WiFi firmware in this repo sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`, so raw analog samples use the board's maximum configured ADC resolution.
+Use this document when you need the current default rates, timing fields, and plotting expectations. These values are software defaults, not hardware guarantees, so bench validation still matters.
 
-## Acquisition class guidance
+---
+
+## Start Here
+
+The repo uses a small set of default presets so the GUI, generated firmware, reference sketches, and protocol docs stay aligned.
+
+Current shared assumptions:
+
+- the UNO R4 WiFi ADC is configured to `14-bit` with `analogReadResolution(14)`
+- startup metadata includes `META,adc_resolution_bits,14`
+- continuous labs log every sample
+- PulseOx logs both raw `PHASE` rows and corrected `CYCLE` rows
+
+---
+
+## Acquisition Class Guidance
 
 ### `CONT_HIGH`
-- Target use: fast waveform capture
-- Typical range: 1000 to 4000 samples per second
-- Logging rule: save every sample to CSV
-- Timing rule: use `t_us` so the device timestamp still resolves individual samples
-- Plotting rule: update the plot less often than samples arrive
+
+Use for fast waveform capture.
+
+Current guidance:
+
+- typical range: `1000` to `4000 samples/s`
+- log every sample
+- use `t_us`
+- update the plot less often than samples arrive
 
 ### `CONT_MED`
-- Target use: medium-rate waveform capture
-- Typical range: 100 to 1000 samples per second
-- Logging rule: save every sample to CSV
-- Plotting rule: redraw about 5 to 10 times per second
+
+Use for medium-rate waveform capture.
+
+Current guidance:
+
+- typical range: `100` to `1000 samples/s`
+- log every sample
+- use `t_ms`
+- redraw the plot at a comfortable classroom rate
 
 ### `PHASED_CYCLE`
-- Target use: repeated multi-phase measurement cycles
-- Typical range: 25 to 150 cycles per second
-- Logging rule: keep both raw `PHASE` packets and reconstructed `CYCLE` packets
-- Plotting rule: emphasize corrected cycle values instead of every raw phase
 
-## Default presets
+Use for repeated multi-phase measurement cycles.
 
-| Lab | Acquisition class | Default rate | Primary packets | Default fields | Plot default |
+Current guidance:
+
+- typical range: `25` to `150 cycles/s`
+- keep both `PHASE` and `CYCLE` rows
+- use `t_us`
+- emphasize corrected cycle values in the live plot
+
+---
+
+## Current Default Presets
+
+| Lab | Acquisition class | Default rate | Primary packets | Default timing field | Plot default |
 | --- | --- | --- | --- | --- | --- |
-| EMG | `CONT_HIGH` | 2000 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_us`, `ch1` | 5 s window, 50 ms redraw |
-| ECG | `CONT_MED` | 500 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_ms`, `ch1` | 10 s window, 100 ms redraw |
-| PulseOx | `PHASED_CYCLE` | 100 cycles/s | `META`, `PHASE`, `CYCLE`, `STAT`, `ERR` | `t_us`, `cycle_idx`, corrected values | 15 s window, 100 ms redraw |
-| Blood Pressure | `CONT_MED` | 200 samples/s | `META`, `DATA`, `STAT`, `ERR` | `t_ms`, `pressure` | 20 s window, 200 ms redraw |
+| EMG | `CONT_HIGH` | `2000 samples/s` | `META`, `DATA`, `STAT`, `ERR` | `t_us` | 5 s window, 50 ms redraw |
+| ECG | `CONT_MED` | `500 samples/s` | `META`, `DATA`, `STAT`, `ERR` | `t_ms` | 10 s window, 100 ms redraw |
+| PulseOx | `PHASED_CYCLE` | `100 cycles/s` | `META`, `PHASE`, `CYCLE`, `STAT`, `ERR` | `t_us` | 15 s window, 100 ms redraw |
+| Blood Pressure | `CONT_MED` | `200 samples/s` | `META`, `DATA`, `STAT`, `ERR` | `t_ms` | 20 s window, 200 ms redraw |
 
-## Blood pressure note
+---
 
-Blood pressure is treated as a continuous waveform lab.
+## Lab Notes
 
-- Students manually control cuff inflation and deflation.
-- The software logs the waveform continuously with `DATA`.
-- The project does not emit procedure-stage packets for blood pressure.
+### EMG
 
-## PulseOx note
+- high-rate continuous waveform lab
+- current default is `2000 samples/s`
+- use `t_us`
 
-PulseOx uses four optical phases per cycle:
-- `RED_ON`
-- `DARK1`
-- `IR_ON`
-- `DARK2`
+### ECG
 
-The GUI-generated firmware logs every phase sample with `PHASE`, sampling the same four physical channels on each phase:
-- `A0 = reflective_raw`
-- `A1 = transmission_raw`
-- `A2 = reflective_filtered`
-- `A3 = transmission_filtered`
+- medium-rate continuous waveform lab
+- current default is `500 samples/s`
+- use `t_ms`
 
-It then reconstructs corrected cycle values with `CYCLE`, where RED vs IR is inferred from the phase timing instead of separate ADC pins.
+### PulseOx
 
-## Migration note
+- phased-cycle optical lab
+- current default is `100 cycles/s`
+- four phases per cycle, so the raw phase rate is `400 phase samples/s`
 
-- `CONT_HIGH` data fields now begin with `t_us`.
-- `CONT_MED` remains on `t_ms`.
+### Blood Pressure
+
+- continuous waveform lab
+- current default is `200 samples/s`
+- no procedure-stage packets are emitted
+
+---
+
+## Validation Reminder
+
+These defaults are starting points. Bench testing should still record:
+
+- target rate
+- achieved rate
+- malformed packet count
+- packet loss notes
+- plot responsiveness
+- hardware notes
+
+Use the validation docs after any board, firmware, or lab-profile change.
+
+---
+
+## See Also
+
+- [README.md](../README.md)
+- [acquisition_architecture.md](./acquisition_architecture.md)
+- [serial_protocol.md](./serial_protocol.md)
+- [validation/README.md](./validation/README.md)

@@ -54,10 +54,7 @@ The current PCB design is published on **OSHWLab**:
 **Biomedical Instrumentation Board**  
 [View the current PCB project on OSHWLab](https://oshwlab.com/dd00055/biomedical-instrumentation-board)
 
-<!-- Replace this with your actual image path if you add a board render or photo -->
-<p align="center">
-  <img src="docs/images/board_render_placeholder.png" alt="Biomedical Instrumentation Board render" width="700">
-</p>
+<!-- Add a board render or photo here later when a current classroom-ready image is available. -->
 
 This board serves as the hardware foundation for the lab workflows in this repository and is being developed as an open educational platform for biosignal acquisition and instrumentation teaching.
 
@@ -82,7 +79,7 @@ The public repository currently includes the following main areas: `docs`, `exam
 
 ## How it works
 
-The repository is organized by **acquisition pattern first**, rather than only by sensor type. This allows one software workflow to be reused across several lab activities. The repo’s current architecture and top-level organization reflect this pattern-first approach. :contentReference[oaicite:2]{index=2}
+The repository is organized by **acquisition pattern first**, rather than only by sensor type. This allows one software workflow to be reused across several lab activities. The repo’s current architecture and top-level organization reflect this pattern-first approach.
 
 ### Acquisition classes
 
@@ -114,7 +111,7 @@ The intended student workflow is:
 6. start acquisition
 7. save one session CSV
 
-The current public repo already presents a “Start Here” path based on Conda, Arduino CLI, a system check, and launch scripts for Linux, macOS, and Windows. :contentReference[oaicite:3]{index=3}
+The current public repo already presents a “Start Here” path based on Conda, Arduino CLI, a system check, and launch scripts for Linux, macOS, and Windows.
 
 ---
 
@@ -220,12 +217,14 @@ The current board design is hosted on OSHWLab and developed as part of an open, 
 ## Screenshots
 <!-- Replace placeholders with real screenshots when ready -->
 GUI setup
-<p align="center"> <img src="docs/images/gui_setup_placeholder.png" alt="GUI setup screenshot" width="800"> </p>
+<p align="center"> <img src="docs/screenshots/student_gui_setup_placeholder.svg" alt="GUI setup screenshot placeholder" width="800"> </p>
 EMG live plot
-<p align="center"> <img src="docs/images/emg_live_plot_placeholder.png" alt="EMG live plot screenshot" width="800"> </p>
+<p align="center"> <img src="docs/screenshots/emg_live_plot_placeholder.svg" alt="EMG live plot screenshot placeholder" width="800"> </p>
 Pulse oximetry live plot
-<p align="center"> <img src="docs/images/pulseox_live_plot_placeholder.png" alt="Pulse oximetry live plot screenshot" width="800"> </p>
+<p align="center"> <img src="docs/screenshots/pulse_ox_live_plot_placeholder.svg" alt="Pulse oximetry live plot screenshot placeholder" width="800"> </p>
+
 ---
+
 ## Author
 
 Daniel Duque Urrego

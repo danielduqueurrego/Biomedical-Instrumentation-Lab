@@ -1,121 +1,164 @@
 # Generated Firmware Workflow
 
-This document describes what the student GUI does when it compiles or uploads Arduino firmware.
+> How the student GUI turns the current lab configuration into a temporary Arduino sketch for compile and upload.
 
-## Why generated firmware is used
+Use this document when you need to understand what the GUI-generated firmware is doing. If you only want to run the lab, go back to [student_setup.md](./student_setup.md).
 
-The student GUI does not always compile the fixed reference sketch directly.
-Instead, it generates a temporary Arduino UNO R4 WiFi sketch from the current GUI signal selection.
+---
 
-This keeps the student workflow simple:
-- choose a lab profile or custom signal setup
-- compile or upload from the GUI
-- review the exact Arduino code that was used
+## Start Here
 
-## Continuous workflow
+The student GUI does not always compile a fixed reference sketch directly. In most classroom cases, it generates a temporary Arduino UNO R4 WiFi sketch from the active lab configuration.
 
-If the selected signals do not use the `PulseOx` preset, the generated sketch:
-- uses the highest default rate among the selected signal presets
-- sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
-- emits only the selected analog ports
-- sends `META,fields,...` and `DATA,...` packets
-- behaves as `CONT_HIGH` or `CONT_MED` depending on the selected rate
-- uses `t_us` timestamps for `CONT_HIGH`
-- uses `t_ms` timestamps for `CONT_MED`
+This keeps the workflow simple:
+
+1. load a lab profile or session preset
+2. review the selected signals and save folder
+3. click compile or upload
+4. inspect the saved Arduino code copy later if needed
+
+Every successful compile saves a timestamped copy of the exact generated code under:
+
+- `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
+
+---
+
+## Continuous Workflow
+
+If the selected signals are not PulseOx, the generated sketch uses the continuous workflow.
+
+Current rules:
+
+- use the highest default rate among the selected signal presets
+- set the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
+- emit only the selected analog ports
+- send `META` plus `DATA` packets
+- resolve to `CONT_HIGH` or `CONT_MED` from the selected rate
+
+Timing behavior:
+
+- `CONT_HIGH` emits `META,fields,t_us,...` and `DATA,t_us,...`
+- `CONT_MED` emits `META,fields,t_ms,...` and `DATA,t_ms,...`
 
 Example:
-- `EMG` at `2000` samples/s
-- `Blood Pressure` at `200` samples/s
 
-The generated sketch uses:
-- `2000` samples/s
-- continuous `DATA` packets
-- `t_us` timing because the resulting acquisition class is `CONT_HIGH`
+- selected presets: `EMG` at `2000 samples/s` and `Blood Pressure` at `200 samples/s`
+- generated result: `CONT_HIGH` at `2000 samples/s`
+- timing field: `t_us`
 
-## PulseOx phased-cycle workflow
+---
 
-If the selected signals use the `PulseOx` preset, the generated sketch switches to `PHASED_CYCLE` mode.
+## PulseOx Workflow
 
-Rules:
+If the selected signals use the `PulseOx` preset, the generated sketch switches to `PHASED_CYCLE`.
+
+Current rules:
+
 - all active signals must be `PulseOx` signals
-- PulseOx uses a fixed UNO R4 WiFi analog mapping:
+- PulseOx uses the fixed UNO R4 WiFi mapping:
   - `A0 = reflective_raw`
   - `A1 = transmission_raw`
   - `A2 = reflective_filtered`
   - `A3 = transmission_filtered`
+- generated firmware drives:
+  - `D6 = RED LED`
+  - `D5 = IR LED`
 
-The generated sketch then:
-- sets the UNO R4 WiFi ADC to `14-bit` with `analogReadResolution(14)`
-- drives `D6` for the red LED
-- drives `D5` for the IR LED
-- discards the first ADC read after each channel switch and averages two settled reads per channel
-- steps through the phase sequence:
-  - `RED_ON`
-  - `DARK1`
-  - `IR_ON`
-  - `DARK2`
-- samples all four PulseOx analog channels during every phase
-- emits one raw `PHASE` packet per phase with the fields:
-  - `reflective_raw`
-  - `transmission_raw`
-  - `reflective_filtered`
-  - `transmission_filtered`
-- emits one corrected `CYCLE` packet after `DARK2` with the fields:
-  - `reflective_raw_red_corr`
-  - `reflective_raw_ir_corr`
-  - `transmission_raw_red_corr`
-  - `transmission_raw_ir_corr`
-  - `reflective_filtered_red_corr`
-  - `reflective_filtered_ir_corr`
-  - `transmission_filtered_red_corr`
-  - `transmission_filtered_ir_corr`
+Phase sequence:
 
-Red and IR are not separate analog outputs. They are inferred from the active LED phase.
+- `RED_ON`
+- `DARK1`
+- `IR_ON`
+- `DARK2`
 
-For PulseOx, the GUI:
-- logs one session CSV per run
-- stores raw phase packets as `PHASE` rows in that CSV
-- stores corrected cycle packets as `CYCLE` rows in that CSV
-- plots the corrected `CYCLE` values live
-- uses student-facing live-plot labels derived from the four configured channel names, with `RED corrected` and `IR corrected` suffixes
+During every phase, the sketch:
 
-Important distinction:
-- the serial protocol still uses explicit field names such as `reflective_raw_red_corr`
-- the saved student session CSV and the live plot use readable labels derived from the configured PulseOx channel names
+- sets the ADC to `14-bit`
+- samples all four analog PulseOx channels
+- discards the first read after switching inputs
+- averages two settled reads per channel
+- emits one `PHASE` packet with all four channel values
 
-Implementation note:
-- the extra dummy-read-plus-average step is there to reduce occasional spike-like artifacts caused by fast ADC input switching between `A0` and `A3`
+After `DARK2`, the sketch emits one corrected `CYCLE` packet.
 
-The generated sketch also emits metadata such as:
-- `META,adc_resolution_bits,14`
-- `META,phase_fields,...`
-- `META,cycle_fields,...`
-- `META,pulseox_analog_map,...`
-- `META,pulseox_led_pins,IR_D5,RED_D6`
-- `META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2`
+Corrected outputs:
 
-## Blood pressure note
+- `reflective_raw_red_corr`
+- `reflective_raw_ir_corr`
+- `transmission_raw_red_corr`
+- `transmission_raw_ir_corr`
+- `reflective_filtered_red_corr`
+- `reflective_filtered_ir_corr`
+- `transmission_filtered_red_corr`
+- `transmission_filtered_ir_corr`
 
-Blood pressure now uses the continuous workflow.
+Important model rule:
 
-- The project does not emit procedure stage packets for blood pressure.
-- Students manually inflate and deflate the cuff while the waveform is logged continuously.
+- red versus IR is inferred from the active phase
+- red and IR are not separate analog inputs
 
-## Saved Arduino code copies
+---
 
-After each successful compile, the project saves a timestamped Arduino code copy under:
-- `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
+## Blood Pressure Note
 
-This lets instructors and students inspect the exact Arduino code that was compiled.
+Blood Pressure stays on the continuous workflow.
 
-## Generated sketch location
+Current behavior:
 
-The temporary generated sketch folders are stored under:
+- no procedure-stage packets
+- no `EVENT` rows
+- students manually inflate and deflate the cuff while continuous `DATA` rows are logged
+
+---
+
+## What Gets Saved During A Run
+
+### Generated sketch files
+
+Temporary generated sketch folders are stored under:
+
 - `data/generated_arduino_sketches/`
 
 These are runtime artifacts and are not intended to be committed.
 
-## Migration note
+### Session logs
 
-- High-rate continuous generated firmware now emits `META,fields,t_us,...` and `DATA,t_us,...`.
-- Medium-rate continuous generated firmware is unchanged and still emits `t_ms`.
+The student GUI saves one CSV per session.
+
+That CSV can contain:
+
+- `META` rows
+- `DATA` rows for continuous labs
+- `PHASE` and `CYCLE` rows for PulseOx
+- `STAT`, `ERR`, or `PARSE_ERROR` rows when relevant
+
+The `row_type` column is the first thing students should use to filter the file.
+
+---
+
+## Why Generated Firmware Is Still Student-Friendly
+
+Even though the code is generated at runtime, the workflow stays simple for class use:
+
+- students do not need to edit `.ino` files
+- the GUI uses the selected lab configuration directly
+- instructors can inspect the saved code copy after compile
+- committed reference sketches still exist for known-good smoke tests and simpler demonstrations
+
+---
+
+## Migration Notes
+
+- high-rate continuous generated firmware now uses `t_us`
+- medium-rate continuous generated firmware still uses `t_ms`
+- PulseOx uses the fixed four-channel shared photodiode model on `A0` to `A3`
+
+---
+
+## See Also
+
+- [README.md](../README.md)
+- [student_setup.md](./student_setup.md)
+- [arduino_cli_setup.md](./arduino_cli_setup.md)
+- [serial_protocol.md](./serial_protocol.md)
+- [docs/labs/pulse_ox.md](./labs/pulse_ox.md)

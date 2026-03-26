@@ -1,232 +1,266 @@
-# Student setup
+# Student Setup
 
-This guide is the beginner-friendly setup path for Windows, macOS, and Linux.
+> Beginner-friendly setup guide for Windows, macOS, and Linux.
 
-## Software students need
+Use this guide when you are preparing a classroom computer or helping a student get to their first live plot. If you only want the short version, see the quick start in [README.md](../README.md).
+
+---
+
+## Start Here
 
 Students only need:
-- one Conda-based Python installation such as Miniconda or Anaconda
+
+- one Conda-based Python distribution such as Miniconda or Anaconda
 - Arduino CLI
 - a USB data cable for the Arduino board
 
-After that, the intended workflow is:
-1. create one Conda environment,
-2. run one system check,
-3. compile or upload firmware from the GUI or Arduino CLI,
-4. launch the Python GUI from a top-level starter script,
-5. save data automatically.
+The intended path is:
 
-## Windows
+1. create one Conda environment
+2. run the system check
+3. prepare Arduino CLI once
+4. launch the GUI
+5. load a lab preset
+6. start acquisition
+7. save one CSV per session
 
-### Install software
-1. Install Miniconda or Anaconda from the official Anaconda site.
-2. Install Arduino CLI from the official Arduino CLI documentation.
-3. Make sure `arduino-cli.exe` is on `PATH`, or set the `ARDUINO_CLI` environment variable to its full path.
+---
 
-### Project setup
-1. Open Command Prompt or PowerShell.
-2. Go to the repository root, then enter `python`:
-   `cd python`
-3. Create the Conda environment:
-   `conda env create -f environment.yml`
-4. Activate it:
-   `conda activate biomed-lab`
-5. Run the system check:
-   `python system_check.py`
-6. Return to the repository root before first run:
-   `cd ..`
+## Quick Path By Operating System
 
-### First run (primary beginner path)
-1. Go to the repository root.
-2. Prepare Arduino CLI once:
-   `tools\setup_arduino_cli.bat`
-3. Upload the reference firmware:
-   `tools\upload_cont_med_three_channel.bat`
-4. Launch the GUI from the repository root:
-   `launch_student_gui_windows.bat`
+### Windows
 
-### Fallback / advanced launch path
-If needed, the older launcher still works from the `python` folder:
-1. From the repository root, enter `python`:
-   `cd python`
-2. Launch the GUI:
-   `launch_student_acquisition_gui.bat`
-3. Return to the repository root when finished:
-   `cd ..`
+1. Install Miniconda or Anaconda.
+2. Install Arduino CLI.
+3. Open Command Prompt or PowerShell in the repository root.
+4. Create and activate the environment:
+   ```bat
+   cd python
+   conda env create -f environment.yml
+   conda activate biomed-lab
+   python system_check.py
+   cd ..
+   ```
+5. Prepare Arduino CLI once:
+   ```bat
+   tools\setup_arduino_cli.bat
+   ```
+6. Launch the GUI:
+   ```bat
+   launch_student_gui_windows.bat
+   ```
 
-## macOS
+### macOS
 
-### Install software
-1. Install Miniconda or Anaconda from the official Anaconda site.
-2. Install Arduino CLI from the official Arduino CLI documentation.
-3. Make sure `arduino-cli` is on `PATH`.
+1. Install Miniconda or Anaconda.
+2. Install Arduino CLI.
+3. Open Terminal in the repository root.
+4. Create and activate the environment:
+   ```bash
+   cd python
+   conda env create -f environment.yml
+   conda activate biomed-lab
+   python system_check.py
+   cd ..
+   ```
+5. Prepare Arduino CLI once:
+   ```bash
+   ./tools/setup_arduino_cli.sh
+   ```
+6. Launch the GUI:
+   ```bash
+   ./launch_student_gui_macos.command
+   ```
 
-### Project setup
-1. Open Terminal.
-2. Go to the repository root, then enter `python`:
-   `cd python`
-3. Create the Conda environment:
-   `conda env create -f environment.yml`
-4. Activate it:
-   `conda activate biomed-lab`
-5. Run the system check:
-   `python system_check.py`
-6. Return to the repository root before first run:
-   `cd ..`
+### Linux
 
-### First run (primary beginner path)
-1. Go to the repository root.
-2. Prepare Arduino CLI once:
-   `./tools/setup_arduino_cli.sh`
-3. Upload a reference firmware (choose one):
-   `./tools/upload_cont_med_three_channel.sh`
-   `./tools/upload_cont_high_emg_reference.sh`
-4. Launch the GUI from the repository root:
-   `./launch_student_gui_macos.command`
+1. Install Miniconda or Anaconda.
+2. Install Arduino CLI.
+3. Make sure your user has serial-port access if required by the OS.
+4. Open Terminal in the repository root.
+5. Create and activate the environment:
+   ```bash
+   cd python
+   conda env create -f environment.yml
+   conda activate biomed-lab
+   python system_check.py
+   cd ..
+   ```
+6. Prepare Arduino CLI once:
+   ```bash
+   ./tools/setup_arduino_cli.sh
+   ```
+7. Launch the GUI:
+   ```bash
+   ./launch_student_gui_linux.sh
+   ```
 
-### Fallback / advanced launch path
-If needed, the older launcher still works from the `python` folder:
-1. From the repository root, enter `python`:
-   `cd python`
-2. Launch the GUI:
-   `./launch_student_acquisition_gui.sh`
-3. Return to the repository root when finished:
-   `cd ..`
+---
 
-## Linux
+## What To Do In The GUI
 
-### Install software
-1. Install Miniconda or Anaconda from the official Anaconda site.
-2. Install Arduino CLI from the official Arduino CLI documentation.
-3. Make sure `arduino-cli` is on `PATH`.
-4. If needed, follow Arduino's Linux serial-port permission instructions.
+Once the GUI opens:
 
-### Project setup
-1. Open Terminal.
-2. Go to the repository root, then enter `python`:
-   `cd python`
-3. Create the Conda environment:
-   `conda env create -f environment.yml`
-4. Activate it:
-   `conda activate biomed-lab`
-5. Run the system check:
-   `python system_check.py`
-6. Return to the repository root before first run:
-   `cd ..`
+1. confirm the board and port are detected
+2. choose a lab from the lab dropdown
+3. optionally load a JSON session preset
+4. choose the save folder
+5. compile or upload firmware if needed
+6. click `Start Acquisition`
 
-### First run (primary beginner path)
-1. Go to the repository root.
-2. Prepare Arduino CLI once:
-   `./tools/setup_arduino_cli.sh`
-3. Upload a reference firmware (choose one):
-   `./tools/upload_cont_med_three_channel.sh`
-   `./tools/upload_cont_high_emg_reference.sh`
-4. Launch the GUI from the repository root:
-   `./launch_student_gui_linux.sh`
+In the most common classroom case, one connected Arduino UNO R4 WiFi should auto-fill the board and port after refresh.
 
-### Fallback / advanced launch path
-If needed, the older launcher still works from the `python` folder:
-1. From the repository root, enter `python`:
-   `cd python`
-2. Launch the GUI:
-   `./launch_student_acquisition_gui.sh`
-3. Return to the repository root when finished:
-   `cd ..`
+---
 
-## What the system check verifies
+## Current GUI Features
 
-The system check script verifies:
+The current student GUI lets students:
+
+- load lab profiles from a dropdown
+- load or save reusable JSON session presets
+- select the board target
+- let Arduino CLI auto-detect the connected board port
+- choose a save folder and output filename
+- use an auto-updated timestamp suffix in the output filename
+- choose between `1` and `6` active signals
+- assign a name, preset, and analog port to each active signal
+- choose how many live subplots to display
+- choose which plotted series appear in each subplot
+- compile or upload firmware from the GUI
+- start and stop acquisition
+- hide the left panel or bottom status log to make more room for plots
+- save one CSV per session
+
+---
+
+## What The System Check Verifies
+
+Run from the `python/` folder:
+
+```bash
+python system_check.py
+```
+
+The system check verifies:
+
 - `tkinter`
 - `matplotlib`
 - `pyserial`
 - `arduino-cli`
 - visible serial ports
 
-Run it with:
-- from the repository root:
-  - `cd python`
-  - `python system_check.py`
-  - `cd ..`
+---
 
-## What the first GUI supports
+## Session Presets
 
-The first GUI allows students to:
-- load lab profiles from a lab dropdown
-- load or save reusable session presets in JSON format
-- select the current board target
-- let Arduino CLI auto-detect the connected board port
-- review the detected serial port if more than one board or port is present
-- choose a save folder and output filename
-- use an auto-updated timestamp suffix in the output filename
-- choose between 1 and 6 active signals
-- assign a name, preset, and analog port to each active signal
-- choose how many live subplots to display
-- choose which plotted series appear in each subplot
-- review preset sampling defaults
-- compile or upload firmware from the GUI
-- get a clear error if firmware upload is attempted with no supported Arduino board detected
-- start and stop acquisition
-- see live plots
-- log data to CSV
+The repo ships example presets in:
 
-The repository includes example session presets in:
 - `python/session_presets/ecg.json`
 - `python/session_presets/emg.json`
 - `python/session_presets/pulse_ox.json`
 - `python/session_presets/blood_pressure.json`
 
-Each session preset stores:
-- the selected lab profile when one is used
-- the active signal names, preset types, and analog ports
-- the generated acquisition class and default sampling rate
-- the save folder and filename prefix
-- the subplot layout and plotted-series selections
+Each preset stores:
 
-The GUI-generated firmware workflow:
+- the selected lab profile
+- active signal names, preset types, and analog ports
+- the generated acquisition class and default rate
+- the save folder and filename prefix
+- subplot layout and plotted-series selections
+
+---
+
+## What The Generated Firmware Does
+
+The GUI-generated firmware workflow currently:
+
 - generates Arduino code from the current signal selection
 - uses the highest selected preset rate
 - emits only the selected analog ports
-- uses `t_us` timing when the generated continuous session resolves to `CONT_HIGH`
-- uses `t_ms` timing when the generated continuous session resolves to `CONT_MED`
+- uses `t_us` when the continuous session resolves to `CONT_HIGH`
+- uses `t_ms` when the continuous session resolves to `CONT_MED`
 - saves a timestamped copy of the compiled Arduino code for review
 - keeps Blood Pressure on the continuous `DATA` workflow
-- if the selected signals use the `PulseOx` preset, all active signals must be `PulseOx`
-- if the selected signals use the `PulseOx` preset, the GUI uses the fixed hardware mapping:
+
+PulseOx-specific behavior:
+
+- all active signals must be `PulseOx`
+- the fixed hardware map is:
   - `A0 = reflective_raw`
   - `A1 = transmission_raw`
   - `A2 = reflective_filtered`
   - `A3 = transmission_filtered`
-- when a row uses the `PulseOx` preset, the GUI locks that row to its fixed PulseOx analog input
-- adds PulseOx LED sequencing on `D6` and `D5` when the `PulseOx` preset is used
-- emits raw `PHASE` packets with all four optical channels during every phase
-- emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each optical path
-- saves one session CSV per run instead of several separate CSV files
-- stores PulseOx raw phases as `PHASE` rows and corrected cycle values as `CYCLE` rows in that same CSV
-- uses readable PulseOx plot labels derived from the four configured channel names, instead of raw protocol field names
+- the GUI locks those PulseOx rows to the correct analog inputs
+- generated firmware drives `D6` for RED and `D5` for IR
+- generated firmware emits raw `PHASE` rows and corrected `CYCLE` rows in the same session CSV
 
-The live-plot workflow:
-- uses `S1` onward as short plotted-series labels in the plot-layout controls
-- shows a signal reference line above the plot so students can match `S1` to the full plotted series name
-- lets one signal appear in more than one subplot when comparison views are helpful
-- resets to a simple default subplot split whenever the subplot count changes
-- lets students hide or restore the left setup panel and bottom status log from the top toolbar
-- places subplot legends on the left side of each graph
+For more detail, see [generated_firmware_workflow.md](./generated_firmware_workflow.md).
 
-For PulseOx sessions, the plotted series are the corrected `CYCLE` outputs rather than the raw analog channel names.
+---
 
-In the most common case, where one Arduino UNO R4 WiFi is connected, the GUI should fill the board and port automatically after refresh.
+## Where Files Are Saved
 
-For more detail on generated Arduino code, see:
-- `docs/generated_firmware_workflow.md`
+### Session data
 
-Migration note:
-- high-rate continuous labs such as EMG now use microsecond Arduino timestamps
-- medium-rate labs such as ECG and Blood Pressure remain on millisecond Arduino timestamps
+The GUI saves one CSV per session in the folder the student chooses.
 
-## Official references
+That CSV can contain:
+
+- `META`
+- `DATA`
+- `PHASE`
+- `CYCLE`
+- `STAT`
+- `ERR`
+- `PARSE_ERROR`
+
+Use the `row_type` column to filter the rows you care about.
+
+### Arduino code copies
+
+Every successful compile saves a copy of the generated sketch under:
+
+- `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
+
+---
+
+## Troubleshooting
+
+### The GUI does not find the board
+
+- reconnect the board
+- run `python tools/arduino_cli.py board-list`
+- refresh the GUI board and port list
+
+### Firmware upload fails immediately
+
+This usually means:
+
+- no supported board was detected
+- the wrong port is selected
+- another program is holding the serial port
+
+### Linux upload shows a permissions error
+
+- check that your user has access to the serial device
+- reconnect the board after fixing permissions
+
+---
+
+## Official References
 
 - Anaconda and Miniconda downloads: https://www.anaconda.com/download
 - Conda environment files: https://docs.conda.io/projects/conda/en/stable/user-guide/tasks/manage-environments.html
 - Arduino CLI installation: https://docs.arduino.cc/arduino-cli/installation
 - Arduino CLI getting started: https://docs.arduino.cc/arduino-cli/getting-started/
 - Linux port access help: https://support.arduino.cc/hc/en-us/articles/360016495679-Fix-port-access-on-Linux
+
+---
+
+## See Also
+
+- [README.md](../README.md)
+- [arduino_cli_setup.md](./arduino_cli_setup.md)
+- [generated_firmware_workflow.md](./generated_firmware_workflow.md)
+- [docs/labs/README.md](./labs/README.md)
+- [examples/session_csv/README.md](../examples/session_csv/README.md)

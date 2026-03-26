@@ -1,147 +1,157 @@
-# Arduino CLI setup
+# Arduino CLI Setup
 
-This project uses Arduino CLI to reduce the amount of clicking students need to do before running a lab.
+> Arduino CLI setup guide for the repo’s student workflow, reference sketches, and GUI upload path.
 
-For the full student workflow, including Conda setup and the Tkinter GUI, see `docs/student_setup.md`.
-For the generated GUI firmware behavior, see `docs/generated_firmware_workflow.md`.
+Use this document when you need to prepare Arduino CLI or troubleshoot firmware compile and upload behavior. If you want the full student path from first install to first plot, start with [student_setup.md](./student_setup.md).
 
-## Project requirement
+---
 
-All student systems need:
+## Start Here
+
+This project uses Arduino CLI so students can compile and upload firmware without working directly inside the Arduino IDE.
+
+Every student system needs:
+
 - Arduino CLI installed
-- Arduino CLI available on `PATH`, or the environment variable `ARDUINO_CLI` set to the full executable path
-- a data USB cable
-- the Arduino UNO R4 WiFi board package: `arduino:renesas_uno`
+- Arduino CLI available on `PATH`, or `ARDUINO_CLI` set to the executable path
+- a USB data cable
+- the UNO R4 WiFi board core: `arduino:renesas_uno`
 
-This repository includes cross-platform helper scripts in `tools/` so students can run setup, compile, and upload commands without editing source files.
+The repo includes helper scripts in `tools/` so the normal classroom flow is one command per step instead of a manual Arduino CLI session.
 
-The Tkinter GUI also uses Arduino CLI board detection so the port can be filled automatically after the student selects a board.
-GUI firmware uploads now fail fast when no supported board is detected, and Arduino CLI compile/upload commands use built-in timeouts so a missing board does not appear to freeze the app indefinitely.
+---
 
-## Recommended project workflow
+## Quick Setup
 
 From the repository root:
 
 1. Install or update Arduino CLI.
-2. Run the one-time board setup command:
+2. Run the one-time setup script:
    - macOS/Linux: `./tools/setup_arduino_cli.sh`
-   - Windows: `tools\\setup_arduino_cli.bat`
-3. Connect the UNO R4 WiFi by USB.
-4. Upload the current `CONT_MED` reference sketch. It streams the UNO R4 WiFi analog inputs `A0` to `A5`, and the GUI lets students choose which of those six inputs are active:
-   - macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
-   - Windows: `tools\\upload_cont_med_three_channel.bat`
+   - Windows: `tools\setup_arduino_cli.bat`
+3. Connect the Arduino UNO R4 WiFi by USB.
+4. Confirm board detection:
+   - `python tools/arduino_cli.py board-list`
 
-In the student GUI workflow, firmware compile and upload use a generated Arduino sketch based on the current GUI signal selection:
-- only the selected analog ports are emitted
-- the sample rate is set to the highest default rate among the selected signal presets
-- continuous `CONT_HIGH` sketches emit `t_us` timestamps
-- continuous `CONT_MED` sketches emit `t_ms` timestamps
-- Blood Pressure remains a continuous waveform workflow with no procedure-event packets
-- if the selected signals use the `PulseOx` preset, all active signals must be `PulseOx` signals
-- in PulseOx mode, the generated sketch uses the fixed board mapping `A0=reflective_raw`, `A1=transmission_raw`, `A2=reflective_filtered`, `A3=transmission_filtered`
-- in PulseOx mode, the generated sketch drives D6 for RED and D5 for IR through `RED_ON`, `DARK1`, `IR_ON`, `DARK2`
-- in PulseOx mode, the generated sketch emits raw `PHASE` packets with all four optical channels on every phase
-- in PulseOx mode, the generated sketch emits corrected `CYCLE` packets with explicit RED-corrected and IR-corrected values for each optical path
-- the generated Arduino source is saved for review after each successful compile
+If you are using the student GUI, this is enough. The GUI can then detect the board, compile firmware, and upload it from the current lab configuration.
 
-If auto-detection does not find the correct port, pass it explicitly:
-- macOS/Linux: `./tools/upload_cont_med_three_channel.sh --port /dev/ttyACM0`
-- Windows: `tools\\upload_cont_med_three_channel.bat --port COM3`
+---
 
-## Windows
+## Quick Reference Commands
 
-Recommended requirements:
-- install the latest Arduino CLI from the official Arduino CLI installation page
-- make sure `arduino-cli.exe` is on `PATH`, or set `ARDUINO_CLI` to the executable path
-- use Command Prompt or PowerShell to run the `.bat` helper scripts
+### One-time setup
 
-Project notes:
-- For UNO R4 WiFi uploads on Windows, keep Arduino CLI updated. Arduino support says the touch-reset upload fix is included in Arduino CLI `0.33.1` or later.
-- This project now prefers machine-readable board detection with `arduino-cli board list --format json`. To guarantee JSON output support in student setups, require Arduino CLI `0.33.1` or later (recommended for all operating systems in this repo).
-- If the board is not detected correctly after connecting it, reconnect it and try the upload again.
+- macOS/Linux: `./tools/setup_arduino_cli.sh`
+- Windows: `tools\setup_arduino_cli.bat`
 
-## macOS
+### Board detection
 
-Recommended requirements:
-- install Arduino CLI with Homebrew, or use the official install script/download
-- make sure `arduino-cli` is on `PATH`
-- run the `.sh` helper scripts from Terminal
+- `python tools/arduino_cli.py board-list`
 
-Project notes:
-- `brew install arduino-cli` is the simplest path for students who already use Homebrew.
-- If Arduino CLI was installed manually, add the install folder to `PATH` before using the helper scripts.
+### Compile current `CONT_MED` reference sketch
 
-## Linux
+- `python tools/arduino_cli.py compile-demo`
 
-Recommended requirements:
-- install Arduino CLI with Homebrew, the official install script, or the official download
-- make sure `arduino-cli` is on `PATH`
-- run the `.sh` helper scripts from Terminal
+### Upload current `CONT_MED` reference sketch
 
-Project notes:
-- If uploads fail with permission errors, follow Arduino's Linux serial-port guidance:
-  - add the user to the `dialout` group if your system uses it
-  - if needed, add the user to the group that owns the device node
-  - if uploads fail after reset, check the udev rules guidance from Arduino
-- If the GUI reports that the upload timed out, first check that the UNO R4 WiFi is connected, appears in `arduino-cli board list`, and is not already open in another serial monitor.
+- macOS/Linux: `./tools/upload_cont_med_three_channel.sh`
+- Windows: `tools\upload_cont_med_three_channel.bat`
 
-## Commands used by this project
+### Upload current `CONT_HIGH` EMG reference sketch
 
-The helper tool wraps these Arduino CLI operations:
-- `arduino-cli core update-index`
-- `arduino-cli core install arduino:renesas_uno`
-- `arduino-cli board list --format json` (preferred when supported by the installed CLI)
-- `arduino-cli compile --fqbn arduino:renesas_uno:unor4wifi <sketch-folder>`
-- `arduino-cli upload --fqbn arduino:renesas_uno:unor4wifi --port <port> <sketch-folder>`
+- macOS/Linux: `./tools/upload_cont_high_emg_reference.sh`
+- Windows: `tools\upload_cont_high_emg_reference.bat`
 
-After each successful compile, the project also saves a timestamped copy of the compiled Arduino sketch source under:
-- `data/arduino_code_snapshots/arduino_code_YYYY_MM_DD_HH_MM_SS.ino`
+---
 
-Committed reference sketches currently included in the repo:
+## What The GUI Does With Arduino CLI
+
+The student GUI uses Arduino CLI for:
+
+- board detection
+- compile-only checks
+- firmware upload
+
+Current GUI behavior:
+
+- if one supported board is connected, the GUI usually fills the board and port automatically
+- if no supported board is detected, upload fails fast with a readable message
+- compile and upload commands use timeouts so a missing or busy board does not look like the app froze
+- every successful compile saves a copy of the exact Arduino code used under `data/arduino_code_snapshots/`
+
+---
+
+## Reference Sketches And Generated Firmware
+
+### Committed reference sketches
+
+The repo currently includes these main committed sketches:
+
 - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
 - `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
 - `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
 - `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
 
-## CI smoke tests
+### GUI-generated firmware
 
-GitHub Actions CI uses Arduino CLI as a compile smoke test for firmware health.
+When students compile or upload from the GUI, the repo usually generates a temporary sketch from the current signal selection.
 
-Current CI assumptions:
-- runner OS: Ubuntu
-- board core installed in CI: `arduino:renesas_uno`
-- compile target board: `arduino:renesas_uno:unor4wifi`
+Current generated behavior:
 
-Current CI compile targets:
-- committed `CONT_MED` reference sketch:
-  - `firmware/cont_med/uno_r4_wifi/three_channel_data_demo`
-- committed `CONT_HIGH` helper sketch:
-  - `firmware/cont_high/uno_r4_wifi/emg_high_rate_reference`
-- committed `CONT_HIGH` four-channel sketch:
-  - `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
-- committed `PHASED_CYCLE` PulseOx reference sketch:
-  - `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
+- only the selected analog ports are emitted
+- the sample rate is the highest selected preset rate
+- `CONT_HIGH` emits `t_us`
+- `CONT_MED` emits `t_ms`
+- generated firmware sets `analogReadResolution(14)` on the UNO R4 WiFi
+- PulseOx switches to `PHASED_CYCLE` mode and uses the fixed PulseOx analog map
 
-Both committed `CONT_HIGH` sketches now use `t_us` timestamps, matching the shared protocol and Python logging path for high-rate data.
-- generated example sketches:
-  - `ECG` for `CONT_MED`
-  - `EMG` for `CONT_HIGH`
-  - `Pulse Oximetry` for `PHASED_CYCLE`
+For details, see [generated_firmware_workflow.md](./generated_firmware_workflow.md).
 
-The CI workflow is intentionally a compile smoke test only.
-It does not upload to hardware, exercise serial ports, or replace the bench validation process described in `docs/validation/README.md`.
+---
 
-## If Arduino CLI is installed but not found
+## Current Board Core Assumption
 
-If the helper scripts report that Arduino CLI is missing, do one of these:
-- add Arduino CLI to your system `PATH`
-- set `ARDUINO_CLI` to the executable path
-- pass `--arduino-cli /full/path/to/arduino-cli` to `tools/arduino_cli.py`
+This repo currently targets:
 
-## Official references
+- board family: `arduino:renesas_uno`
+- main board used in class: `arduino:renesas_uno:unor4wifi`
 
-- Arduino CLI installation: https://docs.arduino.cc/arduino-cli/installation
-- Arduino CLI getting started: https://docs.arduino.cc/arduino-cli/getting-started/
-- Linux port access help: https://support.arduino.cc/hc/en-us/articles/360016495679-Fix-port-access-on-Linux
-- UNO R4 WiFi Windows upload note: https://support.arduino.cc/hc/en-us/articles/9398559565340-Touch-reset-fails-for-UNO-R4-WiFi-on-Windows-Arduino-CLI-0-33-0-or-earlier
-- UNO R4 WiFi connectivity firmware help: https://support.arduino.cc/hc/en-us/articles/9670986058780-Update-the-connectivity-module-firmware-on-UNO-R4-WiFi
+If that changes in the future, update:
+
+- the Arduino CLI helper scripts
+- the GUI defaults
+- CI compile smoke tests
+- the firmware READMEs
+
+---
+
+## Troubleshooting
+
+### Arduino CLI is not found
+
+- make sure `arduino-cli` is on `PATH`
+- or set `ARDUINO_CLI` to the full executable path
+- rerun `python python/system_check.py`
+
+### The board is connected but upload fails
+
+- confirm the port shown by `python tools/arduino_cli.py board-list`
+- close any serial monitor or other program that may be holding the port
+- on Linux, confirm the user has serial-port access
+
+### Upload seems to hang
+
+Current GUI and helper commands use timeouts. If a timeout occurs:
+
+- reconnect the board
+- rerun the board-list command
+- check that the selected port still matches the detected board
+
+---
+
+## See Also
+
+- [README.md](../README.md)
+- [student_setup.md](./student_setup.md)
+- [generated_firmware_workflow.md](./generated_firmware_workflow.md)
+- [serial_protocol.md](./serial_protocol.md)

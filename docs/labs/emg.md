@@ -1,84 +1,120 @@
 # EMG Lab
 
-## Purpose
+> High-rate continuous EMG workflow for comparing raw and conditioned signal paths.
 
-This lab captures several stages of an EMG signal chain so students can compare the raw waveform with common conditioning steps.
+Use this guide when you are setting up the EMG lab in class or checking whether the current EMG configuration matches the repo defaults.
 
-The default classroom configuration includes:
-- raw EMG
-- rectified EMG
-- enveloped EMG
-- pressure
+---
 
-## Acquisition summary
+## Start Here
 
-- Acquisition class: `CONT_HIGH`
-- Default sampling rate: `2000 samples/s`
-- Default Arduino timestamp field: `t_us`
-- Main packet types: `META`, `DATA`, optional `STAT`, optional `ERR`
+Recommended classroom path:
 
-## Board and analog pin mapping
+1. connect the Arduino UNO R4 WiFi
+2. launch the student GUI
+3. choose `EMG` from the lab dropdown or load `python/session_presets/emg.json`
+4. confirm the four EMG rows are loaded on `A0` to `A3`
+5. choose a save folder
+6. compile and upload from the GUI or use the committed EMG reference sketch
+7. start acquisition
+
+---
+
+## Quick Reference
+
+| Item | Current default |
+| --- | --- |
+| Purpose | Compare raw EMG with conditioned EMG paths |
+| Acquisition class | `CONT_HIGH` |
+| Default sampling rate | `2000 samples/s` |
+| Arduino timestamp field | `t_us` |
+| Main packet types | `META`, `DATA`, optional `STAT`, optional `ERR` |
+| Student preset | `python/session_presets/emg.json` |
+| Reference sketch | `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo/emg_four_channel_demo.ino` |
+
+---
+
+## Signal Set And Pin Mapping
 
 Default Arduino UNO R4 WiFi mapping:
+
 - `A0 = Raw EMG`
 - `A1 = Rectified EMG`
 - `A2 = Enveloped EMG`
 - `A3 = Pressure`
 
-Reference sketch:
-- `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo/emg_four_channel_demo.ino`
+These are the four default classroom signals:
 
-## GUI setup
+- raw EMG
+- rectified EMG
+- enveloped EMG
+- pressure
 
-Recommended classroom path:
-1. Connect the Arduino UNO R4 WiFi.
-2. Start the student GUI with `python/run_student_acquisition_gui.py`.
-3. In the lab dropdown, choose `EMG`.
-4. Confirm the GUI auto-detects the board and serial port.
-5. Confirm the four EMG rows are loaded on `A0` to `A3`.
-6. Choose the save folder.
-7. Compile and upload from the GUI, then start acquisition.
+---
 
-Optional preset:
-- `python/session_presets/emg.json`
+## Firmware And GUI Notes
 
-## Firmware or profile to use
+Students can use either:
 
-Use one of these:
-- GUI lab profile: `EMG`
-- GUI session preset: `python/session_presets/emg.json`
-- committed reference sketch: `firmware/cont_high/uno_r4_wifi/emg_four_channel_demo`
+- the GUI-generated firmware path
+- the committed EMG reference sketch
 
-For the normal student workflow, prefer the GUI lab profile or GUI preset.
+Current behavior to remember:
 
-## Expected output files
+- EMG is a `CONT_HIGH` lab
+- timing uses `t_us`
+- the UNO R4 WiFi ADC is configured to `14-bit`
+- the session CSV stores all `DATA` rows in one file
 
-Continuous EMG sessions create one file:
-- `<output>.csv`
+---
 
-Notes:
-- `<output>.csv` stores `META`, `DATA`, and any error rows together
-- EMG `DATA` rows store both host timestamps and Arduino `t_us`
-- current UNO R4 WiFi EMG firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
-- `PARSE_ERROR` and `ERR` rows should stay absent during a healthy session
-- synthetic example file: `examples/session_csv/emg_example_session.csv`
+## Expected Output
 
-## Common troubleshooting
+The session CSV should contain:
 
-- No board detected:
-  Check the USB cable, then click `Refresh Ports`.
-- Upload fails on Linux:
-  Confirm the user has serial-port permission such as `dialout`.
-- Plot looks frozen:
-  Confirm acquisition actually started and check whether `<output>.csv` is growing with new `DATA` rows.
-- Signals look swapped:
-  Re-check the board wiring against `A0` to `A3`.
-- Parsing errors appear:
-  Open `<output>.csv` and check whether `PARSE_ERROR` rows contain unexpected serial text or malformed packets.
+- `META` rows that declare the sampling configuration
+- `DATA` rows for the four EMG channels
+- optional `STAT`, `ERR`, or `PARSE_ERROR` rows if something unusual happens
 
-## Suggested screenshots
+Students should usually start analysis by filtering to:
 
-If you want to build classroom handouts later, place screenshots under `docs/screenshots/` with names such as:
-- `emg_gui_setup.png`
-- `emg_live_plot.png`
-- `emg_board_wiring.jpg`
+- `row_type=DATA`
+
+---
+
+## Troubleshooting
+
+### The plot looks too slow or uneven
+
+- confirm the EMG profile is using `CONT_HIGH`
+- confirm the session metadata reports `t_us`
+- confirm the configured rate is `2000 samples/s`
+
+### The wrong channels are being plotted
+
+- check the analog-port assignments on the left panel
+- reload the EMG preset if needed
+
+### Upload or acquisition fails
+
+- confirm the board and port are detected
+- rerun the system check if needed
+
+---
+
+## Screenshot Placeholder
+
+Recommended screenshot location:
+
+- `docs/screenshots/emg_live_plot_placeholder.svg`
+
+Replace it later with a real classroom capture when available.
+
+---
+
+## See Also
+
+- [Lab index](./README.md)
+- [Student setup](../student_setup.md)
+- [Sampling strategy](../sampling_strategy.md)
+- [Validation tables](../validation/lab_validation_tables.md)

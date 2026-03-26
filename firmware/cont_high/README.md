@@ -1,28 +1,57 @@
-# `CONT_HIGH` firmware
+# `CONT_HIGH` Firmware
 
-Place high-rate continuous waveform sketches here.
+> Committed high-rate continuous sketches, mainly for EMG-style waveform capture.
 
-Typical labs:
-- EMG
+Use this folder when you need a known committed `CONT_HIGH` sketch instead of the GUI-generated firmware path.
 
-Expected packet mix:
-- `META`
-- `DATA`
-- optional `STAT`
-- optional `ERR`
+---
 
-Committed UNO R4 WiFi sketches:
+## Start Here
+
+Current committed UNO R4 WiFi sketches:
+
 - `uno_r4_wifi/emg_high_rate_reference`
 - `uno_r4_wifi/emg_four_channel_demo`
 
-Current reference behavior:
-- `emg_high_rate_reference` is a simple 1 kHz two-channel upload helper path
-- `emg_four_channel_demo` is the manifest-aligned four-channel EMG example at `2000` samples/s
-- both sketches follow the shared `CONT_HIGH` timing rule and emit `t_us`
+Both follow the shared `CONT_HIGH` timing rule and emit `t_us`.
 
-Student helper workflow:
-- one-time setup with `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
-- compile/upload the simple two-channel reference with `tools/upload_cont_high_emg_reference.sh` or `tools/upload_cont_high_emg_reference.bat`
+---
 
-Expected timing rule:
-- use `t_us` timestamps for shared `CONT_HIGH` waveform packets
+## What `CONT_HIGH` Means In This Repo
+
+Current expectations:
+
+- use `META` and `DATA` packets
+- log every sample
+- use `t_us` for waveform timestamps
+- keep the Arduino code simple enough for students to inspect
+
+Typical classroom use:
+
+- EMG
+
+---
+
+## Current Sketch Roles
+
+- `emg_high_rate_reference`: simple two-channel upload helper at `1 kHz`
+- `emg_four_channel_demo`: manifest-aligned four-channel EMG example at `2000 samples/s`
+
+---
+
+## Quick Use
+
+- one-time setup:
+  - `./tools/setup_arduino_cli.sh`
+  - `tools\setup_arduino_cli.bat`
+- current helper upload path:
+  - `./tools/upload_cont_high_emg_reference.sh`
+  - `tools\upload_cont_high_emg_reference.bat`
+
+---
+
+## See Also
+
+- [Sampling strategy](../../docs/sampling_strategy.md)
+- [Serial protocol](../../docs/serial_protocol.md)
+- [EMG lab guide](../../docs/labs/emg.md)

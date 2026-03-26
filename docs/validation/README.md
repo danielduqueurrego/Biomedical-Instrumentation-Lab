@@ -1,85 +1,99 @@
-# Hardware Validation Framework
+# Hardware Validation
 
-Use this section when a board, lab station, or firmware change needs a quick bench checkout.
+> Practical bench-check workflow for instructors and TAs.
 
-The goal is to keep validation simple and repeatable for instructors, TAs, and students.
+Use this section when a board, firmware path, or classroom station needs a quick known-good check before or during a lab session.
 
-## What should be recorded
+---
 
-Each validation session should record at least:
+## Start Here
+
+The goal is to keep validation simple and repeatable.
+
+For every validation run, record at least:
+
 - target sample rate or cycle rate
-- achieved rate measured from the saved CSV data
-- serial stability during the run
-- packet loss or malformed packets
-- plot responsiveness during live viewing
-- bench notes, including wiring changes or observed issues
+- achieved rate from the saved CSV
+- test duration
+- malformed or parse-error count
+- packet loss notes
+- plot responsiveness notes
+- hardware notes
 
-## Validation workflow
+---
 
-1. Choose the correct lab guide from `docs/labs/`.
-2. Load the matching GUI lab profile or session preset.
-3. Compile and upload firmware from the GUI.
-4. Run a short acquisition, usually 30 to 60 seconds.
-5. Save the session CSV and complete the validation checklist.
-6. Keep screenshots or wiring photos if they help explain a failure or a good known setup.
+## Quick Workflow
 
-Practical bench habit:
-- fill the short per-lab table immediately after the run
-- then add extra notes only if something failed or looked unusual
-- compare the saved session CSV with the synthetic examples in `examples/session_csv/` if a TA is unsure how to interpret a `row_type`
+1. open the matching lab guide from [docs/labs/](../labs/README.md)
+2. load the matching GUI lab profile or session preset
+3. compile and upload firmware
+4. run a short acquisition, usually `30` to `60` seconds
+5. save the session CSV
+6. fill the per-lab validation table immediately after the run
+7. add screenshots or wiring photos only if they help explain a result
 
-## How to estimate achieved rate
+---
+
+## What To Use
+
+- general checklist: [hardware_validation_checklist_template.md](./hardware_validation_checklist_template.md)
+- short per-lab tables: [lab_validation_tables.md](./lab_validation_tables.md)
+- example CSV layout: [examples/session_csv/README.md](../../examples/session_csv/README.md)
+
+---
+
+## How To Estimate Achieved Rate
 
 ### Continuous labs
 
-Use the `DATA` rows in `<output>.csv`.
+Use the `DATA` rows in the session CSV.
 
-One simple estimate is:
+Simple estimate:
+
 - `achieved_rate_hz = (sample_count - 1) / ((last_device_time - first_device_time) / time_scale)`
 
 Use:
-- `time_scale = 1000` for `t_ms`
-- `time_scale = 1000000` for `t_us`
+
+- `time_scale = 1_000_000` for `t_us`
+- `time_scale = 1_000` for `t_ms`
 
 ### PulseOx
 
-Use the `CYCLE` rows in `<output>.csv` to estimate achieved cycle rate and the `PHASE` rows in the same file to estimate achieved phase rate.
+Use the `CYCLE` rows for cycle rate, or the `PHASE` rows for raw phase rate.
 
-One simple estimate is:
-- `achieved_cycle_rate_hz = (cycle_count - 1) / ((last_device_time_us - first_device_time_us) / 1000000)`
-- `achieved_phase_rate_hz = (phase_count - 1) / ((last_device_time_us - first_device_time_us) / 1000000)`
+Simple estimate:
 
-## How to check packet quality
+- `achieved_cycle_rate_hz = (cycle_count - 1) / ((last_t_us - first_t_us) / 1_000_000)`
 
-Use the saved session CSV:
-- review `PARSE_ERROR` and `ERR` rows for problems
-- review `META` rows for declared field layouts and rates
+---
 
-Healthy signs:
-- `PARSE_ERROR` and `ERR` rows are absent or only contain explained test interruptions
-- the `META` rows match the expected field layout for the lab
-- the GUI plot updates smoothly enough to follow the signal during class use
+## What Counts As A Good Classroom Result
 
-Warning signs:
-- repeated malformed-packet lines
-- metadata showing the wrong field set
-- obvious serial disconnects or resets during the run
-- a live plot that updates so slowly that students cannot follow the experiment
+For a short classroom checkout, a run is usually acceptable when:
 
-## Reusable checklist
+- the achieved rate is close to the target rate
+- malformed packets are zero or very low
+- the session CSV is readable without confusion
+- the plot updates smoothly enough for students to follow
+- there are no unexplained disconnects or port errors
 
-Use:
-- [Hardware validation checklist template](./hardware_validation_checklist_template.md)
-- [Per-lab validation tables](./lab_validation_tables.md)
+---
 
-## Screenshot placeholders
+## Screenshot Guidance
 
-If screenshots help, place them under:
-- `docs/screenshots/`
+Screenshots are optional, but they help when:
 
-Suggested files:
-- `validation_emg_plot.png`
-- `validation_ecg_plot.png`
-- `validation_pulse_ox_plot.png`
-- `validation_blood_pressure_plot.png`
-- `validation_board_wiring.jpg`
+- a station behaves differently from the others
+- a TA needs to show a known-good setup
+- the plot looks suspicious during a live run
+
+Place screenshots in [docs/screenshots/](../screenshots/README.md).
+
+---
+
+## See Also
+
+- [Lab guides](../labs/README.md)
+- [Student setup](../student_setup.md)
+- [Lab validation tables](./lab_validation_tables.md)
+- [Example session CSVs](../../examples/session_csv/README.md)

@@ -1,109 +1,132 @@
 # Pulse Oximetry Lab
 
-## Purpose
+> Multi-phase optical workflow that logs raw phase measurements and corrected cycle values.
 
-This lab demonstrates multi-phase optical acquisition. Students observe raw photodiode readings during each LED phase and the corrected cycle values reconstructed from those phase measurements.
+Use this guide when you are running the PulseOx lab, validating the optical timing, or checking whether the current hardware model matches the board.
 
-The default classroom configuration includes four physical analog channels:
-- reflective photodiode raw output
-- transmission photodiode raw output
-- filtered reflective photodiode output
-- filtered transmission photodiode output
+---
 
-Red versus IR is not determined by different analog pins. It is inferred from the phase in which the same channels are sampled.
+## Start Here
 
-## Acquisition summary
+Recommended classroom path:
 
-- Acquisition class: `PHASED_CYCLE`
-- Default cycle rate: `100 cycles/s`
-- Default phase rate: `400 phase samples/s`
-- Default Arduino timestamp field: `t_us`
-- Main packet types: `META`, `PHASE`, `CYCLE`, optional `STAT`, optional `ERR`
+1. connect the Arduino UNO R4 WiFi
+2. launch the student GUI
+3. choose `Pulse Oximetry` from the lab dropdown or load `python/session_presets/pulse_ox.json`
+4. confirm the four PulseOx rows are locked to `A0` to `A3`
+5. choose a save folder
+6. compile and upload from the GUI or use the committed PulseOx reference sketch
+7. start acquisition
+
+---
+
+## Quick Reference
+
+| Item | Current default |
+| --- | --- |
+| Purpose | Show raw optical phase behavior and corrected red/IR cycle values |
+| Acquisition class | `PHASED_CYCLE` |
+| Default cycle rate | `100 cycles/s` |
+| Default phase rate | `400 phase samples/s` |
+| Arduino timestamp field | `t_us` |
+| Main packet types | `META`, `PHASE`, `CYCLE`, optional `STAT`, optional `ERR` |
+| Student preset | `python/session_presets/pulse_ox.json` |
+| Reference sketch | `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference/pulse_ox_reference.ino` |
+
+---
+
+## Hardware Model And Pin Mapping
+
+Current UNO R4 WiFi PulseOx mapping:
+
+- `A0 = Reflective photodiode raw output`
+- `A1 = Transmission photodiode raw output`
+- `A2 = Filtered reflective photodiode output`
+- `A3 = Filtered transmission photodiode output`
+- `D6 = RED LED control`
+- `D5 = IR LED control`
+
+Important rule:
+
+- red versus IR is not determined by separate analog pins
+- red versus IR is determined by LED timing phase
 
 Phase sequence:
+
 - `RED_ON`
 - `DARK1`
 - `IR_ON`
 - `DARK2`
 
-## Board and pin mapping
+During every phase, the firmware samples all four analog inputs.
 
-Default Arduino UNO R4 WiFi mapping:
-- `A0 = Reflective photodiode raw output`
-- `A1 = Transmission photodiode raw output`
-- `A2 = Filtered reflective photodiode output`
-- `A3 = Filtered transmission photodiode output`
+---
 
-LED control pins used by generated firmware:
-- `D6 = RED LED control`
-- `D5 = IR LED control`
+## Firmware And GUI Notes
 
-Current repository note:
-- the PulseOx classroom workflow uses GUI-generated firmware rather than a fixed committed reference sketch
+Current behavior to remember:
 
-## GUI setup
+- PulseOx uses `PHASED_CYCLE`, not continuous `DATA`
+- the GUI stores `PHASE` and `CYCLE` rows in the same session CSV
+- the live plot shows corrected `CYCLE` values by default
+- generated firmware uses settled ADC reads to reduce channel-switching spikes
 
-Recommended classroom path:
-1. Connect the Arduino UNO R4 WiFi.
-2. Start the student GUI with `python/run_student_acquisition_gui.py`.
-3. In the lab dropdown, choose `Pulse Oximetry`.
-4. Confirm the GUI loads the four fixed PulseOx channels on `A0` to `A3`.
-5. Confirm students did not mix `PulseOx` with other presets in the same session.
-6. Choose the save folder.
-7. Compile and upload from the GUI.
-8. Start acquisition.
+PulseOx generated and reference firmware both follow the same hardware model and packet semantics.
 
-Optional preset:
-- `python/session_presets/pulse_ox.json`
+---
 
-## Firmware or profile to use
+## Expected Output
 
-Use one of these:
-- GUI lab profile: `Pulse Oximetry`
-- GUI session preset: `python/session_presets/pulse_ox.json`
-- committed reference sketch: `firmware/phased_cycle/uno_r4_wifi/pulse_ox_reference`
+The session CSV should contain:
 
-The GUI-generated firmware will:
-- drive `D6` and `D5`
-- sample `A0` to `A3` during every phase
-- discard the first ADC read after each channel switch and average two settled reads per channel
-- emit raw `PHASE` packets
-- emit corrected `CYCLE` packets
+- `META` rows for cycle rate, phase rate, analog map, LED pins, and field declarations
+- `PHASE` rows with all four analog channel readings during each phase
+- `CYCLE` rows with corrected red and IR outputs for each optical path
+- optional `STAT`, `ERR`, or `PARSE_ERROR` rows if relevant
 
-## Expected output files
+Students should usually start by filtering to:
 
-PulseOx sessions create one file:
-- `<output>.csv`
+- `row_type=CYCLE`
 
-Notes:
-- `PHASE` rows in `<output>.csv` store raw phase samples for all four channels
-- `CYCLE` rows in `<output>.csv` store corrected red and IR outputs by optical path and signal path
-- `META`, `STAT`, `ERR`, and `PARSE_ERROR` rows are stored in the same session CSV
-- current UNO R4 WiFi PulseOx firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
-- the session CSV uses readable PulseOx column labels derived from the configured channel names
-- the live plot shows corrected `CYCLE` values, not every raw phase sample
-- the live plot labels are derived from the four configured left-panel channels, with `RED corrected` and `IR corrected` suffixes
-- synthetic example file: `examples/session_csv/pulse_ox_example_session.csv`
+When debugging optical timing or LED behavior, also inspect:
 
-## Common troubleshooting
+- `row_type=PHASE`
 
-- PulseOx rows cannot be changed freely:
-  This is expected. PulseOx uses fixed channel wiring on `A0` to `A3`.
-- Red and IR seem mixed up:
-  Check the LED wiring on `D6` and `D5`. Red versus IR comes from phase timing, not from separate analog pins.
-- No corrected cycle plot appears:
-  Confirm the session CSV contains both `PHASE` and `CYCLE` rows and inspect any `PARSE_ERROR` or `ERR` rows.
-- Signals are noisy or close to zero:
-  Check the photodiode board power, LED wiring, and optical alignment.
-- Short spike-like peaks still appear:
-  Recompile and upload from the GUI so the PulseOx firmware includes the settled-read ADC helper, then verify the sensor board does not present unusually high source impedance.
-- Packet layout mismatch appears in logs:
-  Recompile and upload from the GUI so the firmware and Python expectations match.
+---
 
-## Suggested screenshots
+## Troubleshooting
 
-If you want to build classroom handouts later, place screenshots under `docs/screenshots/` with names such as:
-- `pulse_ox_gui_setup.png`
-- `pulse_ox_live_plot.png`
-- `pulse_ox_board_wiring.jpg`
-- `pulse_ox_sensor_alignment.jpg`
+### The plot labels do not match the expected channels
+
+- reload the PulseOx preset
+- confirm the four fixed PulseOx channel names are loaded in the left panel
+
+### There are strange peaks or spikes
+
+- confirm you uploaded current firmware, not an older PulseOx sketch
+- current firmware discards the first ADC read after channel switching and averages two settled reads
+- if the spikes remain, record a short validation session and inspect both `PHASE` and `CYCLE` rows
+
+### The session looks like continuous data instead of phases
+
+- confirm the selected lab is actually `Pulse Oximetry`
+- confirm the metadata reports `acq_class,PHASED_CYCLE`
+
+---
+
+## Screenshot Placeholder
+
+Recommended screenshot location:
+
+- `docs/screenshots/pulse_ox_live_plot_placeholder.svg`
+
+Replace it later with a real classroom capture when available.
+
+---
+
+## See Also
+
+- [Lab index](./README.md)
+- [Generated firmware workflow](../generated_firmware_workflow.md)
+- [Serial protocol](../serial_protocol.md)
+- [Validation tables](../validation/lab_validation_tables.md)

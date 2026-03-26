@@ -1,72 +1,109 @@
-# Project brief
+# Project Brief
 
-This repository supports biomedical instrumentation labs built around Arduino boards and Python desktop tools.
+> Short overview of the repository’s purpose, current scope, and teaching goals.
 
-## Initial targets
+Use this document when you want the short project summary without reading the full root README.
+
+---
+
+## Start Here
+
+Biomedical Instrumentation Lab supports classroom biomedical instrumentation activities built around:
+
+- an Arduino UNO R4 WiFi
+- a shared serial protocol
+- a student-friendly Python GUI
+- one-session CSV logging
+
+The project is intended to stay simple enough for undergraduate lab use while still being transparent enough for instructors and contributors to inspect.
+
+---
+
+## Current Scope
+
+The repo currently focuses on:
+
 - Arduino UNO R4 WiFi firmware
 - Python live plotting
 - Python CSV logging
-- Reusable parsers and protocol helpers
-- Pattern-first repository architecture
+- reusable parsers and protocol helpers
+- pattern-first repository architecture
+- classroom presets for EMG, ECG, PulseOx, and Blood Pressure
 
-## Lab types
+---
 
-### 1. Continuous stream labs
-Examples: EMG, ECG, Blood Pressure
+## Acquisition Types
 
-Expected output:
-- timestamp
-- one or more analog channels
+### Continuous waveform labs
 
-### 2. Sequenced pulse-oximetry lab
-Expected acquisition stages:
-- Red LED on
-- All LEDs off
-- IR LED on
-- All LEDs off
+Examples:
 
-The software must support:
+- EMG
+- ECG
+- Blood Pressure
+
+Expected behavior:
+
+- timestamped analog samples
+- shared `META` and `DATA` packets
+- one session CSV per run
+
+### Sequenced optical lab
+
+Current example:
+
+- PulseOx
+
+Expected behavior:
+
 - raw phase logging
-- reconstructed cycle logging
-- live plotting
-- CSV export
+- corrected cycle logging
+- live plotting of corrected values
+- one session CSV per run with `PHASE` and `CYCLE` rows
 
-Current board model:
+Current phase order:
+
+- `RED_ON`
+- `DARK1`
+- `IR_ON`
+- `DARK2`
+
+---
+
+## Current PulseOx Board Model
+
+The repo’s current PulseOx hardware model is:
+
 - `A0 = reflective photodiode raw output`
 - `A1 = transmission photodiode raw output`
 - `A2 = filtered reflective photodiode output`
 - `A3 = filtered transmission photodiode output`
-- red versus IR is inferred from the acquisition phase, not from separate ADC pins
 
-## Current implementation direction
+Important rule:
 
-The repository currently supports:
-- one working end-to-end `CONT_MED` example
-- generated firmware for student GUI workflows
-- true `PHASED_CYCLE` PulseOx support using `PHASE` and `CYCLE` packets
-- a shared serial protocol across all supported acquisition classes
+- red versus IR is inferred from acquisition phase
+- there are not separate red-only and IR-only analog pins
 
-## Constraints
-- Keep the stack free and student-friendly
-- Prioritize clarity and maintainability
-- Design the Python side so it can parse multiple packet types
-- Organize the repository by acquisition pattern first
+---
 
-## Student deployment constraint
+## Current Student Workflow
 
-A major goal of this repository is student usability.
+The intended classroom path is:
 
-The software must be designed so that students can install and run it with minimal setup burden. Prefer a single free software ecosystem for the computer side, ideally a Conda-based Python installation. Avoid requiring multiple separate software tools unless absolutely necessary.
+1. create or activate the Conda environment
+2. set up Arduino CLI once
+3. run the system check
+4. launch the GUI
+5. select a lab preset
+6. compile or upload firmware if needed
+7. start acquisition and save one CSV
 
-The preferred student setup is:
-- Arduino CLI behind scripts or the GUI for firmware upload
-- one Conda-based Python installation for acquisition software
-- one environment file
-- one launch command or launcher script
+---
 
-The project should prioritize:
-- simple installation
-- simple launching
-- minimal dependencies
-- beginner-friendly documentation
-- robust behavior even if students are not experienced programmers
+## See Also
+
+- [README.md](../README.md)
+- [student_setup.md](./student_setup.md)
+- [acquisition_architecture.md](./acquisition_architecture.md)
+- [sampling_strategy.md](./sampling_strategy.md)
+- [serial_protocol.md](./serial_protocol.md)

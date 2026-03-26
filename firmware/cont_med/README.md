@@ -1,28 +1,56 @@
-# `CONT_MED` firmware
+# `CONT_MED` Firmware
 
-Place medium-rate continuous waveform sketches here.
+> Committed medium-rate continuous sketches for ECG, Blood Pressure, and general analog demos.
+
+Use this folder when you need a known committed `CONT_MED` sketch instead of the GUI-generated firmware path.
+
+---
+
+## Start Here
 
 Typical labs:
+
 - ECG
 - Blood Pressure
 - general analog streaming demos
 
-Expected packet mix:
-- `META`
-- `DATA`
-- optional `STAT`
-- optional `ERR`
+Current committed UNO R4 WiFi reference path:
 
-Current student helper workflow:
-- one-time setup with `tools/setup_arduino_cli.sh` or `tools/setup_arduino_cli.bat`
-- compile/upload with `tools/upload_cont_med_three_channel.sh` or `tools/upload_cont_med_three_channel.bat`
+- `uno_r4_wifi/three_channel_data_demo`
 
-Current UNO R4 WiFi reference behavior:
-- stream `A0` to `A5` at about 120 Hz
-- let the Python GUI choose which subset of those six analog inputs is active
+---
 
-GUI-generated behavior:
-- compile and upload a temporary Arduino sketch from the current GUI signal selection
-- use only the selected analog ports
-- set the sample rate to the highest selected preset rate
+## What `CONT_MED` Means In This Repo
+
+Current expectations:
+
+- use `META` and `DATA`
+- log every sample
+- use `t_ms`
+- keep live plotting readable during class
+
+Current GUI-generated behavior:
+
+- emit only the selected analog ports
+- use the highest selected preset rate
 - keep Blood Pressure on the same continuous `DATA` workflow
+
+---
+
+## Quick Use
+
+- one-time setup:
+  - `./tools/setup_arduino_cli.sh`
+  - `tools\setup_arduino_cli.bat`
+- current helper upload path:
+  - `./tools/upload_cont_med_three_channel.sh`
+  - `tools\upload_cont_med_three_channel.bat`
+
+---
+
+## See Also
+
+- [Sampling strategy](../../docs/sampling_strategy.md)
+- [Serial protocol](../../docs/serial_protocol.md)
+- [ECG lab guide](../../docs/labs/ecg.md)
+- [Blood Pressure lab guide](../../docs/labs/blood_pressure.md)

@@ -1,8 +1,12 @@
 # Hardware Validation Checklist Template
 
-Use this template as a bench-test record for any lab station.
+> Fill-in template for recording one bench-validation session.
 
-## Session information
+Use this when you want a slightly more detailed record than the short per-lab tables.
+
+---
+
+## Session Information
 
 - Date:
 - Tester:
@@ -16,7 +20,9 @@ Use this template as a bench-test record for any lab station.
   - committed reference sketch
 - Output basename:
 
-## Hardware setup
+---
+
+## Hardware Setup
 
 - USB cable checked:
 - Power source checked:
@@ -25,7 +31,9 @@ Use this template as a bench-test record for any lab station.
 - Wiring reviewed against the lab guide:
 - Screenshot or photo captured if helpful:
 
-## Target settings
+---
+
+## Target Settings
 
 | Item | Target |
 | --- | --- |
@@ -35,37 +43,32 @@ Use this template as a bench-test record for any lab station.
 | Expected analog map | |
 | Expected packet types | |
 
-## Achieved results
+---
+
+## Achieved Results
 
 | Item | Observed result | Pass/Needs review |
 | --- | --- | --- |
-| Achieved sample rate or cycle rate | | |
-| Serial connection stayed stable for the run | | |
-| Packet loss observed | | |
-| Malformed packets observed | | |
-| Plot responsiveness acceptable for class use | | |
-| Output files created correctly | | |
+| Achieved sample or cycle rate | | |
+| Test duration | | |
+| Parse or malformed packet count | | |
+| Packet loss notes | | |
+| Plot responsiveness notes | | |
+| Serial stability notes | | |
 
-## Output files reviewed
+---
 
-- `<output>.csv` reviewed:
-- `DATA` rows reviewed if applicable:
-- `PHASE` rows reviewed if applicable:
-- `CYCLE` rows reviewed if applicable:
-- `META` rows reviewed:
-- `PARSE_ERROR` and `ERR` rows reviewed:
+## Notes
 
-## Bench notes
+- Bench observations:
+- Hardware observations:
+- Any unusual behavior:
+- Follow-up action:
 
-- Signal quality notes:
-- Noise or drift notes:
-- Student usability notes:
-- Firmware or GUI notes:
-- Follow-up actions:
+---
 
-## Suggested evidence to attach
+## Related Files
 
-- one GUI setup screenshot
-- one live-plot screenshot
-- one board or wiring photo
-- a short note explaining any parse errors or unstable behavior
+- lab guide:
+- saved CSV:
+- screenshot path if captured:

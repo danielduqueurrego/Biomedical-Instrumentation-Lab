@@ -1,35 +1,56 @@
-# Example session CSVs
+# Example Session CSVs
 
-These files are small synthetic examples that match the current student-facing session CSV format.
+> Small synthetic session files that show the current student-facing CSV format.
 
-Use them to learn the logging structure before running hardware:
+Use these files when you want to understand the logging structure before collecting real hardware data.
+
+---
+
+## Start Here
+
+Current example files:
+
 - `emg_example_session.csv`
 - `ecg_example_session.csv`
 - `blood_pressure_example_session.csv`
 - `pulse_ox_example_session.csv`
 
-## How to read them
+These are teaching artifacts, not live captures from a board.
+
+---
+
+## How To Read Them
 
 Start with the `row_type` column:
+
 - `META`: session setup, firmware, field layout, or hardware metadata
 - `DATA`: continuous waveform samples for `CONT_HIGH` or `CONT_MED`
 - `PHASE`: raw phase samples for `PHASED_CYCLE`
-- `CYCLE`: reconstructed corrected cycle values for `PHASED_CYCLE`
-- `STAT`, `ERR`, or `PARSE_ERROR`: status or error rows when present
+- `CYCLE`: corrected cycle values for `PHASED_CYCLE`
+- `STAT`, `ERR`, `PARSE_ERROR`: status or error rows when present
 
 Useful columns:
+
 - `device_timestamp_field`: `t_ms` or `t_us`
-- `device_timestamp`: the Arduino timestamp value
+- `device_timestamp`: the Arduino timestamp
 - `cycle_idx`: present for `PHASE` and `CYCLE`
 - `phase`: present for `PHASE`
-- remaining signal columns: the student-facing data columns for that session
+- remaining signal columns: session-specific data columns
 
-## What students should use first
+---
 
-- For ECG, EMG, and Blood Pressure:
-  filter to `row_type=DATA`
-- For PulseOx:
-  use `row_type=CYCLE` first for the corrected plotted values
-  use `row_type=PHASE` when checking the raw optical phase behavior
+## What Students Should Use First
 
-These files are examples only. They are not captured from a live board.
+- for ECG, EMG, and Blood Pressure:
+  - filter to `row_type=DATA`
+- for PulseOx:
+  - start with `row_type=CYCLE`
+  - use `row_type=PHASE` when checking the raw phase behavior
+
+---
+
+## See Also
+
+- [README.md](../../README.md)
+- [Student setup](../../docs/student_setup.md)
+- [Serial protocol](../../docs/serial_protocol.md)

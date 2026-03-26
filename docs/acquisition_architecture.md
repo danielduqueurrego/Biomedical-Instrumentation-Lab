@@ -1,26 +1,46 @@
-# Acquisition architecture
+# Acquisition Architecture
 
-This repository is organized by acquisition pattern first and by lab second.
+> Repo-level guide to how the project is organized and how each lab fits into the shared acquisition model.
 
-## Supported acquisition classes
+Use this document when you need the big-picture structure of the repository, not the step-by-step student setup. If you are trying to run hardware quickly, start with [README.md](../README.md) and [student_setup.md](./student_setup.md).
 
-### `CONT_HIGH`
-- Use for high-rate continuous waveforms such as EMG.
-- Main packets: `META`, `DATA`, `STAT`, `ERR`
-- Timing rule: use `t_us` for waveform timestamps.
-- Design goal: log every sample, plot a decimated rolling view, keep serial output simple.
+---
 
-### `CONT_MED`
-- Use for medium-rate continuous waveforms such as ECG, Blood Pressure, and general analog streaming demos.
-- Main packets: `META`, `DATA`, `STAT`, `ERR`
-- Design goal: one timestamped CSV packet per sample with beginner-friendly live plotting.
+## Start Here
 
-### `PHASED_CYCLE`
-- Use for timed phase sequences that reconstruct one cycle from several phase measurements, such as pulse oximetry.
-- Main packets: `META`, `PHASE`, `CYCLE`, `STAT`, `ERR`
-- Design goal: keep raw phase logs and reconstructed cycle logs in the same protocol family.
+The repository is organized by **acquisition pattern first**, then by lab or reference sketch. This keeps the student workflow consistent even when the sensing method changes.
 
-## Pattern-first repository layout
+The three acquisition classes used across the repo are:
+
+| Acquisition class | Use it for | Main packets | Timing rule |
+| --- | --- | --- | --- |
+| `CONT_HIGH` | High-rate waveforms such as EMG | `META`, `DATA`, `STAT`, `ERR` | Use `t_us` |
+| `CONT_MED` | Medium-rate waveforms such as ECG and Blood Pressure | `META`, `DATA`, `STAT`, `ERR` | Use `t_ms` |
+| `PHASED_CYCLE` | Multi-phase measurements such as PulseOx | `META`, `PHASE`, `CYCLE`, `STAT`, `ERR` | Use `t_us` |
+
+---
+
+## Why The Repo Is Structured This Way
+
+Pattern-first organization makes it easier to:
+
+- reuse firmware and Python logging rules across multiple labs
+- keep the serial protocol consistent
+- keep the student GUI simple even when lab behavior changes
+- separate beginner-facing workflows from deeper development work
+
+In practice, this means a student can still follow the same basic workflow:
+
+1. connect the board
+2. launch the GUI
+3. load a lab profile or preset
+4. compile or upload firmware if needed
+5. start acquisition
+6. save one session CSV
+
+---
+
+## Repository Layout
 
 ```text
 firmware/
@@ -39,48 +59,105 @@ python/
     architecture.py
     presets.py
     protocol.py
-    serial_tools.py
-    session_logging.py
-    live_plot.py
+    student_gui/
   apps/
-    <pattern_or_lab_app>.py
-  run_<app>.py
-  launch_<app>.sh
-  launch_<app>.bat
+  session_presets/
+
+docs/
+  labs/
+  validation/
+
+examples/
+  session_csv/
 ```
 
-## Lab mapping
-- EMG: `CONT_HIGH`
-- ECG: `CONT_MED`
-- PulseOx: `PHASED_CYCLE`
-- Blood Pressure: `CONT_MED`
+What each area is for:
 
-## Blood pressure rule
-- Blood pressure is modeled as `CONT_MED`.
-- The pressure waveform and supporting channels are sent with `DATA`.
-- Students manually inflate and deflate the cuff, so the project does not model separate procedure `EVENT` packets.
+- `firmware/`: committed reference sketches, organized by acquisition class
+- `python/acquisition/`: shared protocol, preset, plotting, logging, and firmware-generation logic
+- `python/acquisition/student_gui/`: modular Tkinter GUI implementation
+- `python/session_presets/`: reusable classroom presets in JSON format
+- `docs/labs/`: student-facing and TA-facing lab guides
+- `docs/validation/`: bench-validation workflow and templates
+- `examples/session_csv/`: example one-file session logs
 
-## PulseOx rule
-- PulseOx is modeled as `PHASED_CYCLE`.
-- The Arduino side logs one `PHASE` packet for each optical phase:
-  - `RED_ON`
-  - `DARK1`
-  - `IR_ON`
-  - `DARK2`
-- During every phase, the Arduino side samples the same four physical analog channels:
-  - `A0 = reflective_raw`
-  - `A1 = transmission_raw`
-  - `A2 = reflective_filtered`
-  - `A3 = transmission_filtered`
-- After `DARK2`, the Arduino side reconstructs one corrected `CYCLE` packet with explicit RED-corrected and IR-corrected outputs for each path.
+---
 
-## Current implementation status
-1. Shared Python packet parsing and CSV logging are implemented for the continuous workflow.
-2. `CONT_MED` is implemented end to end for the reference UNO R4 WiFi demo and the student GUI.
-3. GUI-generated `PHASED_CYCLE` PulseOx firmware is implemented with raw `PHASE` logging and corrected `CYCLE` logging.
-4. `CONT_HIGH` uses the same shared GUI workflow, now with `t_us` timestamps for high-rate continuous data, and still benefits from more high-rate validation on real hardware.
+## How The Classes Behave
 
-## Canonical lab manifest
-- `python/acquisition/lab_manifest.py` is the canonical source for per-lab defaults.
-- `presets.py` and `lab_profiles.py` derive their acquisition class, rates, packet types, default emitted fields, plotting defaults, and phase names from this manifest.
-- Keep this manifest updated first when adding or changing labs so GUI labels and protocol defaults stay aligned.
+### `CONT_HIGH`
+
+Use `CONT_HIGH` for high-rate waveform capture where millisecond timing is not precise enough.
+
+Current repo expectations:
+
+- save every sample
+- plot a rolling view instead of redrawing on every sample
+- log `DATA,t_us,...`
+- use the manifest default rate for the selected lab or preset
+
+Current example:
+
+- EMG
+
+### `CONT_MED`
+
+Use `CONT_MED` for continuous waveforms where millisecond timing is sufficient and the student benefit is clarity rather than maximum throughput.
+
+Current repo expectations:
+
+- save every sample
+- log `DATA,t_ms,...`
+- use live plotting that stays readable during class
+
+Current examples:
+
+- ECG
+- Blood Pressure
+- simple analog reference demos
+
+### `PHASED_CYCLE`
+
+Use `PHASED_CYCLE` when one meaningful cycle is reconstructed from several timed phase measurements.
+
+Current repo expectations:
+
+- save both `PHASE` and `CYCLE` rows in the same session CSV
+- keep the phase order explicit in the protocol
+- plot corrected cycle values by default
+
+Current example:
+
+- PulseOx
+
+---
+
+## Current Lab Mapping
+
+| Lab | Acquisition class | Default rate | Student-facing workflow |
+| --- | --- | --- | --- |
+| EMG | `CONT_HIGH` | `2000 samples/s` | GUI preset or committed EMG reference sketch |
+| ECG | `CONT_MED` | `500 samples/s` | GUI preset and generated firmware |
+| PulseOx | `PHASED_CYCLE` | `100 cycles/s` | GUI preset or committed PulseOx reference sketch |
+| Blood Pressure | `CONT_MED` | `200 samples/s` | GUI preset and generated firmware |
+
+---
+
+## Design Rules Kept Across The Repo
+
+- keep Arduino and Python responsibilities clearly separated
+- keep the serial protocol human-readable first
+- keep student installation minimal
+- keep logging reliable even when plotting is simplified
+- let the manifest and shared protocol drive the rest of the implementation
+
+---
+
+## See Also
+
+- [README.md](../README.md)
+- [student_setup.md](./student_setup.md)
+- [sampling_strategy.md](./sampling_strategy.md)
+- [serial_protocol.md](./serial_protocol.md)
+- [generated_firmware_workflow.md](./generated_firmware_workflow.md)
+- [docs/labs/README.md](./labs/README.md)

@@ -1,79 +1,110 @@
 # ECG Lab
 
-## Purpose
+> Medium-rate continuous ECG workflow for comparing raw, amplified, and comparator outputs.
 
-This lab lets students compare a raw ECG pickup with a conditioned waveform and a thresholded comparator output.
+Use this guide when you are preparing the ECG lab station or helping students confirm the expected ECG signals and rate.
 
-The default classroom configuration includes:
-- raw ECG
-- amplified ECG
-- comparator output
+---
 
-## Acquisition summary
+## Start Here
 
-- Acquisition class: `CONT_MED`
-- Default sampling rate: `500 samples/s`
-- Default Arduino timestamp field: `t_ms`
-- Main packet types: `META`, `DATA`, optional `STAT`, optional `ERR`
+Recommended classroom path:
 
-## Board and analog pin mapping
+1. connect the Arduino UNO R4 WiFi
+2. launch the student GUI
+3. choose `ECG` from the lab dropdown or load `python/session_presets/ecg.json`
+4. confirm the three ECG rows are loaded on `A0` to `A2`
+5. choose a save folder
+6. compile and upload from the GUI
+7. start acquisition
+
+---
+
+## Quick Reference
+
+| Item | Current default |
+| --- | --- |
+| Purpose | Compare raw ECG with conditioned and comparator outputs |
+| Acquisition class | `CONT_MED` |
+| Default sampling rate | `500 samples/s` |
+| Arduino timestamp field | `t_ms` |
+| Main packet types | `META`, `DATA`, optional `STAT`, optional `ERR` |
+| Student preset | `python/session_presets/ecg.json` |
+| Firmware source | GUI-generated firmware |
+
+---
+
+## Signal Set And Pin Mapping
 
 Default Arduino UNO R4 WiFi mapping:
+
 - `A0 = Raw ECG`
 - `A1 = Amplified ECG`
 - `A2 = Comparator Output`
 
-The standard ECG classroom workflow uses GUI-generated firmware rather than a dedicated committed ECG sketch.
+Default classroom signals:
 
-## GUI setup
+- raw ECG
+- amplified ECG
+- comparator output
 
-Recommended classroom path:
-1. Connect the Arduino UNO R4 WiFi.
-2. Start the student GUI with `python/run_student_acquisition_gui.py`.
-3. In the lab dropdown, choose `ECG`.
-4. Confirm the GUI loads the three ECG signals on `A0` to `A2`.
-5. Choose the save folder.
-6. Compile and upload from the GUI.
-7. Start acquisition.
+---
 
-Optional preset:
-- `python/session_presets/ecg.json`
+## Firmware And GUI Notes
 
-## Firmware or profile to use
+Current behavior to remember:
 
-Use one of these:
-- GUI lab profile: `ECG`
-- GUI session preset: `python/session_presets/ecg.json`
+- ECG is a `CONT_MED` lab
+- timing uses `t_ms`
+- the GUI generates firmware from the selected signals
+- the session CSV stores all continuous data in one file
 
-The GUI will generate the Arduino code from the current signal selection and the default ECG rate.
+---
 
-## Expected output files
+## Expected Output
 
-Continuous ECG sessions create one file:
-- `<output>.csv`
+The session CSV should contain:
 
-Notes:
-- `<output>.csv` stores `META`, `DATA`, and any error rows together
-- ECG `DATA` rows store both host timestamps and Arduino `t_ms`
-- current UNO R4 WiFi ECG firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
-- synthetic example file: `examples/session_csv/ecg_example_session.csv`
+- `META` rows describing the selected ports and rate
+- `DATA` rows for the three ECG channels
+- optional `STAT`, `ERR`, or `PARSE_ERROR` rows if relevant
 
-## Common troubleshooting
+Students should usually start by filtering to:
 
-- Port field is empty:
-  Click `Refresh Ports` and confirm the board appears in Arduino CLI.
-- Comparator output looks flat:
-  Verify the comparator channel is actually wired to `A2`.
-- Sampling looks slower than expected:
-  Check the `META` rows in `<output>.csv` for the declared `CONT_MED` rate and use the hardware validation checklist.
-- File overwrite warning appears:
-  Stop acquisition and use the auto-refreshed timestamped output basename.
-- Parse errors appear:
-  Inspect the `PARSE_ERROR` or `ERR` rows in `<output>.csv`.
+- `row_type=DATA`
 
-## Suggested screenshots
+---
 
-If you want to build classroom handouts later, place screenshots under `docs/screenshots/` with names such as:
-- `ecg_gui_setup.png`
-- `ecg_live_plot.png`
-- `ecg_board_wiring.jpg`
+## Troubleshooting
+
+### The comparator channel looks flat
+
+- verify that the comparator output is actually wired to `A2`
+- confirm the selected ECG preset did not get overwritten
+
+### The session rate looks wrong
+
+- confirm the metadata reports `CONT_MED`
+- confirm the reported rate is `500 samples/s`
+
+### The board is not detected
+
+- refresh the GUI board and port list
+- run `python tools/arduino_cli.py board-list`
+
+---
+
+## Screenshot Placeholder
+
+Suggested location for a future ECG screenshot:
+
+- `docs/screenshots/ecg_live_plot.png`
+
+---
+
+## See Also
+
+- [Lab index](./README.md)
+- [Student setup](../student_setup.md)
+- [Sampling strategy](../sampling_strategy.md)
+- [Example session CSVs](../../examples/session_csv/README.md)

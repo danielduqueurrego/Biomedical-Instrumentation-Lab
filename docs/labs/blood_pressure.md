@@ -1,87 +1,118 @@
 # Blood Pressure Lab
 
-## Purpose
+> Continuous waveform workflow for pressure acquisition during manual cuff inflation and deflation.
 
-This lab records the pressure waveform while students manually inflate and deflate the cuff. It also keeps the additional photodiode channels that are currently part of the standard lab profile.
+Use this guide when you are preparing the blood-pressure station or confirming the current board mapping and logging behavior.
 
-The default classroom configuration includes:
-- raw pressure
-- filtered pressure
-- red PD
-- IR PD
+---
 
-## Acquisition summary
+## Start Here
 
-- Acquisition class: `CONT_MED`
-- Default sampling rate: `200 samples/s`
-- Default Arduino timestamp field: `t_ms`
-- Main packet types: `META`, `DATA`, optional `STAT`, optional `ERR`
+Recommended classroom path:
 
-Important classroom note:
-- blood pressure is treated as a continuous waveform lab
-- students manually control cuff inflation and deflation
-- the project does not emit procedure-stage events for this lab
+1. connect the Arduino UNO R4 WiFi
+2. launch the student GUI
+3. choose `Blood Pressure` from the lab dropdown or load `python/session_presets/blood_pressure.json`
+4. confirm the four Blood Pressure rows are loaded on `A0` to `A3`
+5. choose a save folder
+6. compile and upload from the GUI
+7. start acquisition while the student manually inflates and deflates the cuff
 
-## Board and analog pin mapping
+---
+
+## Quick Reference
+
+| Item | Current default |
+| --- | --- |
+| Purpose | Record pressure waveforms and supporting optical channels during manual cuff operation |
+| Acquisition class | `CONT_MED` |
+| Default sampling rate | `200 samples/s` |
+| Arduino timestamp field | `t_ms` |
+| Main packet types | `META`, `DATA`, optional `STAT`, optional `ERR` |
+| Student preset | `python/session_presets/blood_pressure.json` |
+| Firmware source | GUI-generated firmware |
+
+---
+
+## Signal Set And Pin Mapping
 
 Default Arduino UNO R4 WiFi mapping:
+
 - `A0 = Raw Pressure`
 - `A1 = Filtered Pressure`
 - `A2 = Red PD`
 - `A3 = IR PD`
 
-The standard Blood Pressure classroom workflow uses GUI-generated firmware rather than a dedicated committed blood-pressure sketch.
+Default classroom signals:
 
-## GUI setup
+- raw pressure
+- filtered pressure
+- red PD
+- IR PD
 
-Recommended classroom path:
-1. Connect the Arduino UNO R4 WiFi.
-2. Start the student GUI with `python/run_student_acquisition_gui.py`.
-3. In the lab dropdown, choose `Blood Pressure`.
-4. Confirm the GUI loads the four lab channels on `A0` to `A3`.
-5. Choose the save folder.
-6. Compile and upload from the GUI.
-7. Start acquisition before the cuff procedure begins.
+Important classroom note:
 
-Optional preset:
-- `python/session_presets/blood_pressure.json`
+- Blood Pressure is treated as a continuous waveform lab
+- students manually control cuff inflation and deflation
+- the project does not emit procedure-stage events for this lab
 
-## Firmware or profile to use
+---
 
-Use one of these:
-- GUI lab profile: `Blood Pressure`
-- GUI session preset: `python/session_presets/blood_pressure.json`
+## Firmware And GUI Notes
 
-The GUI will generate the Arduino code from the current signal selection and the default Blood Pressure rate.
+Current behavior to remember:
 
-## Expected output files
+- Blood Pressure uses `CONT_MED`
+- timing uses `t_ms`
+- the GUI generates firmware from the selected configuration
+- the session CSV stores all continuous rows in one file
 
-Blood Pressure sessions create one file:
-- `<output>.csv`
+---
 
-Notes:
-- `<output>.csv` stores `META`, `DATA`, and any error rows together
-- Blood Pressure `DATA` rows store both host timestamps and Arduino `t_ms`
-- current UNO R4 WiFi Blood Pressure firmware sets `analogReadResolution(14)` and reports `META,adc_resolution_bits,14`
-- the output stays on the continuous `DATA` workflow during manual cuff inflation and deflation
-- synthetic example file: `examples/session_csv/blood_pressure_example_session.csv`
+## Expected Output
 
-## Common troubleshooting
+The session CSV should contain:
 
-- Pressure trace is clipped:
-  Check the sensor scaling and confirm the expected pressure channel is on `A0`.
-- Filtered pressure looks identical to raw pressure:
-  Re-check the analog conditioning path feeding `A1`.
-- Students started too early or too late:
-  Note the timing in bench notes and repeat the capture rather than editing timestamps by hand.
-- Serial drops during the procedure:
-  Inspect `PARSE_ERROR` or `ERR` rows in `<output>.csv` and repeat the session with a shorter USB cable if needed.
-- Board detection fails:
-  Confirm the Arduino UNO R4 WiFi is still present in Arduino CLI and click `Refresh Ports`.
+- `META` rows describing the selected ports and rate
+- `DATA` rows for the pressure and photodiode channels
+- optional `STAT`, `ERR`, or `PARSE_ERROR` rows if relevant
 
-## Suggested screenshots
+Students should usually start analysis by filtering to:
 
-If you want to build classroom handouts later, place screenshots under `docs/screenshots/` with names such as:
-- `blood_pressure_gui_setup.png`
-- `blood_pressure_live_plot.png`
-- `blood_pressure_board_wiring.jpg`
+- `row_type=DATA`
+
+---
+
+## Troubleshooting
+
+### The pressure waveform does not change during cuff operation
+
+- confirm the pressure channels are on `A0` and `A1`
+- verify that the cuff hardware is connected to the expected board inputs
+
+### The session looks too slow
+
+- confirm the metadata reports `200 samples/s`
+- confirm the session is running as `CONT_MED`
+
+### Students are looking for event markers
+
+- remind them that this lab does not use procedure-stage packets
+- inflation and deflation are recorded as part of the continuous waveform only
+
+---
+
+## Screenshot Placeholder
+
+Suggested location for a future Blood Pressure screenshot:
+
+- `docs/screenshots/blood_pressure_live_plot.png`
+
+---
+
+## See Also
+
+- [Lab index](./README.md)
+- [Student setup](../student_setup.md)
+- [Sampling strategy](../sampling_strategy.md)
+- [Validation tables](../validation/lab_validation_tables.md)

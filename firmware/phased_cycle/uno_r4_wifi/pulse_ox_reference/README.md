@@ -1,9 +1,24 @@
-# PulseOx reference sketch
+# PulseOx Reference Sketch
 
-This folder contains a fixed, known-good PulseOx reference sketch for the Arduino UNO R4 WiFi:
-- [pulse_ox_reference.ino](./pulse_ox_reference.ino)
+> Fixed, known-good PulseOx reference sketch for the Arduino UNO R4 WiFi.
 
-## Pin mapping
+Use this sketch when you want a committed PulseOx implementation that matches the current board model and shared protocol exactly.
+
+---
+
+## Quick Reference
+
+| Item | Current value |
+| --- | --- |
+| Acquisition class | `PHASED_CYCLE` |
+| Cycle rate | `100 cycles/s` |
+| Phase rate | `400 phase samples/s` |
+| Timestamp field | `t_us` |
+| ADC setting | `analogReadResolution(14)` |
+
+---
+
+## Pin Mapping
 
 - `A0 = reflective raw photodiode output`
 - `A1 = transmission raw photodiode output`
@@ -12,23 +27,29 @@ This folder contains a fixed, known-good PulseOx reference sketch for the Arduin
 - `D6 = RED LED control`
 - `D5 = IR LED control`
 
-## Timing model
+Important model rule:
 
-- Acquisition class: `PHASED_CYCLE`
-- Cycle rate: `100 cycles/s`
-- Phase rate: `400 phase samples/s`
-- Phase order:
-  - `RED_ON`
-  - `DARK1`
-  - `IR_ON`
-  - `DARK2`
-- Device timestamp field: `t_us`
+- red versus IR is determined by phase timing, not by separate analog outputs
+
+---
+
+## Timing Model
+
+Phase order:
+
+- `RED_ON`
+- `DARK1`
+- `IR_ON`
+- `DARK2`
 
 Each optical cycle contains four phase captures. One corrected `CYCLE` packet is emitted after `DARK2`.
 
-## Packet fields
+---
 
-Startup metadata:
+## Packet Fields
+
+Startup metadata includes:
+
 - `META,lab,PULSEOX_REFERENCE`
 - `META,acq_class,PHASED_CYCLE`
 - `META,adc_resolution_bits,14`
@@ -38,33 +59,39 @@ Startup metadata:
 - `META,pulseox_analog_map,reflective_raw=A0,transmission_raw=A1,reflective_filtered=A2,transmission_filtered=A3`
 - `META,pulseox_led_pins,IR_D5,RED_D6`
 - `META,pulseox_phase_sequence,RED_ON,DARK1,IR_ON,DARK2`
-- `META,phase_fields,t_us,cycle_idx,phase,reflective_raw,transmission_raw,reflective_filtered,transmission_filtered`
-- `META,cycle_fields,t_us,cycle_idx,reflective_raw_red_corr,reflective_raw_ir_corr,transmission_raw_red_corr,transmission_raw_ir_corr,reflective_filtered_red_corr,reflective_filtered_ir_corr,transmission_filtered_red_corr,transmission_filtered_ir_corr`
 
-Phase packet:
+Raw phase rows:
+
 - `PHASE,t_us,cycle_idx,phase,reflective_raw,transmission_raw,reflective_filtered,transmission_filtered`
 
-Cycle packet:
+Corrected cycle rows:
+
 - `CYCLE,t_us,cycle_idx,reflective_raw_red_corr,reflective_raw_ir_corr,transmission_raw_red_corr,transmission_raw_ir_corr,reflective_filtered_red_corr,reflective_filtered_ir_corr,transmission_filtered_red_corr,transmission_filtered_ir_corr`
 
-## Expected output
+---
 
-When used with the current Python GUI:
-- the session CSV contains `META`, `PHASE`, and `CYCLE` rows
-- the live plot shows the corrected `CYCLE` values
-- the saved session CSV keeps the same `row_type` workflow used elsewhere in the repo
+## How It Differs From Generated Firmware
 
-## Why this sketch exists
+This committed sketch is fixed and known-good.
 
-This sketch is for bench validation and known-good checkout.
+The GUI-generated PulseOx firmware follows the same hardware model and packet semantics, but it is generated at runtime from the current student configuration and still saves a compiled code copy under `data/arduino_code_snapshots/`.
 
-It differs from the GUI-generated PulseOx firmware in these ways:
-- fixed `100 cycles/s` timing instead of deriving timing from the active GUI preset selection
-- fixed `PULSEOX_REFERENCE` lab tag instead of `GUI_SELECTED_SIGNALS`
-- fixed pin mapping and fixed packet field layout, with no dependence on current GUI state
+---
 
-It intentionally keeps the same PulseOx hardware model and packet semantics as the generated firmware so TAs can compare them directly.
+## Expected Output
 
-## ADC read strategy
+During a normal run, students should expect:
 
-The sketch discards the first ADC read after each channel switch and averages two settled reads per channel. This reduces occasional spike-like artifacts when rapidly scanning `A0` to `A3`.
+- `META` startup rows
+- `PHASE` rows for each phase
+- `CYCLE` rows for corrected cycle values
+
+In the GUI session CSV, those rows are stored together in one file and filtered by `row_type`.
+
+---
+
+## See Also
+
+- [PulseOx lab guide](../../../../docs/labs/pulse_ox.md)
+- [Generated firmware workflow](../../../../docs/generated_firmware_workflow.md)
+- [Serial protocol](../../../../docs/serial_protocol.md)

@@ -1,6 +1,10 @@
 # Per-Lab Validation Tables
 
-Use these short tables right after a bench run. Fill one section per tested lab station.
+> Short fill-in tables for fast post-run bench validation.
+
+Use these right after a test run when you want the minimum amount of validation paperwork that still captures the important classroom-readiness details.
+
+---
 
 ## EMG
 
@@ -41,8 +45,6 @@ Use these short tables right after a bench run. Fill one section per tested lab 
 | GUI profile or preset | `Pulse Oximetry` |
 | Target cycle rate | `100 cycles/s` |
 | Achieved cycle rate | |
-| Target phase rate | `400 phase samples/s` |
-| Achieved phase rate | |
 | Test duration | |
 | Parse / malformed packet count | |
 | Packet loss notes | |
@@ -63,3 +65,11 @@ Use these short tables right after a bench run. Fill one section per tested lab 
 | Packet loss notes | |
 | Plot responsiveness notes | |
 | Hardware notes | |
+
+---
+
+## See Also
+
+- [Hardware validation README](./README.md)
+- [Full checklist template](./hardware_validation_checklist_template.md)
+- [Lab guides](../labs/README.md)
