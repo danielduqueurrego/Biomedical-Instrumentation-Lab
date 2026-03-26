@@ -17,10 +17,6 @@ It is designed to support practical laboratory experiences in:
 ## Author
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Biomedical%20Engineering-Open%20Education%20%26%20Instrumentation-blue?style=for-the-badge" alt="Biomedical Engineering Badge">
-</p>
-
-<p align="center">
   <strong>Daniel Duque Urrego</strong><br>
   Ph.D. Student in Biomedical Engineering<br>
   West Virginia University
