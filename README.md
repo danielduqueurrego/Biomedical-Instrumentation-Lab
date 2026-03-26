@@ -14,6 +14,51 @@ It is designed to support practical laboratory experiences in:
 
 ---
 
+## Author
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Biomedical%20Engineering-Open%20Education%20%26%20Instrumentation-blue?style=for-the-badge" alt="Biomedical Engineering Badge">
+</p>
+
+<p align="center">
+  <strong>Daniel Duque Urrego</strong><br>
+  Ph.D. Student in Biomedical Engineering<br>
+  West Virginia University
+</p>
+
+<p align="center">
+  Passionate about <strong>biomedical instrumentation</strong>, <strong>open educational hardware</strong>, 
+  <strong>biosignal acquisition</strong>, and creating hands-on tools that help students connect theory with real-world measurement systems.
+  Experience with IMUs and upper limb applications.
+</p>
+
+<p align="center">
+  Experience with IMUs and upper limb applications.
+</p>
+
+<p align="center">
+  <a href="https://www.linkedin.com/in/danielduqueu/">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+  </a>
+  <a href="https://orcid.org/0000-0001-7924-8030">
+    <img src="https://img.shields.io/badge/ORCID-Profile-A6CE39?style=for-the-badge&logo=orcid&logoColor=white" alt="ORCID">
+  </a>
+  <a href="mailto:dd00055@mix.wvu.edu">
+    <img src="https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://scholar.google.com/citations?user=Nrw8UxUAAAAJ&hl">
+    <img src="https://img.shields.io/badge/Google%20Scholar-Publications-4285F4?style=flat-square&logo=google-scholar&logoColor=white" alt="Google Scholar">
+  </a>
+  <a href="https://github.com/danielduqueurrego">
+    <img src="https://img.shields.io/badge/GitHub-Projects-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+  </a>
+</p>
+
+---
+
 ## Why this project exists
 
 Biomedical instrumentation courses often teach important concepts such as signal conditioning, filtering, amplification, sampling, and physiological sensing, but students do not always get a reusable, transparent, and affordable platform they can explore themselves.
@@ -227,12 +272,6 @@ The current board design is hosted on OSHWLab and developed as part of an open, 
 
 
 ---
-
-## Author
-
-Daniel Duque Urrego
-Ph.D. Student in Biomedical Engineering
-West Virginia University
 
 ## Sponsors and support
 
