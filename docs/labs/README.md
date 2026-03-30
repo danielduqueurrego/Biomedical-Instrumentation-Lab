@@ -1,29 +1,52 @@
 # Lab Guides
 
-Use these guides during class to go from setup to acquisition quickly.
+> Classroom-facing guides for the main labs supported by this repository.
 
-## Available labs
+Start here when you need the fastest path from setup to a specific lab. Each guide keeps the same structure: purpose, acquisition class, default rate, pin mapping, GUI setup, expected output, and troubleshooting.
+
+---
+
+## 📘 Available Guides
+
 - [EMG](./emg.md)
 - [ECG](./ecg.md)
 - [Pulse Oximetry](./pulse_ox.md)
 - [Blood Pressure](./blood_pressure.md)
 
-## What each guide includes
+---
+
+## 🚀 Start Here
+
+If you are running a lab station for the first time:
+
+1. complete [student_setup.md](../student_setup.md)
+2. launch the GUI
+3. open the matching lab guide below
+4. load the matching lab profile or session preset
+5. follow the pin map and output expectations in that guide
+
+---
+
+## 🧭 What The Guides Cover
+
+Each lab guide includes:
+
+- purpose of the lab
 - acquisition class
-- default sampling/cycle rate
-- pin mapping
+- default sampling or cycle rate
+- board and pin mapping
 - GUI setup
-- expected CSV output
-- troubleshooting tips
+- firmware or profile to use
+- expected output files
+- common troubleshooting steps
 
-## Before running a lab
-1. Complete [Student Setup](../student_setup.md)
-2. Launch the GUI
-3. Load the matching preset/profile
-4. Save one CSV session per run
+---
 
-## Related docs
-- [Serial protocol](../serial_protocol.md)
+## 🔗 Useful Related Docs
+
+- [Student setup](../student_setup.md)
 - [Sampling strategy](../sampling_strategy.md)
-- [Validation](../validation/README.md)
-- [Example CSV files](../../examples/session_csv/README.md)
+- [Serial protocol](../serial_protocol.md)
+- [Generated firmware workflow](../generated_firmware_workflow.md)
+- [Hardware validation](../validation/README.md)
+- [Example session CSVs](../../examples/session_csv/README.md)
