@@ -11,7 +11,7 @@ Use this folder when you are setting up the Python side of the project or contri
 If you are a student or TA, the main path is:
 
 1. create the Conda environment from `environment.yml`
-2. run `python system_check.py`
+2. from the repository root, run a student doctor launcher
 3. go back to the repository root
 4. launch the student GUI with the top-level OS launcher
 
@@ -20,8 +20,13 @@ From this `python/` folder:
 ```bash
 conda env create -f environment.yml
 conda activate biomed-lab
-python system_check.py
 ```
+
+Then from repository root run one of:
+
+- Linux: `./launch_student_doctor_linux.sh`
+- macOS: `./launch_student_doctor_macos.command`
+- Windows: `launch_student_doctor_windows.bat`
 
 ---
 

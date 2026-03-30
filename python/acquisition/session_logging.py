@@ -80,11 +80,14 @@ class SessionCsvLogger:
         data_value_headers: tuple[str, ...] = (),
         phase_value_headers: tuple[str, ...] = (),
         cycle_value_headers: tuple[str, ...] = (),
+        flush_every_rows: int = 1,
     ):
         self.csv_path = csv_path
         self.data_value_headers = data_value_headers
         self.phase_value_headers = phase_value_headers
         self.cycle_value_headers = cycle_value_headers
+        self.flush_every_rows = max(1, int(flush_every_rows))
+        self._rows_since_flush = 0
         self._file = csv_path.open("w", newline="", encoding="utf-8")
         self._writer = csv.writer(self._file)
         self._writer.writerow(
@@ -96,6 +99,12 @@ class SessionCsvLogger:
             ]
         )
         self._file.flush()
+
+    def _flush_if_needed(self) -> None:
+        self._rows_since_flush += 1
+        if self._rows_since_flush >= self.flush_every_rows:
+            self._file.flush()
+            self._rows_since_flush = 0
 
     def _write_row(
         self,
@@ -139,7 +148,7 @@ class SessionCsvLogger:
                 *padded_cycle_values,
             ]
         )
-        self._file.flush()
+        self._flush_if_needed()
 
     def write_meta(
         self,
@@ -227,6 +236,7 @@ class SessionCsvLogger:
         )
 
     def close(self) -> None:
+        self._file.flush()
         self._file.close()
 
 

@@ -31,6 +31,14 @@ Suggested future additions:
 - `pulse_ox_board_wiring.jpg`
 - `validation_emg_plot.png`
 
+Capture each screenshot with a consistent classroom flow:
+
+1. board connected and detected in GUI
+2. selected lab preset visible
+3. save folder visible
+4. acquisition running with live plot
+5. status area showing no errors
+
 ---
 
 ## Where These Images Belong

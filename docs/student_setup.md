@@ -17,7 +17,7 @@ Students only need:
 The intended path is:
 
 1. create one Conda environment
-2. run the system check
+2. run the student doctor check
 3. prepare Arduino CLI once
 4. launch the GUI
 5. load a lab preset
@@ -38,14 +38,17 @@ The intended path is:
    cd python
    conda env create -f environment.yml
    conda activate biomed-lab
-   python system_check.py
    cd ..
    ```
 5. Prepare Arduino CLI once:
    ```bat
    tools\setup_arduino_cli.bat
    ```
-6. Launch the GUI:
+6. Run the doctor check:
+   ```bat
+   launch_student_doctor_windows.bat
+   ```
+7. Launch the GUI:
    ```bat
    launch_student_gui_windows.bat
    ```
@@ -60,14 +63,17 @@ The intended path is:
    cd python
    conda env create -f environment.yml
    conda activate biomed-lab
-   python system_check.py
    cd ..
    ```
 5. Prepare Arduino CLI once:
    ```bash
    ./tools/setup_arduino_cli.sh
    ```
-6. Launch the GUI:
+6. Run the doctor check:
+   ```bash
+   ./launch_student_doctor_macos.command
+   ```
+7. Launch the GUI:
    ```bash
    ./launch_student_gui_macos.command
    ```
@@ -83,14 +89,17 @@ The intended path is:
    cd python
    conda env create -f environment.yml
    conda activate biomed-lab
-   python system_check.py
    cd ..
    ```
 6. Prepare Arduino CLI once:
    ```bash
    ./tools/setup_arduino_cli.sh
    ```
-7. Launch the GUI:
+7. Run the doctor check:
+   ```bash
+   ./launch_student_doctor_linux.sh
+   ```
+8. Launch the GUI:
    ```bash
    ./launch_student_gui_linux.sh
    ```
@@ -132,6 +141,16 @@ The current student GUI lets students:
 - save one CSV per session
 
 ---
+
+## What The Student Doctor Verifies
+
+From the repository root, run one of:
+
+- Linux: `./launch_student_doctor_linux.sh`
+- macOS: `./launch_student_doctor_macos.command`
+- Windows: `launch_student_doctor_windows.bat`
+
+The doctor command runs the system checks and then tries to list connected boards using Arduino CLI.
 
 ## What The System Check Verifies
 

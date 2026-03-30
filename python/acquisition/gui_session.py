@@ -45,6 +45,8 @@ from acquisition.session_logging import (
 
 
 SERIAL_SHUTDOWN_EXCEPTIONS = (serial.SerialException, OSError, TypeError)
+CONT_HIGH_SESSION_LOG_FLUSH_EVERY_ROWS = 25
+DEFAULT_SESSION_LOG_FLUSH_EVERY_ROWS = 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -107,6 +109,13 @@ class GuiAcquisitionSession:
         self.session_logger: SessionCsvLogger | None = None
         self.running = False
 
+    def _session_log_flush_every_rows(self) -> int:
+        if self.is_phased_cycle:
+            return DEFAULT_SESSION_LOG_FLUSH_EVERY_ROWS
+        if self.continuous_acquisition_class == AcquisitionClass.CONT_HIGH.name:
+            return CONT_HIGH_SESSION_LOG_FLUSH_EVERY_ROWS
+        return DEFAULT_SESSION_LOG_FLUSH_EVERY_ROWS
+
     def start(self) -> None:
         if self.running:
             raise RuntimeError("Acquisition is already running.")
@@ -121,11 +130,13 @@ class GuiAcquisitionSession:
                     session_paths.session_csv_path,
                     phase_value_headers=tuple(signal.name.strip() for signal in self.config.signal_configurations),
                     cycle_value_headers=self.plot_series_names,
+                    flush_every_rows=self._session_log_flush_every_rows(),
                 )
             else:
                 self.session_logger = SessionCsvLogger(
                     session_paths.session_csv_path,
                     data_value_headers=self.selected_field_names[1:],
+                    flush_every_rows=self._session_log_flush_every_rows(),
                 )
 
             self._write_session_metadata()

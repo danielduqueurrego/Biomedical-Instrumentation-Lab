@@ -174,11 +174,24 @@ cd ..
 tools\setup_arduino_cli.bat
 ```
 
-### 3. Run the system check
+### 3. Run the student doctor check
 ```bash
-cd python
+./launch_student_doctor_linux.sh
+```
+
+- macOS
+```bash
+./launch_student_doctor_macos.command
+```
+
+- Windows
+```bat
+launch_student_doctor_windows.bat
+```
+
+If you prefer to run only the package check directly from `python/`, you can still run:
+```bash
 python system_check.py
-cd ..
 ```
 
 ### 4. Launch the student GUI

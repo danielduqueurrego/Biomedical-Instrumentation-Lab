@@ -80,6 +80,13 @@ class SessionLoggingSingleCsvTests(unittest.TestCase):
             self.assertEqual(second.session_csv_path.name, "example_session_1.csv")
             self.assertEqual(second.output_basename, "example_session_1")
 
+    def test_session_csv_logger_normalizes_flush_interval(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir_name:
+            csv_path = Path(temp_dir_name) / "session.csv"
+            logger = SessionCsvLogger(csv_path, flush_every_rows=0)
+            self.assertEqual(logger.flush_every_rows, 1)
+            logger.close()
+
 
 if __name__ == "__main__":
     unittest.main()
