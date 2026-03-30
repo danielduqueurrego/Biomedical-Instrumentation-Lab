@@ -72,6 +72,8 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
 
 CONT_MED_UNO_R4_DEMO_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo"
 CONT_HIGH_UNO_R4_EMG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference"
+CONT_MED_UNO_R4_ECG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "ecg_reference"
+CONT_MED_UNO_R4_BP_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "blood_pressure_reference"
 
 SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD,)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
@@ -457,6 +459,34 @@ def build_arg_parser() -> argparse.ArgumentParser:
     upload_cont_high_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
     upload_cont_high_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
 
+    compile_ecg_parser = subparsers.add_parser(
+        "compile-ecg-reference",
+        help="Compile the CONT_MED UNO R4 ECG reference sketch.",
+    )
+    compile_ecg_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
+    upload_ecg_parser = subparsers.add_parser(
+        "upload-ecg-reference",
+        help="Compile and upload the CONT_MED UNO R4 ECG reference sketch.",
+    )
+    upload_ecg_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
+    upload_ecg_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
+    upload_ecg_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
+    compile_bp_parser = subparsers.add_parser(
+        "compile-bp-reference",
+        help="Compile the CONT_MED UNO R4 Blood Pressure reference sketch.",
+    )
+    compile_bp_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
+    upload_bp_parser = subparsers.add_parser(
+        "upload-bp-reference",
+        help="Compile and upload the CONT_MED UNO R4 Blood Pressure reference sketch.",
+    )
+    upload_bp_parser.add_argument("--port", default=None, help="Serial port such as COM3 or /dev/ttyACM0.")
+    upload_bp_parser.add_argument("--skip-compile", action="store_true", help="Upload without compiling first.")
+    upload_bp_parser.add_argument("--verbose", action="store_true", help="Show verbose Arduino CLI output.")
+
     return parser
 
 
@@ -523,6 +553,54 @@ def main() -> int:
                 selected_port,
                 verbose=args.verbose,
             )
+            print("Upload finished.")
+        elif args.command == "compile-ecg-reference":
+            print(f"Compiling {CONT_MED_UNO_R4_ECG_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+            snapshot_dir = cli.compile(
+                CONT_MED_UNO_R4_ECG_SKETCH_DIR,
+                UNO_R4_WIFI_BOARD.fqbn,
+                verbose=args.verbose,
+            )
+            print("Compile finished.")
+            print(f"Saved Arduino code copy to: {snapshot_dir}")
+        elif args.command == "upload-ecg-reference":
+            if not args.skip_compile:
+                print(f"Compiling {CONT_MED_UNO_R4_ECG_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+                snapshot_dir = cli.compile(
+                    CONT_MED_UNO_R4_ECG_SKETCH_DIR,
+                    UNO_R4_WIFI_BOARD.fqbn,
+                    verbose=args.verbose,
+                )
+                print("Compile finished.")
+                print(f"Saved Arduino code copy to: {snapshot_dir}")
+
+            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
+            print(f"Uploading {CONT_MED_UNO_R4_ECG_SKETCH_DIR.name} to {selected_port}...")
+            cli.upload(CONT_MED_UNO_R4_ECG_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
+            print("Upload finished.")
+        elif args.command == "compile-bp-reference":
+            print(f"Compiling {CONT_MED_UNO_R4_BP_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+            snapshot_dir = cli.compile(
+                CONT_MED_UNO_R4_BP_SKETCH_DIR,
+                UNO_R4_WIFI_BOARD.fqbn,
+                verbose=args.verbose,
+            )
+            print("Compile finished.")
+            print(f"Saved Arduino code copy to: {snapshot_dir}")
+        elif args.command == "upload-bp-reference":
+            if not args.skip_compile:
+                print(f"Compiling {CONT_MED_UNO_R4_BP_SKETCH_DIR.name} for {UNO_R4_WIFI_BOARD.fqbn}...")
+                snapshot_dir = cli.compile(
+                    CONT_MED_UNO_R4_BP_SKETCH_DIR,
+                    UNO_R4_WIFI_BOARD.fqbn,
+                    verbose=args.verbose,
+                )
+                print("Compile finished.")
+                print(f"Saved Arduino code copy to: {snapshot_dir}")
+
+            selected_port = args.port or cli.detect_port_for_board(UNO_R4_WIFI_BOARD)
+            print(f"Uploading {CONT_MED_UNO_R4_BP_SKETCH_DIR.name} to {selected_port}...")
+            cli.upload(CONT_MED_UNO_R4_BP_SKETCH_DIR, UNO_R4_WIFI_BOARD.fqbn, selected_port, verbose=args.verbose)
             print("Upload finished.")
         else:
             raise ArduinoCliError(f"Unsupported command: {args.command}")

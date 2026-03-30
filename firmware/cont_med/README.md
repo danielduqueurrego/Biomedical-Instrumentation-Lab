@@ -14,9 +14,11 @@ Typical labs:
 - Blood Pressure
 - general analog streaming demos
 
-Current committed UNO R4 WiFi reference path:
+Current committed UNO R4 WiFi reference paths:
 
-- `uno_r4_wifi/three_channel_data_demo`
+- `uno_r4_wifi/ecg_reference` — named ECG sketch at 500 Hz (A0=Raw ECG, A1=Amplified ECG, A2=Comparator)
+- `uno_r4_wifi/blood_pressure_reference` — named Blood Pressure sketch at 200 Hz (A0=Pressure Waveform)
+- `uno_r4_wifi/three_channel_data_demo` — generic six-channel analog-bank demo at 120 Hz
 
 ---
 
@@ -42,7 +44,13 @@ Current GUI-generated behavior:
 - one-time setup:
   - `./tools/setup_arduino_cli.sh`
   - `tools\setup_arduino_cli.bat`
-- current helper upload path:
+- ECG reference upload:
+  - `./tools/upload_cont_med_ecg_reference.sh`
+  - `tools\upload_cont_med_ecg_reference.bat`
+- Blood Pressure reference upload:
+  - `./tools/upload_cont_med_blood_pressure_reference.sh`
+  - `tools\upload_cont_med_blood_pressure_reference.bat`
+- generic analog-bank demo upload:
   - `./tools/upload_cont_med_three_channel.sh`
   - `tools\upload_cont_med_three_channel.bat`
 
