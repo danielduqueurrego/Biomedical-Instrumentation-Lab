@@ -8,6 +8,28 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  student-environment:
+    name: Student Conda environment check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          activate-environment: biomed-lab
+          environment-file: python/environment.yml
+          auto-activate-base: false
+
+      - name: Run system check from student environment
+        shell: bash -el {0}
+        run: |
+          set -euxo pipefail
+          python python/system_check.py || true
+          python -c "import matplotlib, serial; print('Student env imports OK')"
+
   test:
     name: Python tests
     runs-on: ubuntu-latest
