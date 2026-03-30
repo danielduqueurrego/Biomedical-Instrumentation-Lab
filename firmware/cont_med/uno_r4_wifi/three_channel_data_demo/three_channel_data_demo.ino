@@ -2,6 +2,7 @@
 //
 // Shared protocol packets:
 //   META,lab,CONT_MED_ANALOG_BANK
+//   META,firmware_version,1
 //   META,acq_class,CONT_MED
 //   META,rate_hz,120
 //   META,adc_resolution_bits,14
@@ -27,6 +28,7 @@ unsigned long nextSampleTimeUs = 0;
 
 void writeMetadata() {
   Serial.println("META,lab,CONT_MED_ANALOG_BANK");
+  Serial.println("META,firmware_version,1");
   Serial.println("META,acq_class,CONT_MED");
   Serial.println("META,rate_hz,120");
   Serial.println("META,adc_resolution_bits,14");

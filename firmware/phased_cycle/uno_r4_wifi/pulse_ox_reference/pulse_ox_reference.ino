@@ -15,6 +15,7 @@
 //
 // Shared protocol packets:
 //   META,lab,PULSEOX_REFERENCE
+//   META,firmware_version,1
 //   META,acq_class,PHASED_CYCLE
 //   META,adc_resolution_bits,14
 //   META,cycle_rate_hz,100
@@ -99,6 +100,7 @@ const char* phaseName(PulseOxPhase phase) {
 
 void writeMetadata() {
   Serial.println("META,lab,PULSEOX_REFERENCE");
+  Serial.println("META,firmware_version,1");
   Serial.println("META,acq_class,PHASED_CYCLE");
   Serial.println("META,adc_resolution_bits,14");
   Serial.println("META,cycle_rate_hz,100");

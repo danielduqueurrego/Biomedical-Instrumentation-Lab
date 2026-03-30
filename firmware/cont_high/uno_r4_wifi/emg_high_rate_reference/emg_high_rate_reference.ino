@@ -2,6 +2,7 @@
 //
 // Shared protocol packets:
 //   META,lab,CONT_HIGH_EMG_REFERENCE
+//   META,firmware_version,1
 //   META,acq_class,CONT_HIGH
 //   META,rate_hz,1000
 //   META,adc_resolution_bits,14
@@ -30,6 +31,7 @@ unsigned long nextSampleTimeUs = 0;
 
 void writeMetadata() {
   Serial.println("META,lab,CONT_HIGH_EMG_REFERENCE");
+  Serial.println("META,firmware_version,1");
   Serial.println("META,acq_class,CONT_HIGH");
   Serial.println("META,rate_hz,1000");
   Serial.println("META,adc_resolution_bits,14");
