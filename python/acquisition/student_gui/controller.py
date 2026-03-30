@@ -34,6 +34,9 @@ class StudentAcquisitionGui(
         self.session = None
         self.background_queue: SimpleQueue = SimpleQueue()
         self.cli_task_running = False
+        self.cli_available = True
+        self.cli_last_error = ""
+        self._auto_system_check_ran = False
 
         self.board_var = tk.StringVar(value=UNO_R4_WIFI_BOARD.display_name)
         self.port_var = tk.StringVar(value="")

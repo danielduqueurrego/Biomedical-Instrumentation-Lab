@@ -16,6 +16,7 @@ from acquisition.arduino_codegen import create_generated_analog_capture_sketch
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
+SNAPSHOT_RETAIN_COUNT = 20
 BOARD_LIST_TIMEOUT_SECONDS = 10
 COMPILE_TIMEOUT_SECONDS = 180
 UPLOAD_TIMEOUT_SECONDS = 30
@@ -24,6 +25,23 @@ SETUP_TIMEOUT_SECONDS = 300
 
 class ArduinoCliError(RuntimeError):
     """Raised when Arduino CLI could not complete the requested operation."""
+
+
+def _prune_old_snapshots(directory: Path, retain: int) -> None:
+    try:
+        snapshots = sorted(
+            (path for path in directory.glob("arduino_code_*.ino") if path.is_file()),
+            key=lambda path: path.stat().st_mtime,
+            reverse=True,
+        )
+    except FileNotFoundError:
+        return
+
+    for stale in snapshots[retain:]:
+        try:
+            stale.unlink()
+        except OSError:
+            continue
 
 
 @dataclass(frozen=True, slots=True)
@@ -388,6 +406,7 @@ class ArduinoCli:
 
         source_sketch_path = self._find_primary_sketch_file(sketch_dir)
         snapshot_path.write_text(source_sketch_path.read_text(encoding="utf-8"), encoding="utf-8")
+        _prune_old_snapshots(ARDUINO_CODE_SNAPSHOT_DIR, SNAPSHOT_RETAIN_COUNT)
         return snapshot_path
 
     def compile(self, sketch_dir: Path, fqbn: str, verbose: bool = False) -> Path:

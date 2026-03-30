@@ -40,21 +40,20 @@ def sanitize_output_basename(output_basename: str) -> str:
 def create_named_session_paths(output_dir: Path, output_basename: str) -> NamedSessionPaths:
     output_dir.mkdir(parents=True, exist_ok=True)
     safe_basename = sanitize_output_basename(output_basename)
+    candidate_basename = safe_basename
+    candidate_path = output_dir / f"{candidate_basename}.csv"
+    suffix = 1
 
-    paths = NamedSessionPaths(
+    while candidate_path.exists():
+        candidate_basename = f"{safe_basename}_{suffix}"
+        candidate_path = output_dir / f"{candidate_basename}.csv"
+        suffix += 1
+
+    return NamedSessionPaths(
         output_dir=output_dir,
-        output_basename=safe_basename,
-        session_csv_path=output_dir / f"{safe_basename}.csv",
+        output_basename=candidate_basename,
+        session_csv_path=candidate_path,
     )
-
-    existing_paths = [paths.session_csv_path.name] if paths.session_csv_path.exists() else []
-    if existing_paths:
-        joined = ", ".join(existing_paths)
-        raise FileExistsError(
-            f"The selected output name would overwrite existing files in {output_dir}: {joined}"
-        )
-
-    return paths
 
 
 class SessionCsvLogger:

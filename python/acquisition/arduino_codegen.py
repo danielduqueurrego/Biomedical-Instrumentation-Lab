@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+import shutil
 
 from acquisition.gui_models import validate_signal_configurations
 from acquisition.presets import (
@@ -22,6 +23,7 @@ from acquisition.protocol import (
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 GENERATED_ARDUINO_SKETCH_DIR = REPO_ROOT / "data" / "generated_arduino_sketches"
+GENERATED_SKETCH_RETAIN_COUNT = 20
 DEFAULT_FALLBACK_RATE_HZ = 120
 ADC_RESOLUTION_BITS = 14
 
@@ -37,6 +39,23 @@ class GeneratedSketchArtifact:
     uses_pulseox_led_cycle: bool
     phase_rate_hz: int | None = None
     cycle_rate_hz: int | None = None
+
+
+def _prune_old_generated_sketches(base_dir: Path, retain: int) -> None:
+    if not base_dir.exists():
+        return
+
+    sketches = sorted(
+        (path for path in base_dir.iterdir() if path.is_dir()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+
+    for stale in sketches[retain:]:
+        try:
+            shutil.rmtree(stale)
+        except OSError:
+            continue
 
 
 def _timestamp_tag() -> str:
@@ -451,6 +470,7 @@ def create_generated_analog_capture_sketch(signal_configurations, baud_rate: int
         render_generated_analog_capture_sketch(signal_configurations, baud_rate),
         encoding="utf-8",
     )
+    _prune_old_generated_sketches(GENERATED_ARDUINO_SKETCH_DIR, GENERATED_SKETCH_RETAIN_COUNT)
 
     sample_rate_hz = determine_generated_sample_rate_hz(signal_configurations)
     sample_period_us = max(1, round(1_000_000 / sample_rate_hz))
