@@ -283,10 +283,10 @@ The current board design is hosted on OSHWLab and developed as part of an open, 
 This project is currently supported by:
 |Sponsor|   |
 | --- | --- |
-|WVU Department of Chemical and Biomedical Engineering| <img src="WVU CBE.png" alt="WVU CBE Logo" height="200"> |
-| OSHWLab | <img src="oshwlab.png" alt="OSHWLab Logo" height="200"> |
-| EasyEDA | <img src="EasyEDA_logo.svg" alt="EasyEDA Logo" height="200"> |
-| JLCPCB | <img src="JLCPCB_Logo.svg" alt="JLCPCB Logo" height="200"> |
+|WVU Department of Chemical and Biomedical Engineering| <img src="img/WVU CBE.png" alt="WVU CBE Logo" height="200"> |
+| OSHWLab | <img src="img/oshwlab.png" alt="OSHWLab Logo" height="200"> |
+| EasyEDA | <img src="img/EasyEDA_logo.svg" alt="EasyEDA Logo" height="200"> |
+| JLCPCB | <img src="img/JLCPCB_Logo.svg" alt="JLCPCB Logo" height="200"> |
 
 Their support helps advance open, hands-on biomedical engineering education and prototype development.
 
