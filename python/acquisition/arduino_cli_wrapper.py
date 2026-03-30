@@ -88,12 +88,18 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
 )
 
+UNO_R3_BOARD = BoardDefinition(
+    display_name="Arduino UNO R3",
+    fqbn="arduino:avr:uno",
+    core="arduino:avr",
+)
+
 CONT_MED_UNO_R4_DEMO_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo"
 CONT_HIGH_UNO_R4_EMG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference"
 CONT_MED_UNO_R4_ECG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "ecg_reference"
 CONT_MED_UNO_R4_BP_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "blood_pressure_reference"
 
-SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD,)
+SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD, UNO_R3_BOARD)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
 
 

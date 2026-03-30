@@ -25,7 +25,7 @@ class FirmwareMixin:
     def _selected_firmware_label(self) -> str:
         if self.current_lab_profile is not None:
             return self.current_lab_profile.firmware_label
-        return "Generated UNO R4 WiFi Acquisition Firmware"
+        return "Generated Acquisition Firmware"
 
     def _setup_arduino_cli(self) -> None:
         self._run_cli_task("Arduino CLI setup", self._setup_arduino_cli_task)
