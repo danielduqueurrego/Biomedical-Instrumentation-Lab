@@ -29,10 +29,6 @@ It is designed to support practical laboratory experiences in:
 </p>
 
 <p align="center">
-  Experience with IMUs and upper limb applications.
-</p>
-
-<p align="center">
   <a href="https://www.linkedin.com/in/danielduqueu/">
     <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
   </a>

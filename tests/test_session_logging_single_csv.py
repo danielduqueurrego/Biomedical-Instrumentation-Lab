@@ -70,6 +70,16 @@ class SessionLoggingSingleCsvTests(unittest.TestCase):
         self.assertEqual(rows[3]["row_type"], "PARSE_ERROR")
         self.assertEqual(rows[3]["error_message"], "Malformed packet")
 
+    def test_named_session_paths_adds_suffix_on_collision(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir_name:
+            output_dir = Path(temp_dir_name)
+            first = create_named_session_paths(output_dir, "example_session")
+            first.session_csv_path.touch()
+
+            second = create_named_session_paths(output_dir, "example_session")
+            self.assertEqual(second.session_csv_path.name, "example_session_1.csv")
+            self.assertEqual(second.output_basename, "example_session_1")
+
 
 if __name__ == "__main__":
     unittest.main()

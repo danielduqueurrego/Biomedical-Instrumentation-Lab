@@ -42,12 +42,14 @@ class ConnectionMixin:
     def _refresh_ports(self, log_message: bool = True) -> None:
         cli_error = ""
         self.detected_board_ports = []
+        cli_available = True
 
         try:
             cli = ArduinoCli.from_environment()
             self.detected_board_ports = cli.list_supported_board_ports()
         except (ArduinoCliError, FileNotFoundError) as error:
             cli_error = str(error)
+            cli_available = False
 
         ports = list_available_ports()
         self.port_display_to_device = {}
@@ -88,8 +90,17 @@ class ConnectionMixin:
             else:
                 self._append_status("No serial ports detected.")
 
-        if cli_error and not self.detected_board_ports:
+        self.cli_available = cli_available
+        self.cli_last_error = cli_error
+        if not cli_available and not self.detected_board_ports:
             self.connection_summary_var.set("Arduino CLI not available. Showing serial ports only.")
+            if not getattr(self, "_auto_system_check_ran", False):
+                self._auto_system_check_ran = True
+                report = run_system_check()
+                self._append_status(render_system_check(report))
+
+        if hasattr(self, "_refresh_cli_button_state"):
+            self._refresh_cli_button_state()
 
     def _on_board_selected(self, _event=None) -> None:
         if self._auto_populate_detected_connection():

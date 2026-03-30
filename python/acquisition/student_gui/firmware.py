@@ -153,6 +153,15 @@ class FirmwareMixin:
         threading.Thread(target=worker, daemon=True).start()
 
     def _set_cli_buttons_state(self, state: str) -> None:
-        self.setup_cli_button.configure(state=state)
-        self.compile_button.configure(state=state)
-        self.upload_button.configure(state=state)
+        effective_state = state
+        if state == "normal" and not getattr(self, "cli_available", True):
+            effective_state = "disabled"
+        self.setup_cli_button.configure(state=effective_state)
+        self.compile_button.configure(state=effective_state)
+        self.upload_button.configure(state=effective_state)
+
+    def _refresh_cli_button_state(self) -> None:
+        if self.cli_task_running:
+            self._set_cli_buttons_state("disabled")
+        else:
+            self._set_cli_buttons_state("normal")
