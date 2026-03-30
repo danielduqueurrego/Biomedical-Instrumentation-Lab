@@ -15,6 +15,7 @@ from acquisition.arduino_cli_wrapper import (
     BoardDefinition,
     CONT_HIGH_UNO_R4_EMG_SKETCH_DIR,
     DetectedBoardPort,
+    UNO_R3_BOARD,
     UNO_R4_WIFI_BOARD,
 )
 
@@ -81,3 +82,31 @@ def test_run_wraps_subprocess_timeout_with_student_friendly_message(monkeypatch)
     message = str(error_info.value)
     assert "timed out" in message
     assert "arduino-cli upload --port /dev/ttyACM0" in message
+
+
+def test_parse_board_list_json_matches_arduino_uno_r3_by_fqbn() -> None:
+    cli = ArduinoCli("arduino-cli")
+
+    parsed = cli._parse_board_list_json(
+        """
+        {
+          "detected_ports": [
+            {
+              "port": {
+                "address": "/dev/cu.usbmodem1201",
+                "label": "Arduino Uno",
+                "protocol": "serial",
+                "protocol_label": "Serial Port (USB)"
+              },
+              "matching_boards": [
+                {"name": "Arduino Uno", "fqbn": "arduino:avr:uno"}
+              ]
+            }
+          ]
+        }
+        """
+    )
+
+    assert len(parsed) == 1
+    assert parsed[0].port == "/dev/cu.usbmodem1201"
+    assert parsed[0].matched_board == UNO_R3_BOARD
