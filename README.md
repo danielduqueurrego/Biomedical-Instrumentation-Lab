@@ -12,9 +12,34 @@ It is designed to support practical laboratory experiences in:
 - **Blood pressure**
 - and other analog or multi-phase biomedical sensing activities
 
+
 ---
 
-## Author
+## 🚀 Start here first
+
+If you are a student and want the fastest path:
+
+1. Install **Anaconda** (recommended): https://www.anaconda.com/download
+2. Create the `biomed-lab` environment from `python/environment.yml`
+3. Run the **student doctor** launcher
+4. Run the **student GUI** launcher
+
+This keeps setup to one Conda environment plus Arduino tools.
+
+## ✅ Requirements and links
+
+### Hardware
+- **Arduino UNO R4 WiFi**
+- **Biomedical Instrumentation Board (shield)**: https://oshwlab.com/dd00055/biomedical-instrumentation-board
+
+### Software
+- **Anaconda**: https://www.anaconda.com/download
+- **Arduino CLI** docs: https://arduino.github.io/arduino-cli/latest/
+- **Arduino IDE/Board Manager reference**: https://docs.arduino.cc/software/ide-v2/tutorials/ide-v2-board-manager/
+
+---
+
+## 👤 Author
 
 <p align="center">
   <strong>Daniel Duque Urrego</strong><br>
@@ -51,7 +76,7 @@ It is designed to support practical laboratory experiences in:
 
 ---
 
-## Why this project exists
+## 🎯 Why this project exists
 
 Biomedical instrumentation courses often teach important concepts such as signal conditioning, filtering, amplification, sampling, and physiological sensing, but students do not always get a reusable, transparent, and affordable platform they can explore themselves.
 
@@ -69,7 +94,7 @@ This repository brings together the hardware, firmware, desktop tools, examples,
 
 ---
 
-## Project highlights
+## ✨ Project highlights
 
 - **Custom educational PCB** for biomedical instrumentation labs
 - **Arduino UNO R4 WiFi** firmware workflows
@@ -84,7 +109,7 @@ This repository brings together the hardware, firmware, desktop tools, examples,
 
 ---
 
-## The board
+## 🧩 The board
 
 The current PCB design is published on **OSHWLab**:
 
@@ -97,7 +122,7 @@ This board serves as the hardware foundation for the lab workflows in this repos
 
 ---
 
-## What this repository includes
+## 📦 What this repository includes
 
 This repository currently includes:
 
@@ -114,7 +139,7 @@ The public repository currently includes the following main areas: `docs`, `exam
 
 ---
 
-## How it works
+## ⚙️ How it works
 
 The repository is organized by **acquisition pattern first**, rather than only by sensor type. This allows one software workflow to be reused across several lab activities. The repo’s current architecture and top-level organization reflect this pattern-first approach.
 
@@ -136,7 +161,7 @@ This design helps keep the student experience consistent while still supporting 
 
 ---
 
-## Student workflow
+## 👩‍🎓 Student workflow
 
 The intended student workflow is:
 
@@ -152,7 +177,7 @@ The current public repo already presents a “Start Here” path based on Conda,
 
 ---
 
-## Quick start
+## 🚀 Quick start
 
 ### 1. Create the Python environment
 
@@ -219,7 +244,7 @@ Each session is saved as a CSV file, and the current repo documentation notes th
 
 ---
 
-## Example applications
+## 🧪 Example applications
 
 This platform is currently designed to support lab activities such as:
 
@@ -231,7 +256,7 @@ This platform is currently designed to support lab activities such as:
 
 ---
 
-## Repository structure
+## 📂 Repository structure
 ```
 docs/                 Documentation, setup, lab guides, validation
 examples/session_csv/ Example session output files
@@ -253,7 +278,7 @@ These areas are visible in the current public repo and README structure.
 
 ---
 
-## Current PCB and design workflow
+## 🛠️ Current PCB and design workflow
 
 This project combines:
 

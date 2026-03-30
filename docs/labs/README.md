@@ -6,7 +6,7 @@ Start here when you need the fastest path from setup to a specific lab. Each gui
 
 ---
 
-## Available Guides
+## 📘 Available Guides
 
 - [EMG](./emg.md)
 - [ECG](./ecg.md)
@@ -15,7 +15,7 @@ Start here when you need the fastest path from setup to a specific lab. Each gui
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 If you are running a lab station for the first time:
 
@@ -27,7 +27,7 @@ If you are running a lab station for the first time:
 
 ---
 
-## What The Guides Cover
+## 🧭 What The Guides Cover
 
 Each lab guide includes:
 
@@ -42,7 +42,7 @@ Each lab guide includes:
 
 ---
 
-## Useful Related Docs
+## 🔗 Useful Related Docs
 
 - [Student setup](../student_setup.md)
 - [Sampling strategy](../sampling_strategy.md)

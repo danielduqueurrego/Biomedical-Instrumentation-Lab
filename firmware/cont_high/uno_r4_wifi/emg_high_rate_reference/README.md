@@ -6,7 +6,7 @@ Use this sketch when you want the fastest known-good high-rate upload path witho
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -18,7 +18,7 @@ Use this sketch when you want the fastest known-good high-rate upload path witho
 
 ---
 
-## Packet Layout
+## 📡 Packet Layout
 
 - `META,acq_class,CONT_HIGH`
 - `META,rate_hz,1000`
@@ -27,7 +27,7 @@ Use this sketch when you want the fastest known-good high-rate upload path witho
 
 ---
 
-## Quick Use
+## 🚀 Quick Use
 
 From the repository root:
 
@@ -41,7 +41,7 @@ If auto-detect cannot find the board port:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [CONT_HIGH firmware overview](../../README.md)
 - [EMG lab guide](../../../../docs/labs/emg.md)

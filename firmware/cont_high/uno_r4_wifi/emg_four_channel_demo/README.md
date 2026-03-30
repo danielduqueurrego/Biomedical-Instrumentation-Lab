@@ -6,7 +6,7 @@ Use this sketch when you want a fixed `CONT_HIGH` EMG example that matches the r
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -17,7 +17,7 @@ Use this sketch when you want a fixed `CONT_HIGH` EMG example that matches the r
 
 ---
 
-## Pin Mapping
+## 🔌 Pin Mapping
 
 - `A0 = Raw EMG`
 - `A1 = Rectified EMG`
@@ -26,7 +26,7 @@ Use this sketch when you want a fixed `CONT_HIGH` EMG example that matches the r
 
 ---
 
-## Packet Layout
+## 📡 Packet Layout
 
 Startup metadata:
 
@@ -42,7 +42,7 @@ Data rows:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [EMG lab guide](../../../../docs/labs/emg.md)
 - [Sampling strategy](../../../../docs/sampling_strategy.md)

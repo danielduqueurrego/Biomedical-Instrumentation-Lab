@@ -6,7 +6,7 @@ Use this folder when you need a known committed `CONT_MED` sketch instead of the
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Typical labs:
 
@@ -22,7 +22,7 @@ Current committed UNO R4 WiFi reference paths:
 
 ---
 
-## What `CONT_MED` Means In This Repo
+## 🧠 What `CONT_MED` Means In This Repo
 
 Current expectations:
 
@@ -39,7 +39,7 @@ Current GUI-generated behavior:
 
 ---
 
-## Quick Use
+## 🚀 Quick Use
 
 - one-time setup:
   - `./tools/setup_arduino_cli.sh`
@@ -56,7 +56,7 @@ Current GUI-generated behavior:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [Sampling strategy](../../docs/sampling_strategy.md)
 - [Serial protocol](../../docs/serial_protocol.md)

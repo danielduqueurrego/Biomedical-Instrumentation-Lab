@@ -6,7 +6,7 @@ Use this folder when you are setting up the Python side of the project or contri
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 If you are a student or TA, the main path is:
 
@@ -30,7 +30,7 @@ Then from repository root run one of:
 
 ---
 
-## Folder Layout
+## 📂 Folder Layout
 
 - `acquisition/`: shared protocol, preset, serial, logging, and plotting helpers
 - `acquisition/student_gui/`: modular Tkinter GUI package split by connection, firmware, signals, plotting, session controls, and status output
@@ -42,7 +42,7 @@ Then from repository root run one of:
 
 ---
 
-## Main Student GUI
+## 🖥️ Main Student GUI
 
 The current student GUI is a shared Arduino UNO R4 WiFi acquisition app built around the six standard analog inputs `A0` to `A5`.
 
@@ -60,7 +60,7 @@ Fallback launchers from this `python/` folder:
 
 ---
 
-## What The GUI Supports
+## ✅ What The GUI Supports
 
 Students can currently:
 
@@ -81,9 +81,9 @@ Students can currently:
 
 ---
 
-## Important Current Behavior
+## ⚠️ Important Current Behavior
 
-### Continuous labs
+#### 📈 Continuous labs
 
 - the generated sketch uses only the selected analog ports
 - the generated sketch uses the highest selected preset rate
@@ -91,7 +91,7 @@ Students can currently:
 - `CONT_MED` emits `t_ms`
 - the UNO R4 WiFi ADC is configured to `14-bit`
 
-### PulseOx
+#### ❤️ PulseOx
 
 - all active signals must be `PulseOx`
 - PulseOx uses the fixed map:
@@ -103,7 +103,7 @@ Students can currently:
 - generated firmware emits `PHASE` and corrected `CYCLE` rows
 - the live plot shows corrected `CYCLE` values
 
-### Firmware uploads
+#### 🔧 Firmware uploads
 
 - compile and upload actions use timeouts
 - missing-board uploads fail fast with a readable message
@@ -111,7 +111,7 @@ Students can currently:
 
 ---
 
-## Session Presets
+## 🧰 Session Presets
 
 Shipped presets:
 
@@ -130,7 +130,7 @@ Each preset stores:
 
 ---
 
-## Output Files
+## 💾 Output Files
 
 The student GUI saves one CSV per session in the folder the user chooses.
 
@@ -154,7 +154,7 @@ Inside that folder it writes one `session.csv`.
 
 ---
 
-## Contributor Checks
+## 🧪 Contributor Checks
 
 Student setup stays minimal with `environment.yml`. Contributors can also use `environment-dev.yml`.
 
@@ -166,7 +166,7 @@ Typical checks:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [README.md](../README.md)
 - [Student setup](../docs/student_setup.md)

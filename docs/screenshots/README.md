@@ -6,7 +6,7 @@ Use this folder when you want to replace the current placeholders with real clas
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Nothing in this folder is required for the software to run. It exists so the docs always have a consistent place to point when a screenshot is needed.
 
@@ -18,7 +18,7 @@ Current placeholder assets:
 
 ---
 
-## Recommended Replacements
+## 🖼️ Recommended Replacements
 
 - replace `student_gui_setup_placeholder.svg` with `student_gui_setup.png`
 - replace `emg_live_plot_placeholder.svg` with `emg_live_plot.png`
@@ -41,7 +41,7 @@ Capture each screenshot with a consistent classroom flow:
 
 ---
 
-## Where These Images Belong
+## 📍 Where These Images Belong
 
 - `student_gui_setup.png`: root quickstart and [student_setup.md](../student_setup.md)
 - `emg_live_plot.png`: [docs/labs/emg.md](../labs/emg.md)
@@ -50,7 +50,7 @@ Capture each screenshot with a consistent classroom flow:
 
 ---
 
-## Naming Guidance
+## 🏷️ Naming Guidance
 
 Keep names simple and descriptive:
 
@@ -61,7 +61,7 @@ Keep names simple and descriptive:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [README.md](../../README.md)
 - [student_setup.md](../student_setup.md)

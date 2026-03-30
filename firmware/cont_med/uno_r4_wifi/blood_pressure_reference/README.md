@@ -6,7 +6,7 @@ Use this sketch when you want a known-good blood pressure acquisition sketch tha
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -19,13 +19,13 @@ Use this sketch when you want a known-good blood pressure acquisition sketch tha
 
 ---
 
-## Pin Mapping
+## 🔌 Pin Mapping
 
 - `A0 = Pressure Waveform` — analog output from the pressure transducer or cuff sensor
 
 ---
 
-## Packet Layout
+## 📡 Packet Layout
 
 Startup metadata:
 
@@ -42,7 +42,7 @@ Data rows:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [CONT_MED firmware overview](../../README.md)
 - [Blood Pressure lab guide](../../../../docs/labs/blood_pressure.md)

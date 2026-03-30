@@ -6,7 +6,7 @@ Use this section when a board, firmware path, or classroom station needs a quick
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 The goal is to keep validation simple and repeatable.
 
@@ -22,7 +22,7 @@ For every validation run, record at least:
 
 ---
 
-## Quick Workflow
+## ✅ Quick Workflow
 
 1. open the matching lab guide from [docs/labs/](../labs/README.md)
 2. load the matching GUI lab profile or session preset
@@ -34,7 +34,7 @@ For every validation run, record at least:
 
 ---
 
-## What To Use
+## 📋 What To Use
 
 - general checklist: [hardware_validation_checklist_template.md](./hardware_validation_checklist_template.md)
 - short per-lab tables: [lab_validation_tables.md](./lab_validation_tables.md)
@@ -42,9 +42,9 @@ For every validation run, record at least:
 
 ---
 
-## How To Estimate Achieved Rate
+## 📈 How To Estimate Achieved Rate
 
-### Continuous labs
+#### 📈 Continuous labs
 
 Use the `DATA` rows in the session CSV.
 
@@ -57,7 +57,7 @@ Use:
 - `time_scale = 1_000_000` for `t_us`
 - `time_scale = 1_000` for `t_ms`
 
-### PulseOx
+#### ❤️ PulseOx
 
 Use the `CYCLE` rows for cycle rate, or the `PHASE` rows for raw phase rate.
 
@@ -67,7 +67,7 @@ Simple estimate:
 
 ---
 
-## What Counts As A Good Classroom Result
+## ✅ What Counts As A Good Classroom Result
 
 For a short classroom checkout, a run is usually acceptable when:
 
@@ -79,7 +79,7 @@ For a short classroom checkout, a run is usually acceptable when:
 
 ---
 
-## Screenshot Guidance
+## 🖼️ Screenshot Guidance
 
 Screenshots are optional, but they help when:
 
@@ -91,7 +91,7 @@ Place screenshots in [docs/screenshots/](../screenshots/README.md).
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [Lab guides](../labs/README.md)
 - [Student setup](../student_setup.md)

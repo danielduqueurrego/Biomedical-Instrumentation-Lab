@@ -6,7 +6,7 @@ Use this sketch when you want a committed PulseOx implementation that matches th
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -18,7 +18,7 @@ Use this sketch when you want a committed PulseOx implementation that matches th
 
 ---
 
-## Pin Mapping
+## 🔌 Pin Mapping
 
 - `A0 = reflective raw photodiode output`
 - `A1 = transmission raw photodiode output`
@@ -33,7 +33,7 @@ Important model rule:
 
 ---
 
-## Timing Model
+## ⏱️ Timing Model
 
 Phase order:
 
@@ -46,7 +46,7 @@ Each optical cycle contains four phase captures. One corrected `CYCLE` packet is
 
 ---
 
-## Packet Fields
+## 📡 Packet Fields
 
 Startup metadata includes:
 
@@ -70,7 +70,7 @@ Corrected cycle rows:
 
 ---
 
-## How It Differs From Generated Firmware
+## 🔍 How It Differs From Generated Firmware
 
 This committed sketch is fixed and known-good.
 
@@ -78,7 +78,7 @@ The GUI-generated PulseOx firmware follows the same hardware model and packet se
 
 ---
 
-## Expected Output
+## ✅ Expected Output
 
 During a normal run, students should expect:
 
@@ -90,7 +90,7 @@ In the GUI session CSV, those rows are stored together in one file and filtered 
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [PulseOx lab guide](../../../../docs/labs/pulse_ox.md)
 - [Generated firmware workflow](../../../../docs/generated_firmware_workflow.md)

@@ -6,7 +6,7 @@ Use this sketch when you want a simple committed reference upload instead of a G
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -18,7 +18,7 @@ Use this sketch when you want a simple committed reference upload instead of a G
 
 ---
 
-## What It Does
+## ⚙️ What It Does
 
 This sketch:
 
@@ -32,7 +32,7 @@ When students compile or upload from the GUI, the project generates a temporary 
 
 ---
 
-## Quick Use
+## 🚀 Quick Use
 
 From the repository root:
 
@@ -49,7 +49,7 @@ If the port is not detected automatically:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [CONT_MED firmware overview](../../README.md)
 - [Student setup](../../../../docs/student_setup.md)

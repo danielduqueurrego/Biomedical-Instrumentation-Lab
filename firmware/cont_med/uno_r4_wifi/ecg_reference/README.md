@@ -6,7 +6,7 @@ Use this sketch when you want a known-good ECG acquisition sketch that clearly i
 
 ---
 
-## Quick Reference
+## 📌 Quick Reference
 
 | Item | Current value |
 | --- | --- |
@@ -19,7 +19,7 @@ Use this sketch when you want a known-good ECG acquisition sketch that clearly i
 
 ---
 
-## Pin Mapping
+## 🔌 Pin Mapping
 
 - `A0 = Raw ECG` — signal before amplification
 - `A1 = Amplified ECG` — signal after instrumentation amplifier
@@ -27,7 +27,7 @@ Use this sketch when you want a known-good ECG acquisition sketch that clearly i
 
 ---
 
-## Packet Layout
+## 📡 Packet Layout
 
 Startup metadata:
 
@@ -44,7 +44,7 @@ Data rows:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [CONT_MED firmware overview](../../README.md)
 - [ECG lab guide](../../../../docs/labs/ecg.md)

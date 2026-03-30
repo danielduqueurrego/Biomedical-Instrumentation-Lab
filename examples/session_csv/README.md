@@ -6,7 +6,7 @@ Use these files when you want to understand the logging structure before collect
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Current example files:
 
@@ -19,7 +19,7 @@ These are teaching artifacts, not live captures from a board.
 
 ---
 
-## How To Read Them
+## 📄 How To Read Them
 
 Start with the `row_type` column:
 
@@ -39,7 +39,7 @@ Useful columns:
 
 ---
 
-## What Students Should Use First
+## 👩‍🎓 What Students Should Use First
 
 - for ECG, EMG, and Blood Pressure:
   - filter to `row_type=DATA`
@@ -49,7 +49,7 @@ Useful columns:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [README.md](../../README.md)
 - [Student setup](../../docs/student_setup.md)

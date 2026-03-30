@@ -6,7 +6,7 @@ Use this folder when you need a known committed `CONT_HIGH` sketch instead of th
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Current committed UNO R4 WiFi sketches:
 
@@ -17,7 +17,7 @@ Both follow the shared `CONT_HIGH` timing rule and emit `t_us`.
 
 ---
 
-## What `CONT_HIGH` Means In This Repo
+## 🧠 What `CONT_HIGH` Means In This Repo
 
 Current expectations:
 
@@ -32,14 +32,14 @@ Typical classroom use:
 
 ---
 
-## Current Sketch Roles
+## 🧩 Current Sketch Roles
 
 - `emg_high_rate_reference`: simple two-channel upload helper at `1 kHz`
 - `emg_four_channel_demo`: manifest-aligned four-channel EMG example at `2000 samples/s`
 
 ---
 
-## Quick Use
+## 🚀 Quick Use
 
 - one-time setup:
   - `./tools/setup_arduino_cli.sh`
@@ -50,7 +50,7 @@ Typical classroom use:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [Sampling strategy](../../docs/sampling_strategy.md)
 - [Serial protocol](../../docs/serial_protocol.md)

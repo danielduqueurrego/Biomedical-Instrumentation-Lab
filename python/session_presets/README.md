@@ -6,7 +6,7 @@ Use this folder when you want to load a ready-made classroom setup or save a con
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Students can use the GUI buttons:
 
@@ -22,7 +22,7 @@ Current shipped examples:
 
 ---
 
-## What A Preset Stores
+## 📦 What A Preset Stores
 
 Each preset stores:
 
@@ -34,7 +34,7 @@ Each preset stores:
 
 ---
 
-## How To Use Them In Class
+## 👩‍🏫 How To Use Them In Class
 
 Recommended classroom workflow:
 
@@ -49,7 +49,7 @@ Instructors or TAs can also save custom presets for a specific section or statio
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [Python README](../README.md)
 - [Student setup](../../docs/student_setup.md)

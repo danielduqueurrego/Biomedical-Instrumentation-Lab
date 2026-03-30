@@ -6,7 +6,7 @@ Use this folder when you need a known committed `PHASED_CYCLE` sketch instead of
 
 ---
 
-## Start Here
+## 🚀 Start Here
 
 Typical lab:
 
@@ -18,7 +18,7 @@ Current committed UNO R4 WiFi reference sketch:
 
 ---
 
-## What `PHASED_CYCLE` Means In This Repo
+## 🧠 What `PHASED_CYCLE` Means In This Repo
 
 Current expectations:
 
@@ -42,7 +42,7 @@ Current PulseOx behavior:
 
 ---
 
-## See Also
+## 🔗 See Also
 
 - [PulseOx lab guide](../../docs/labs/pulse_ox.md)
 - [Generated firmware workflow](../../docs/generated_firmware_workflow.md)
