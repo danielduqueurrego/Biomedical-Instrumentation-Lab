@@ -19,12 +19,12 @@ from acquisition.protocol import (
     parse_data_packet,
     parse_meta_packet,
 )
+from acquisition.runtime_paths import cont_med_demo_output_dir
 from acquisition.serial_tools import DEFAULT_BAUD_RATE, choose_serial_port, open_serial_connection
 from acquisition.session_logging import SessionCsvLogger, create_session_paths
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_OUTPUT_DIR = REPO_ROOT / "data" / "cont_med" / "three_channel_data_demo"
+DEFAULT_OUTPUT_DIR = cont_med_demo_output_dir()
 SERIAL_SHUTDOWN_EXCEPTIONS = (serial.SerialException, OSError, TypeError)
 
 

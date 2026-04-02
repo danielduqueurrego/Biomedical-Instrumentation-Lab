@@ -6,6 +6,7 @@ from pathlib import Path
 import shutil
 
 from acquisition.gui_models import validate_signal_configurations
+from acquisition.runtime_paths import generated_arduino_sketch_dir
 from acquisition.presets import (
     continuous_acquisition_class_name_for_rate_hz,
     continuous_timestamp_field_name_for_rate_hz,
@@ -20,9 +21,7 @@ from acquisition.protocol import (
     PULSEOX_PHASE_VALUE_FIELDS,
 )
 
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
-GENERATED_ARDUINO_SKETCH_DIR = REPO_ROOT / "data" / "generated_arduino_sketches"
+GENERATED_ARDUINO_SKETCH_DIR = generated_arduino_sketch_dir()
 GENERATED_SKETCH_RETAIN_COUNT = 20
 DEFAULT_FALLBACK_RATE_HZ = 120
 ADC_RESOLUTION_BITS = 14

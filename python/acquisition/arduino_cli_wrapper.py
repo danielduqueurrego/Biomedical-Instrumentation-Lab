@@ -12,10 +12,10 @@ from datetime import datetime
 from pathlib import Path
 
 from acquisition.arduino_codegen import create_generated_analog_capture_sketch
+from acquisition.runtime_paths import arduino_code_snapshot_dir, resource_path
 
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-ARDUINO_CODE_SNAPSHOT_DIR = REPO_ROOT / "data" / "arduino_code_snapshots"
+ARDUINO_CODE_SNAPSHOT_DIR = arduino_code_snapshot_dir()
 SNAPSHOT_RETAIN_COUNT = 20
 BOARD_LIST_TIMEOUT_SECONDS = 10
 COMPILE_TIMEOUT_SECONDS = 180
@@ -85,7 +85,7 @@ UNO_R4_WIFI_BOARD = BoardDefinition(
     display_name="Arduino UNO R4 WiFi",
     fqbn="arduino:renesas_uno:unor4wifi",
     core="arduino:renesas_uno",
-    sketch_dir=REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo",
+    sketch_dir=resource_path("firmware", "cont_med", "uno_r4_wifi", "three_channel_data_demo"),
 )
 
 UNO_R3_BOARD = BoardDefinition(
@@ -94,10 +94,10 @@ UNO_R3_BOARD = BoardDefinition(
     core="arduino:avr",
 )
 
-CONT_MED_UNO_R4_DEMO_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "three_channel_data_demo"
-CONT_HIGH_UNO_R4_EMG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_high" / "uno_r4_wifi" / "emg_high_rate_reference"
-CONT_MED_UNO_R4_ECG_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "ecg_reference"
-CONT_MED_UNO_R4_BP_SKETCH_DIR = REPO_ROOT / "firmware" / "cont_med" / "uno_r4_wifi" / "blood_pressure_reference"
+CONT_MED_UNO_R4_DEMO_SKETCH_DIR = resource_path("firmware", "cont_med", "uno_r4_wifi", "three_channel_data_demo")
+CONT_HIGH_UNO_R4_EMG_SKETCH_DIR = resource_path("firmware", "cont_high", "uno_r4_wifi", "emg_high_rate_reference")
+CONT_MED_UNO_R4_ECG_SKETCH_DIR = resource_path("firmware", "cont_med", "uno_r4_wifi", "ecg_reference")
+CONT_MED_UNO_R4_BP_SKETCH_DIR = resource_path("firmware", "cont_med", "uno_r4_wifi", "blood_pressure_reference")
 
 SUPPORTED_BOARDS = (UNO_R4_WIFI_BOARD, UNO_R3_BOARD)
 FQBN_PATTERN = re.compile(r"[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+:[A-Za-z0-9_.-]+")
@@ -112,6 +112,14 @@ def resolve_arduino_cli(explicit_path: str | None = None) -> str:
     env_path = os.environ.get("ARDUINO_CLI")
     if env_path:
         candidate_paths.append(Path(env_path))
+
+    program_files = os.environ.get("ProgramFiles")
+    if program_files:
+        candidate_paths.append(Path(program_files) / "Arduino CLI" / "arduino-cli.exe")
+
+    program_files_x86 = os.environ.get("ProgramFiles(x86)")
+    if program_files_x86:
+        candidate_paths.append(Path(program_files_x86) / "Arduino CLI" / "arduino-cli.exe")
 
     for candidate in candidate_paths:
         if candidate.is_file():

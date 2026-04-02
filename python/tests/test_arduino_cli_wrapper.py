@@ -110,3 +110,19 @@ def test_parse_board_list_json_matches_arduino_uno_r3_by_fqbn() -> None:
     assert len(parsed) == 1
     assert parsed[0].port == "/dev/cu.usbmodem1201"
     assert parsed[0].matched_board == UNO_R3_BOARD
+
+
+def test_resolve_arduino_cli_checks_program_files_install_location(monkeypatch, tmp_path: Path) -> None:
+    install_root = tmp_path / "Program Files"
+    cli_path = install_root / "Arduino CLI" / "arduino-cli.exe"
+    cli_path.parent.mkdir(parents=True)
+    cli_path.write_text("", encoding="utf-8")
+
+    monkeypatch.delenv("ARDUINO_CLI", raising=False)
+    monkeypatch.setenv("ProgramFiles", str(install_root))
+    monkeypatch.delenv("ProgramFiles(x86)", raising=False)
+    monkeypatch.setattr(arduino_cli_wrapper.shutil, "which", lambda _name: None)
+
+    resolved = arduino_cli_wrapper.resolve_arduino_cli()
+
+    assert resolved == str(cli_path)

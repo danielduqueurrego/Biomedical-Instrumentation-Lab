@@ -10,7 +10,8 @@ from acquisition.presets import (
     default_sample_rate_hz_for_signal_configurations,
 )
 from acquisition.protocol import pulseox_cycle_display_names
-from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR, DEFAULT_SESSION_PRESET_DIR, REPO_ROOT
+from acquisition.runtime_paths import writable_app_root
+from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR, DEFAULT_SESSION_PRESET_DIR
 
 
 SESSION_PRESET_SCHEMA_VERSION = 1
@@ -141,7 +142,7 @@ def _serialize_path(path: Path) -> str:
         return expanded_path.as_posix()
 
     try:
-        return expanded_path.relative_to(REPO_ROOT).as_posix()
+        return expanded_path.relative_to(writable_app_root()).as_posix()
     except ValueError:
         return str(expanded_path)
 
@@ -150,7 +151,7 @@ def resolve_preset_path(path_text: str) -> Path:
     candidate_path = Path(path_text).expanduser()
     if candidate_path.is_absolute():
         return candidate_path
-    return REPO_ROOT / candidate_path
+    return writable_app_root() / candidate_path
 
 
 def derive_preset_metadata(signal_configurations: tuple[SignalConfiguration, ...]) -> tuple[str, int | None, str | None]:
