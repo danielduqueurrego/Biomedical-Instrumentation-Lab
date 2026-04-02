@@ -22,6 +22,10 @@
 
 Biomedical Instrumentation Lab is a teaching-focused platform built around a **custom PCB**, **Arduino UNO R4 WiFi firmware**, and a **student-friendly Python GUI** for acquiring, visualizing, and saving physiological signals in the lab.
 
+<p align="center">
+  <img src="img/MainBoard.PNG" height="400">
+</p>
+
 It is designed to support practical laboratory experiences in:
 
 - **EMG**
