@@ -1,9 +1,17 @@
 # Biomedical Instrumentation Lab
 
 <!-- ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/danielduqueurrego/Biomedical-Instrumentation-Lab/latest/total) -->
-![Static Badge](https://img.shields.io/badge/GitHub_Project-Ongoing-yellow?style=plastic&logo=github)
-![GitHub License](https://img.shields.io/github/license/danielduqueurrego/Biomedical-Instrumentation-Lab?style=plastic)
-![Website](https://img.shields.io/website?url=https%3A%2F%2Foshwlab.com%2Fdd00055%2Fbiomedical-instrumentation-board&style=plastic&logo=easyeda&label=Board%20repo)
+<p align="center">
+  <a href="https://github.com/danielduqueurrego/Biomedical-Instrumentation-Lab">
+    <img src="https://img.shields.io/badge/GitHub_Project-Ongoing-yellow?style=plastic&logo=github">
+  </a>
+  <a href="https://github.com/danielduqueurrego/Biomedical-Instrumentation-Lab/blob/main/LICENSE.txt">
+    <img src="https://img.shields.io/github/license/danielduqueurrego/Biomedical-Instrumentation-Lab?style=plastic">
+  </a>
+  <a href="https://oshwlab.com/dd00055/biomedical-instrumentation-board">
+    <img src="https://img.shields.io/website?url=https%3A%2F%2Foshwlab.com%2Fdd00055%2Fbiomedical-instrumentation-board&style=plastic&logo=easyeda&label=Board%20repo">
+  </a>
+</p>
 
 
 > Open educational hardware and software for hands-on biomedical instrumentation laboratories.
