@@ -1,5 +1,11 @@
 # Biomedical Instrumentation Lab
 
+<!-- ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/danielduqueurrego/Biomedical-Instrumentation-Lab/latest/total) -->
+![GitHub tag status](https://img.shields.io/github/checks-status/danielduqueurrego/Biomedical-Instrumentation-Lab/Ongoing?style=plastic&logo=github)
+![GitHub License](https://img.shields.io/github/license/danielduqueurrego/Biomedical-Instrumentation-Lab?style=plastic)
+![Website](https://img.shields.io/website?url=https%3A%2F%2Foshwlab.com%2Fdd00055%2Fbiomedical-instrumentation-board&style=plastic&logo=easyeda&label=Board%20repo)
+
+
 > Open educational hardware and software for hands-on biomedical instrumentation laboratories.
 
 Biomedical Instrumentation Lab is a teaching-focused platform built around a **custom PCB**, **Arduino UNO R4 WiFi firmware**, and a **student-friendly Python GUI** for acquiring, visualizing, and saving physiological signals in the lab.
