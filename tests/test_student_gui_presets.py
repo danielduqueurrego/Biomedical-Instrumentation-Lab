@@ -9,7 +9,7 @@ PYTHON_DIR = REPO_ROOT / "python"
 if str(PYTHON_DIR) not in sys.path:
     sys.path.insert(0, str(PYTHON_DIR))
 
-from acquisition.lab_profiles import get_lab_profile
+from acquisition.lab_profiles import CUSTOM_LAB_PROFILE_NAME, LAB_PROFILE_ORDER, get_lab_profile
 from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR
 from acquisition.student_gui.preset_io import (
     SessionPreset,
@@ -23,6 +23,10 @@ from acquisition.student_gui.preset_io import (
 
 
 class StudentGuiPresetTests(unittest.TestCase):
+    def test_lab_profile_order_includes_custom_first(self) -> None:
+        self.assertGreaterEqual(len(LAB_PROFILE_ORDER), 1)
+        self.assertEqual(LAB_PROFILE_ORDER[0], CUSTOM_LAB_PROFILE_NAME)
+
     def test_session_preset_roundtrip_preserves_emg_configuration(self) -> None:
         profile = get_lab_profile("EMG")
         plot_series_names = default_plot_series_names(profile.signal_configurations)

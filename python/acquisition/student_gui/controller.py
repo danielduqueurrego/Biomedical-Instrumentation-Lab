@@ -6,7 +6,7 @@ from tkinter import ttk
 
 from acquisition.arduino_cli_wrapper import UNO_R4_WIFI_BOARD
 from acquisition.gui_models import DEFAULT_ACTIVE_SIGNAL_COUNT, default_gui_config
-from acquisition.lab_profiles import LAB_PROFILE_ORDER
+from acquisition.lab_profiles import CUSTOM_LAB_PROFILE_NAME, LAB_PROFILE_ORDER
 from acquisition.student_gui.connection import ConnectionMixin
 from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR, GUI_POLL_INTERVAL_MS
 from acquisition.student_gui.firmware import FirmwareMixin
@@ -45,7 +45,7 @@ class StudentAcquisitionGui(
         self.signal_count_var = tk.IntVar(value=DEFAULT_ACTIVE_SIGNAL_COUNT)
         self.subplot_count_var = tk.IntVar(value=1)
         self.connection_summary_var = tk.StringVar(value="Waiting for board detection")
-        self.lab_profile_var = tk.StringVar(value="Choose Lab")
+        self.lab_profile_var = tk.StringVar(value=CUSTOM_LAB_PROFILE_NAME)
         self.current_lab_var = tk.StringVar(value="Loaded lab: Custom")
         self.controls_toggle_label_var = tk.StringVar(value="Hide Left Panel")
         self.status_toggle_label_var = tk.StringVar(value="Hide Status Log")

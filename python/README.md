@@ -26,7 +26,8 @@ Then from repository root run one of:
 
 - Linux: `./launch_student_doctor_linux.sh`
 - macOS: `./launch_student_doctor_macos.command`
-- Windows: `launch_student_doctor_windows.bat`
+- Windows Command Prompt: `launch_student_doctor_windows.bat`
+- Windows PowerShell: `.\launch_student_doctor_windows.bat`
 
 ---
 
@@ -50,7 +51,8 @@ Primary beginner launch from the repository root:
 
 - Linux: `./launch_student_gui_linux.sh`
 - macOS: `./launch_student_gui_macos.command`
-- Windows: `launch_student_gui_windows.bat`
+- Windows Command Prompt: `launch_student_gui_windows.bat`
+- Windows PowerShell: `.\launch_student_gui_windows.bat`
 
 Fallback launchers from this `python/` folder:
 

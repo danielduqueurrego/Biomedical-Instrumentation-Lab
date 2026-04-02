@@ -33,6 +33,7 @@ The intended path is:
 1. Install Miniconda or Anaconda.
 2. Install Arduino CLI.
 3. Open Command Prompt or PowerShell in the repository root.
+   If you use PowerShell, prefix top-level batch launchers with `.\`.
 4. Create and activate the environment:
    ```bat
    cd python
@@ -46,11 +47,13 @@ The intended path is:
    ```
 6. Run the doctor check:
    ```bat
-   launch_student_doctor_windows.bat
+   Command Prompt: launch_student_doctor_windows.bat
+   PowerShell:    .\launch_student_doctor_windows.bat
    ```
 7. Launch the GUI:
    ```bat
-   launch_student_gui_windows.bat
+   Command Prompt: launch_student_gui_windows.bat
+   PowerShell:    .\launch_student_gui_windows.bat
    ```
 
 ### macOS
@@ -148,7 +151,8 @@ From the repository root, run one of:
 
 - Linux: `./launch_student_doctor_linux.sh`
 - macOS: `./launch_student_doctor_macos.command`
-- Windows: `launch_student_doctor_windows.bat`
+- Windows Command Prompt: `launch_student_doctor_windows.bat`
+- Windows PowerShell: `.\launch_student_doctor_windows.bat`
 
 The doctor command runs the system checks and then tries to list connected boards using Arduino CLI.
 
@@ -244,6 +248,13 @@ Every successful compile saves a copy of the generated sketch under:
 ---
 
 ## Troubleshooting
+
+### PowerShell says the Windows launcher is not recognized
+
+PowerShell does not run top-level batch files from the current folder unless you include `.\`.
+
+- Use `.\launch_student_doctor_windows.bat`
+- Use `.\launch_student_gui_windows.bat`
 
 ### The GUI does not find the board
 
