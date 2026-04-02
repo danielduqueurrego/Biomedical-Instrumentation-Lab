@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from acquisition.protocol import PULSEOX_ANALOG_PORTS
 from acquisition.lab_manifest import LAB_MANIFEST
-from acquisition.lab_profiles import LAB_PROFILE_ORDER, LAB_PROFILES
+from acquisition.lab_profiles import CUSTOM_LAB_PROFILE_NAME, LAB_PROFILE_ORDER, LAB_PROFILES
 from acquisition.presets import LAB_PRESETS
 
 
@@ -19,8 +19,9 @@ def test_manifest_entries_map_to_gui_profiles_and_presets() -> None:
 def test_lab_profile_order_matches_manifest_profile_labels() -> None:
     manifest_profile_labels = tuple(entry.profile_label for entry in LAB_MANIFEST.values())
 
-    assert LAB_PROFILE_ORDER == manifest_profile_labels
-    assert set(LAB_PROFILE_ORDER) == set(LAB_PROFILES)
+    assert LAB_PROFILE_ORDER[0] == CUSTOM_LAB_PROFILE_NAME
+    assert LAB_PROFILE_ORDER[1:] == manifest_profile_labels
+    assert set(LAB_PROFILE_ORDER[1:]) == set(LAB_PROFILES)
 
 
 def test_all_lab_profile_signal_presets_exist_in_lab_presets() -> None:
