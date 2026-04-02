@@ -1,10 +1,14 @@
 # Biomedical Instrumentation Lab
 
-<!-- ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/danielduqueurrego/Biomedical-Instrumentation-Lab/latest/total) -->
+> Open educational hardware and software for hands-on biomedical instrumentation laboratories.
+
 <p align="center">
   <a href="https://www.buymeacoffee.com/danielduqueurrego">
-    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=danielduqueurrego&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=&slug=danielduqueurrego&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
   </a>
+</p>
+  
+<p align="center">
   <a href="https://github.com/danielduqueurrego/Biomedical-Instrumentation-Lab">
     <img src="https://img.shields.io/badge/GitHub_Project-Ongoing-yellow?style=plastic&logo=github">
   </a>
@@ -15,9 +19,6 @@
     <img src="https://img.shields.io/website?url=https%3A%2F%2Foshwlab.com%2Fdd00055%2Fbiomedical-instrumentation-board&style=plastic&logo=easyeda&label=Board%20repo">
   </a>
 </p>
-
-
-> Open educational hardware and software for hands-on biomedical instrumentation laboratories.
 
 Biomedical Instrumentation Lab is a teaching-focused platform built around a **custom PCB**, **Arduino UNO R4 WiFi firmware**, and a **student-friendly Python GUI** for acquiring, visualizing, and saving physiological signals in the lab.
 
