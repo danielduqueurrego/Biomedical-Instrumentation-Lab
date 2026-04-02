@@ -36,6 +36,7 @@ SHARED_FIRMWARE_LABEL = "Generated UNO R4 WiFi Acquisition Firmware"
 SHARED_FIRMWARE_NOTE = (
     "The GUI generates UNO R4 WiFi firmware directly from the selected signals and rates."
 )
+CUSTOM_LAB_PROFILE_NAME = "Custom"
 PULSE_OX_NOTE = (
     "This profile runs in PHASED_CYCLE mode. The generated sketch logs raw PHASE packets, "
     "samples all four optical channels on A0 to A3 during every phase, reconstructs corrected "
@@ -89,7 +90,7 @@ LAB_PROFILES = {
     for manifest_entry in LAB_MANIFEST.values()
 }
 
-LAB_PROFILE_ORDER = LAB_PROFILE_LABELS
+LAB_PROFILE_ORDER = (CUSTOM_LAB_PROFILE_NAME, *LAB_PROFILE_LABELS)
 
 
 def get_lab_profile(profile_name: str) -> LabProfile:

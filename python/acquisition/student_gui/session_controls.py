@@ -8,6 +8,7 @@ from tkinter import filedialog, messagebox, ttk
 from acquisition.gui_models import MAX_SIGNAL_COUNT
 from acquisition.gui_session import GuiAcquisitionSession
 from acquisition.presets import get_preset
+from acquisition.lab_profiles import CUSTOM_LAB_PROFILE_NAME
 from acquisition.student_gui.constants import DEFAULT_OUTPUT_DIR, DEFAULT_SESSION_PRESET_DIR, TIMESTAMP_SUFFIX_PATTERN
 from acquisition.student_gui.preset_io import (
     build_session_preset,
@@ -139,7 +140,7 @@ class SessionControlsMixin:
         if preset.lab_profile_name is not None:
             self._load_lab_profile(preset.lab_profile_name, log_message=False)
         else:
-            self.lab_profile_var.set("Choose Lab")
+            self.lab_profile_var.set(CUSTOM_LAB_PROFILE_NAME)
             self.current_lab_var.set("Loaded lab: Custom")
             self.firmware_summary_var.set("Firmware: Generated UNO R4 WiFi Acquisition Firmware. Loaded from preset.")
 

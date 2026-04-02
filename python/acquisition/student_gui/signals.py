@@ -7,7 +7,7 @@ from tkinter import ttk
 
 from acquisition.arduino_cli_wrapper import SUPPORTED_BOARDS, UNO_R4_WIFI_BOARD
 from acquisition.gui_models import MAX_SIGNAL_COUNT, GuiAcquisitionConfig, SignalConfiguration, validate_gui_config
-from acquisition.lab_profiles import LAB_PROFILE_ORDER, get_lab_profile
+from acquisition.lab_profiles import CUSTOM_LAB_PROFILE_NAME, LAB_PROFILE_ORDER, get_lab_profile
 from acquisition.presets import LAB_PRESETS, get_preset
 from acquisition.protocol import PULSEOX_ANALOG_PORTS, UNO_R4_ANALOG_PORTS, pulseox_cycle_display_names
 
@@ -81,7 +81,9 @@ class SignalConfigurationMixin:
 
     def _on_lab_profile_selected(self, _event=None) -> None:
         profile_name = self.lab_profile_var.get().strip()
-        if profile_name in LAB_PROFILE_ORDER:
+        if profile_name == CUSTOM_LAB_PROFILE_NAME:
+            self._select_custom_lab()
+        elif profile_name in LAB_PROFILE_ORDER:
             self._load_lab_profile(profile_name)
 
     def _load_lab_profile(self, profile_name: str, log_message: bool = True) -> None:
@@ -111,6 +113,18 @@ class SignalConfigurationMixin:
             self._append_status(
                 f"Loaded {profile.display_name} profile with {len(profile.signal_configurations)} signal(s)."
             )
+
+    def _select_custom_lab(self, log_message: bool = True) -> None:
+        self.current_lab_profile = None
+        self.lab_profile_var.set(CUSTOM_LAB_PROFILE_NAME)
+        self.current_lab_var.set("Loaded lab: Custom")
+        self.firmware_summary_var.set(
+            "Firmware: Generated UNO R4 WiFi Acquisition Firmware. Configure signals manually for a custom lab."
+        )
+        self._refresh_output_basename()
+
+        if log_message:
+            self._append_status("Custom lab selected. Signal names, presets, and analog ports stay editable.")
 
     def _selected_board(self):
         for board in SUPPORTED_BOARDS:
