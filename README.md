@@ -1,7 +1,7 @@
 # Biomedical Instrumentation Lab
 
 <!-- ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/danielduqueurrego/Biomedical-Instrumentation-Lab/latest/total) -->
-![GitHub tag status](https://img.shields.io/github/checks-status/danielduqueurrego/Biomedical-Instrumentation-Lab/Ongoing?style=plastic&logo=github)
+![Static Badge](https://img.shields.io/badge/GitHub_Project-Ongoing-yellow?style=plastic&logo=github)
 ![GitHub License](https://img.shields.io/github/license/danielduqueurrego/Biomedical-Instrumentation-Lab?style=plastic)
 ![Website](https://img.shields.io/website?url=https%3A%2F%2Foshwlab.com%2Fdd00055%2Fbiomedical-instrumentation-board&style=plastic&logo=easyeda&label=Board%20repo)
 
@@ -61,22 +61,22 @@ This keeps setup to one Conda environment plus Arduino tools.
 
 <p align="center">
   <a href="https://www.linkedin.com/in/danielduqueu/">
-    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn">
+    <img src="https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=plastic&logo=linkedin&logoColor=white" alt="LinkedIn">
   </a>
   <a href="https://orcid.org/0000-0001-7924-8030">
-    <img src="https://img.shields.io/badge/ORCID-Profile-A6CE39?style=for-the-badge&logo=orcid&logoColor=white" alt="ORCID">
+    <img src="https://img.shields.io/badge/ORCID-Profile-A6CE39?style=plastic&logo=orcid&logoColor=white" alt="ORCID">
   </a>
   <a href="mailto:dd00055@mix.wvu.edu">
-    <img src="https://img.shields.io/badge/Email-Contact-D14836?style=for-the-badge&logo=gmail&logoColor=white" alt="Email">
+    <img src="https://img.shields.io/badge/Email-Contact-D14836?style=plastic&logo=gmail&logoColor=white" alt="Email">
   </a>
 </p>
 
 <p align="center">
   <a href="https://scholar.google.com/citations?user=Nrw8UxUAAAAJ&hl">
-    <img src="https://img.shields.io/badge/Google%20Scholar-Publications-4285F4?style=flat-square&logo=google-scholar&logoColor=white" alt="Google Scholar">
+    <img src="https://img.shields.io/badge/Google%20Scholar-Publications-4285F4?style=plastic&logo=google-scholar&logoColor=white" alt="Google Scholar">
   </a>
   <a href="https://github.com/danielduqueurrego">
-    <img src="https://img.shields.io/badge/GitHub-Projects-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+    <img src="https://img.shields.io/badge/GitHub-Projects-181717?style=plastic&logo=github&logoColor=white" alt="GitHub">
   </a>
 </p>
 
