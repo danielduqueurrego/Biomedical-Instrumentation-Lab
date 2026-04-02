@@ -2,6 +2,9 @@
 
 <!-- ![GitHub Downloads (all assets, latest release)](https://img.shields.io/github/downloads/danielduqueurrego/Biomedical-Instrumentation-Lab/latest/total) -->
 <p align="center">
+  <a href="https://www.buymeacoffee.com/danielduqueurrego">
+    <img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=danielduqueurrego&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff" />
+  </a>
   <a href="https://github.com/danielduqueurrego/Biomedical-Instrumentation-Lab">
     <img src="https://img.shields.io/badge/GitHub_Project-Ongoing-yellow?style=plastic&logo=github">
   </a>
